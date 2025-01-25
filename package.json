@@ -1,11 +1,13 @@
 {
   "name": "porfolio",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "seed": "ts-node -r tsconfig-paths/register src/seed/seedData.ts",
     "lint": "next lint"
   },
   "dependencies": {
@@ -46,6 +48,8 @@
     "eslint-config-next": "14.2.4",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5"
   }
 }

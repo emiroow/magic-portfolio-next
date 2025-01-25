@@ -1,8 +1,10 @@
 import { ISocial } from "@/interface/ISocial";
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const socialSchema = new Schema<ISocial>({
   name: { type: String },
   url: { type: String },
   icon: { type: String },
 });
+
+export const socialModel = mongoose.model<ISocial>("social", socialSchema);

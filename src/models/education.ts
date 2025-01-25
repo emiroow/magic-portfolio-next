@@ -1,5 +1,5 @@
 import { IEducation } from "@/interface/IEducation";
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const educationSchema = new Schema<IEducation>({
   school: { type: String },
@@ -9,3 +9,8 @@ export const educationSchema = new Schema<IEducation>({
   start: { type: String },
   end: { type: String },
 });
+
+export const educationModel = mongoose.model<IEducation>(
+  "education",
+  educationSchema
+);

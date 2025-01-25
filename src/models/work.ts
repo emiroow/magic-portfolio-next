@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const workSchema = new Schema<IWork>({
   company: { type: String },
@@ -11,3 +11,5 @@ export const workSchema = new Schema<IWork>({
   end: { type: String },
   description: { type: String },
 });
+
+export const workModel = mongoose.model<IWork>("work", workSchema);

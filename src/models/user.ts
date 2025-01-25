@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export const userSchema = new Schema<IUser>({
   name: { type: String, required: true },
@@ -12,3 +12,5 @@ export const userSchema = new Schema<IUser>({
   tel: { type: String },
   email: { type: String },
 });
+
+export const userModel = mongoose.model<IUser>("Education", userSchema);
