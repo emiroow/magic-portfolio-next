@@ -8,9 +8,9 @@ export const educationSchema = new Schema<IEducation>({
   logoUrl: { type: String },
   start: { type: String },
   end: { type: String },
+  lang: { type: String },
 });
 
-export const educationModel = mongoose.model<IEducation>(
-  "education",
-  educationSchema
-);
+export const educationModel =
+  mongoose.models.education ||
+  mongoose.model<IEducation>("education", educationSchema);

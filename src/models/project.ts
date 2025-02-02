@@ -15,6 +15,8 @@ export const product = new Schema<IProduct>({
     },
   ],
   image: { type: String },
+  lang: { type: String },
 });
 
-export const productModel = mongoose.model<IProduct>("product", product);
+export const productModel =
+  mongoose.models.product || mongoose.model<IProduct>("product", product);

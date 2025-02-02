@@ -13,4 +13,5 @@ interface IProduct {
   technologies: string[];
   links: Link[];
   image: string;
+  lang: String;
 }

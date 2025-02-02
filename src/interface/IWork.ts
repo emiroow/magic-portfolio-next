@@ -8,4 +8,5 @@ interface IWork {
   start?: string;
   end?: string;
   description?: string;
+  lang: String;
 }

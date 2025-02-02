@@ -9,4 +9,5 @@ interface IUser {
   avatarUrl?: string;
   tel?: string;
   email?: string;
+  lang: String;
 }

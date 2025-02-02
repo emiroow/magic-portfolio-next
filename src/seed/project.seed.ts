@@ -28,6 +28,35 @@ export const seedProductData = async () => {
       ],
       image: "",
       video: "https://example.com/video.mp4",
+      lang: "en",
+    },
+    {
+      title: "چت کالکت",
+      href: "https://chatcollect.com",
+      dates: "ژانویه 2024 - فوریه 2024",
+      active: true,
+      description:
+        "با انتشار فروشگاه GPT اوپن‌ای‌آی، تصمیم گرفتم یک سرویس SaaS بسازم که به کاربران امکان می‌دهد آدرس‌های ایمیل کاربران GPT خود را جمع‌آوری کنند. این یک روش عالی برای ایجاد مخاطب و کسب درآمد از API GPT است.",
+      technologies: [
+        "Next.js",
+        "Typescript",
+        "PostgreSQL",
+        "Prisma",
+        "TailwindCSS",
+        "Stripe",
+        "Shadcn UI",
+        "Magic UI",
+      ],
+      links: [
+        {
+          type: "وب‌سایت",
+          href: "https://chatcollect.com",
+          icon: "globe",
+        },
+      ],
+      image: "",
+      video: "https://example.com/video.mp4",
+      lang: "fa",
     },
   ];
   await productModel.create(projectData);

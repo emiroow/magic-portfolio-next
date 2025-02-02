@@ -11,6 +11,8 @@ export const userSchema = new Schema<IUser>({
   avatarUrl: { type: String },
   tel: { type: String },
   email: { type: String },
+  lang: { type: String },
 });
 
-export const userModel = mongoose.model<IUser>("Education", userSchema);
+export const userModel =
+  mongoose.models.user || mongoose.model<IUser>("user", userSchema);

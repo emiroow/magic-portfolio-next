@@ -10,6 +10,8 @@ export const workSchema = new Schema<IWork>({
   start: { type: String },
   end: { type: String },
   description: { type: String },
+  lang: { type: String },
 });
 
-export const workModel = mongoose.model<IWork>("work", workSchema);
+export const workModel =
+  mongoose.models.work || mongoose.model<IWork>("work", workSchema);

@@ -5,4 +5,5 @@ export interface IEducation {
   logoUrl?: string;
   start?: string;
   end?: string;
+  lang?: string;
 }
