@@ -5,6 +5,7 @@ import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
 import { userModel } from "@/models/user";
 import { workModel } from "@/models/work";
+import mongoose from "mongoose";
 import { seedEducationData } from "./education.seed";
 import { seedProductData } from "./project.seed";
 import { seedSkillsData } from "./skill.seed";
@@ -15,6 +16,9 @@ import { seedWorkData } from "./work.seed";
 const seedData = async () => {
   try {
     await connectDB();
+
+    // drop data base
+    await mongoose.connection.dropDatabase();
 
     const counts = await Promise.all([
       educationModel.countDocuments(),

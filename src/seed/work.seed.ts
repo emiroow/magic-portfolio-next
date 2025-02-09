@@ -9,7 +9,8 @@ export const seedWorkData = async () => {
       badges: [],
       location: "Remote",
       title: "Bitcoin Protocol Engineer",
-      logoUrl: "/atomic.png",
+      logoUrl:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
       start: "May 2021",
       end: "Oct 2022",
       description:
@@ -22,7 +23,8 @@ export const seedWorkData = async () => {
       badges: [],
       location: "دورکاری",
       title: "مهندس پروتکل بیت‌کوین",
-      logoUrl: "/atomic.png",
+      logoUrl:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
       start: "مه 2021",
       end: "اکتبر 2022",
       description:

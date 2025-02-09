@@ -11,7 +11,7 @@ export const seedUserData = async () => {
       description:
         "Software Engineer turned Entrepreneur. I love building things and helping people. Very active on Twitter.",
       summary: "Summary of Dillion Verma",
-      avatarUrl: "https://example.com/avatar.jpg",
+      avatarUrl: "https://avatars.githubusercontent.com/u/86824829?v=4",
       tel: "123-456-7890",
       email: "dillion@example.com",
       lang: "en",
@@ -25,7 +25,7 @@ export const seedUserData = async () => {
       description:
         "مهندس نرم‌افزار که به کارآفرین تبدیل شده است. من عاشق ساختن چیزها و کمک به مردم هستم. بسیار فعال در توییتر.",
       summary: "خلاصه‌ای از دیلیون ورما",
-      avatarUrl: "https://example.com/avatar.jpg",
+      avatarUrl: "https://avatars.githubusercontent.com/u/86824829?v=4",
       tel: "123-456-7890",
       email: "dillion@example.com",
       lang: "fa",

@@ -7,14 +7,22 @@ import { Badge } from "@/components/ui/badge";
 import { DATA } from "@/data/resume";
 import { IClientResponse } from "@/interface/IGlobal";
 import axios from "axios";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import Markdown from "react-markdown";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default async function Page() {
+export default async function Page({
+  params: { locale },
+}: Readonly<{
+  children: React.ReactNode;
+  params: { locale: string };
+}>) {
+  const t = await getTranslations();
+
   const { data } = await axios.get<IClientResponse>(
-    "http://localhost:3000/api/en"
+    `http://localhost:3000/api/${locale}`
   );
 
   return (
@@ -27,7 +35,7 @@ export default async function Page() {
                 delay={BLUR_FADE_DELAY}
                 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
                 yOffset={8}
-                text={`Hi, I'm ${data.user?.name} 👋`}
+                text={`${t("hi")} ${data.user?.name} 👋`}
               />
               <BlurFadeText
                 className="max-w-[600px] md:text-xl"
