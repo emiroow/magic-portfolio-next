@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-export const product = new Schema<IProduct>({
+export const project = new Schema<IProject>({
   title: { type: String },
   href: { type: String },
   dates: { type: String },
@@ -18,5 +18,5 @@ export const product = new Schema<IProduct>({
   lang: { type: String },
 });
 
-export const productModel =
-  mongoose.models.product || mongoose.model<IProduct>("product", product);
+export const projectModel =
+  mongoose.models.project || mongoose.model<IProject>("project", project);

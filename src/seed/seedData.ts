@@ -1,11 +1,13 @@
 import { connectDB } from "@/config/dbConnection";
 import { educationModel } from "@/models/education";
-import { productModel } from "@/models/project";
+import { projectModel } from "@/models/project";
+import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
 import { userModel } from "@/models/user";
 import { workModel } from "@/models/work";
 import { seedEducationData } from "./education.seed";
 import { seedProductData } from "./project.seed";
+import { seedSkillsData } from "./skill.seed";
 import { seedSocialData } from "./social.seed";
 import { seedUserData } from "./user.seed";
 import { seedWorkData } from "./work.seed";
@@ -16,10 +18,11 @@ const seedData = async () => {
 
     const counts = await Promise.all([
       educationModel.countDocuments(),
-      productModel.countDocuments(),
+      projectModel.countDocuments(),
       socialModel.countDocuments(),
       userModel.countDocuments(),
       workModel.countDocuments(),
+      skillModel.countDocuments(),
     ]);
 
     if (counts.some((count) => count > 0)) {
@@ -33,6 +36,7 @@ const seedData = async () => {
       seedSocialData(),
       seedWorkData(),
       seedUserData(),
+      seedSkillsData(),
     ]);
 
     console.log("Seed data inserted successfully");

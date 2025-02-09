@@ -10,9 +10,9 @@ import Link from "next/link";
 import React from "react";
 
 interface ResumeCardProps {
-  logoUrl: string;
-  altText: string;
-  title: string;
+  logoUrl?: string;
+  altText?: string;
+  title?: string;
   subtitle?: string;
   href?: string;
   badges?: readonly string[];
@@ -52,7 +52,7 @@ export const ResumeCard = ({
               alt={altText}
               className="object-contain"
             />
-            <AvatarFallback>{altText[0]}</AvatarFallback>
+            <AvatarFallback>{altText && altText[0]}</AvatarFallback>
           </Avatar>
         </div>
         <div className="flex-grow ml-4 items-center flex-col group">

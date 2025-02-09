@@ -4,9 +4,10 @@ interface Link {
   icon: string;
 }
 
-interface IProduct {
+interface IProject {
   title: string;
   href: string;
+  video: string;
   dates: string;
   active: boolean;
   description: string;

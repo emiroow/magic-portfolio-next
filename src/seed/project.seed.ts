@@ -1,4 +1,4 @@
-import { productModel } from "@/models/project";
+import { projectModel } from "@/models/project";
 
 export const seedProductData = async () => {
   const projectData = [
@@ -59,5 +59,5 @@ export const seedProductData = async () => {
       lang: "fa",
     },
   ];
-  await productModel.create(projectData);
+  await projectModel.create(projectData);
 };
