@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 export const userSchema = new Schema<IUser>({
   name: { type: String, required: true },
+  fullName: { type: String, required: true },
   initials: { type: String },
   url: { type: String },
   location: { type: String },

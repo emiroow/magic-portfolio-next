@@ -4,6 +4,7 @@ export const seedUserData = async () => {
   const userData = [
     {
       name: "Amir",
+      fullName: "Amir esmaeelzadeh",
       initials: "DV",
       url: "https://dillion.io",
       location: "San Francisco, CA",
@@ -18,6 +19,7 @@ export const seedUserData = async () => {
     },
     {
       name: "امیر",
+      fullName: "امیر اسماعیل زاده",
       initials: "DV",
       url: "https://dillion.io",
       location: "سانفرانسیسکو، کالیفرنیا",

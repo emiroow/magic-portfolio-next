@@ -1,5 +1,6 @@
 interface IUser {
   name: string; // Required field
+  fullName: string; // Required field
   initials?: string;
   url?: string;
   location?: string;

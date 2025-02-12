@@ -1,5 +1,6 @@
 import { connectDB } from "@/config/dbConnection";
 import { educationModel } from "@/models/education";
+import { projectModel } from "@/models/project";
 import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
 import { userModel } from "@/models/user";
@@ -14,7 +15,7 @@ export const GET = async (
   try {
     const user = await userModel.findOne({ lang });
     const education = await educationModel.find({ lang });
-    const project = await educationModel.find({ lang });
+    const project = await projectModel.find({ lang });
     const work = await workModel.find({ lang });
     const social = await socialModel.find();
     const skills = await skillModel.find();

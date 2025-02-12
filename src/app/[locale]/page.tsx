@@ -4,25 +4,105 @@ import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { DATA } from "@/data/resume";
+import { endPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
 import axios from "axios";
+import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import Markdown from "react-markdown";
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default async function Page({
-  params: { locale },
-}: Readonly<{
+type Props = {
   children: React.ReactNode;
   params: { locale: string };
-}>) {
-  const t = await getTranslations();
+};
 
+export const generateMetadata = async ({ params: { locale } }: Props) => {
   const { data } = await axios.get<IClientResponse>(
     `http://localhost:3000/api/${locale}`
+  );
+
+  return {
+    metadataBase: new URL(data.user?.url || ""),
+    title: {
+      default: data.user?.fullName,
+      template: `%s | ${data.user?.fullName}`,
+    },
+    alternates: {
+      canonical: `http://localhost:3000/api/${locale}`,
+      languages: {
+        fa: `http://localhost:3000/api/fa`,
+        en: `http://localhost:3000/api/en`,
+      },
+    },
+    description: data.user?.description,
+    openGraph: {
+      title: `${data.user?.name}`,
+      description: data.user?.description,
+      url: data.user?.url,
+      siteName: `${data.user?.fullName}`,
+      locale: locale === "fa" ? "fa_IR" : "en_US",
+      type: "website",
+    },
+    appLinks: {
+      web: {
+        url: "",
+        should_fallback: true,
+      },
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    icons: {
+      icon: [
+        { url: "/icon.png" },
+        new URL("/icon.png", "https://example.com"),
+        { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
+      ],
+      shortcut: ["/shortcut-icon.png"],
+      apple: [
+        { url: "/apple-icon.png" },
+        { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
+      ],
+      other: [
+        {
+          rel: "apple-touch-icon-precomposed",
+          url: "/apple-touch-icon-precomposed.png",
+        },
+      ],
+    },
+    twitter: {
+      title: `${data.user?.name}`,
+      card: "summary_large_image",
+    },
+    verification: {
+      google: "google",
+      yandex: "yandex",
+      yahoo: "yahoo",
+      other: {
+        me: [data.user?.email],
+      },
+    },
+  } as Metadata;
+};
+
+export default async function Page({ params: { locale } }: Props) {
+  const t = await getTranslations();
+  const tHero = await getTranslations("hero");
+  const tProject = await getTranslations("project");
+  const tContact = await getTranslations("contact");
+
+  const { data } = await axios.get<IClientResponse>(
+    `${endPoint}/api/${locale}`
   );
 
   return (
@@ -34,8 +114,8 @@ export default async function Page({
               <BlurFadeText
                 delay={BLUR_FADE_DELAY}
                 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
-                yOffset={8}
-                text={`${t("hi")} ${data.user?.name} 👋`}
+                yOffset={20}
+                text={`${tHero("hi")} ${data.user?.name} 👋`}
               />
               <BlurFadeText
                 className="max-w-[600px] md:text-xl"
@@ -54,7 +134,7 @@ export default async function Page({
       </section>
       <section id="about">
         <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold">About</h2>
+          <h2 className="text-xl font-bold">{t("about")}</h2>
         </BlurFade>
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
@@ -65,7 +145,7 @@ export default async function Page({
       <section id="work">
         <div className="flex min-h-0 flex-col gap-y-3">
           <BlurFade delay={BLUR_FADE_DELAY * 5}>
-            <h2 className="text-xl font-bold">Work Experience</h2>
+            <h2 className="text-xl font-bold">{t("experience")}</h2>
           </BlurFade>
           {data.work?.map((work, id) => (
             <BlurFade
@@ -90,7 +170,7 @@ export default async function Page({
       <section id="education">
         <div className="flex min-h-0 flex-col gap-y-3">
           <BlurFade delay={BLUR_FADE_DELAY * 7}>
-            <h2 className="text-xl font-bold">Education</h2>
+            <h2 className="text-xl font-bold">{t("education")}</h2>
           </BlurFade>
           {data.education?.map((education, id) => (
             <BlurFade
@@ -113,7 +193,7 @@ export default async function Page({
       <section id="skills">
         <div className="flex min-h-0 flex-col gap-y-3">
           <BlurFade delay={BLUR_FADE_DELAY * 9}>
-            <h2 className="text-xl font-bold">Skills</h2>
+            <h2 className="text-xl font-bold">{t("skills")}</h2>
           </BlurFade>
           <div className="flex flex-wrap gap-1">
             {data.skills?.map((skill, id) => (
@@ -127,18 +207,16 @@ export default async function Page({
       <section id="projects">
         <div className="space-y-12 w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 11}>
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
+            <div className="flex flex-col items-center justify-center space-y-5 text-center">
+              <div className="space-y-5">
                 <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                  My Projects
+                  {tProject("myProjects")}
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Check out my latest work
+                  {tProject("title")}
                 </h2>
                 <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  I&apos;ve worked on a variety of projects, from simple
-                  websites to complex web applications. Here are a few of my
-                  favorites.
+                  {tProject("subTitle")}
                 </p>
               </div>
             </div>
@@ -157,7 +235,6 @@ export default async function Page({
                   dates={project.dates}
                   tags={project.technologies}
                   image={project.image}
-                  video={project.video}
                   links={project.links}
                 />
               </BlurFade>
@@ -168,23 +245,15 @@ export default async function Page({
       <section id="contact">
         <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
-            <div className="space-y-3">
+            <div className="space-y-6">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                Contact
+                {tContact("contact")}
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Get in Touch
+                {tContact("title")}
               </h2>
               <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Want to chat? Just shoot me a dm{" "}
-                <Link
-                  href={DATA.contact.social.X.url}
-                  className="text-blue-500 hover:underline"
-                >
-                  with a direct question on twitter
-                </Link>{" "}
-                and I&apos;ll respond whenever I can. I will ignore all
-                soliciting.
+                {tContact("subTitle")}
               </p>
             </div>
           </BlurFade>

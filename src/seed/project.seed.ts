@@ -26,8 +26,10 @@ export const seedProductData = async () => {
           icon: "globe",
         },
       ],
-      image: "",
-      video: "https://example.com/video.mp4",
+      image:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
+      video:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
       lang: "en",
     },
     {
@@ -54,8 +56,10 @@ export const seedProductData = async () => {
           icon: "globe",
         },
       ],
-      image: "",
-      video: "https://example.com/video.mp4",
+      image:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
+      video:
+        "https://api.emiroow.ir/Files/Public/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953_ae02ad62-41da-485d-8428-460bc1b95aa1.webp",
       lang: "fa",
     },
   ];
