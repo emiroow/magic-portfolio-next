@@ -4,7 +4,7 @@ import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { endPoint } from "@/constants/global";
+import { apiEndPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
 import axios from "axios";
 import { Metadata } from "next";
@@ -19,21 +19,20 @@ type Props = {
 };
 
 export const generateMetadata = async ({ params: { locale } }: Props) => {
-  const { data } = await axios.get<IClientResponse>(
-    `http://localhost:3000/api/${locale}`
-  );
+  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
+  const t = await getTranslations();
 
   return {
     metadataBase: new URL(data.user?.url || ""),
     title: {
-      default: data.user?.fullName,
-      template: `%s | ${data.user?.fullName}`,
+      default: `${data.user?.fullName} | ${t("personalWebsite")}`,
+      template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
     },
     alternates: {
-      canonical: `http://localhost:3000/api/${locale}`,
+      canonical: `${apiEndPoint}/${locale}`,
       languages: {
-        fa: `http://localhost:3000/api/fa`,
-        en: `http://localhost:3000/api/en`,
+        fa: `${apiEndPoint}/fa`,
+        en: `${apiEndPoint}/en`,
       },
     },
     description: data.user?.description,
@@ -101,9 +100,7 @@ export default async function Page({ params: { locale } }: Props) {
   const tProject = await getTranslations("project");
   const tContact = await getTranslations("contact");
 
-  const { data } = await axios.get<IClientResponse>(
-    `${endPoint}/api/${locale}`
-  );
+  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">

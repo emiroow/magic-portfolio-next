@@ -9,9 +9,9 @@ export const seedUserData = async () => {
       url: "https://dillion.io",
       location: "San Francisco, CA",
       locationLink: "https://www.google.com/maps/place/sanfrancisco",
-      description:
-        "Software Engineer turned Entrepreneur. I love building things and helping people. Very active on Twitter.",
-      summary: "Summary of Dillion Verma",
+      summary:
+        "Web developer with 2 years of relevant work experience in the field of programming, adhering to the principles of web programming and Clean Code, as well as in UI design, website development and web applications.",
+      description: "Summary of Dillion Verma",
       avatarUrl: "https://avatars.githubusercontent.com/u/86824829?v=4",
       tel: "123-456-7890",
       email: "dillion@example.com",
@@ -24,9 +24,9 @@ export const seedUserData = async () => {
       url: "https://dillion.io",
       location: "سانفرانسیسکو، کالیفرنیا",
       locationLink: "https://www.google.com/maps/place/sanfrancisco",
-      description:
-        "مهندس نرم‌افزار که به کارآفرین تبدیل شده است. من عاشق ساختن چیزها و کمک به مردم هستم. بسیار فعال در توییتر.",
-      summary: "خلاصه‌ای از دیلیون ورما",
+      summary:
+        "توسعه دهنده وب با سابقه 4 سال کار مرتبط در زمینه برنامه نویسی، پایبند به اصول برنامه نوسی تحت وب و Clean Code و همچنین در طراحی UI ، توسعه وبسایت و وب اپلیکیشن‌ ها",
+      description: "خلاصه‌ای از دیلیون ورما",
       avatarUrl: "https://avatars.githubusercontent.com/u/86824829?v=4",
       tel: "123-456-7890",
       email: "dillion@example.com",
