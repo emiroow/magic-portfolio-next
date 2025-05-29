@@ -14,7 +14,6 @@ import Markdown from "react-markdown";
 const BLUR_FADE_DELAY = 0.04;
 
 type Props = {
-  children: React.ReactNode;
   params: { locale: string };
 };
 
@@ -61,24 +60,24 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
         "max-snippet": -1,
       },
     },
-    icons: {
-      icon: [
-        { url: "/icon.png" },
-        new URL("/icon.png", "https://example.com"),
-        { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
-      ],
-      shortcut: ["/shortcut-icon.png"],
-      apple: [
-        { url: "/apple-icon.png" },
-        { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
-      ],
-      other: [
-        {
-          rel: "apple-touch-icon-precomposed",
-          url: "/apple-touch-icon-precomposed.png",
-        },
-      ],
-    },
+    // icons: {
+    //   icon: [
+    //     { url: "/icon.png" },
+    //     new URL("/icon.png", "https://example.com"),
+    //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
+    //   ],
+    //   shortcut: ["/shortcut-icon.png"],
+    //   apple: [
+    //     { url: "/apple-icon.png" },
+    //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
+    //   ],
+    //   other: [
+    //     {
+    //       rel: "apple-touch-icon-precomposed",
+    //       url: "/apple-touch-icon-precomposed.png",
+    //     },
+    //   ],
+    // },
     twitter: {
       title: `${data.user?.name}`,
       card: "summary_large_image",
@@ -102,11 +101,13 @@ export default async function Page({ params: { locale } }: Props) {
 
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
 
+  // console.log(data);
+
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
-          <div className="gap-2 flex justify-between">
+          <div className="gap-2 flex justify-between max-md:items-center">
             <div className="flex-col flex flex-1 space-y-1.5">
               <BlurFadeText
                 delay={BLUR_FADE_DELAY}

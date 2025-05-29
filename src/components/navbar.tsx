@@ -1,5 +1,4 @@
 import { Dock, DockIcon } from "@/components/magicui/dock";
-import { ModeToggle } from "@/components/mode-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -10,6 +9,7 @@ import {
 import { DATA } from "@/data/resume";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ModeToggle } from "./mode-toggle";
 import ThemeToggle from "./theme-toggle";
 
 export default function Navbar() {

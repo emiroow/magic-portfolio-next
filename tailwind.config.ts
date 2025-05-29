@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
   darkMode: ["class"],
@@ -20,8 +19,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-        estedad: ["var(--font-estedad)"],
+        estedadRegular: "estedad Regular",
+        robotRegular: "robot Regular",
+        robotBold: "robot Bold",
       },
       colors: {
         border: "hsl(var(--border))",
