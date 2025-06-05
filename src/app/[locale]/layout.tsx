@@ -1,4 +1,3 @@
-import Navbar from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/i18n/routing";
@@ -20,7 +19,7 @@ export default function LocaleLayout({
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
-  console.log(locale);
+
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
       <body
@@ -31,10 +30,7 @@ export default function LocaleLayout({
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="light">
-          <TooltipProvider delayDuration={0}>
-            {children}
-            <Navbar />
-          </TooltipProvider>
+          <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

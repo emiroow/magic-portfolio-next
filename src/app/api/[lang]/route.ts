@@ -14,18 +14,16 @@ export const GET = async (
   await connectDB();
   try {
     const user = await userModel.findOne({ lang });
-    const education = await educationModel.find({ lang });
-    const project = await projectModel.find({ lang });
-    const work = await workModel.find({ lang });
-    const social = await socialModel.find();
-    const skills = await skillModel.find();
-
+    const educations = await educationModel.find({ lang });
+    const projects = await projectModel.find({ lang });
+    const works = await workModel.find({ lang });
+    const socials = await socialModel.find();
+    const skills = await skillModel.find({ lang });
     return NextResponse.json(
-      { user, education, work, social, skills, project },
+      { user, educations, projects, works, socials, skills },
       { status: 200 }
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -7,7 +7,7 @@ const ThemeToggle = () => {
   const local = useLocale();
   const router = useRouter();
   return (
-    <Link href={local === "fa" ? "/en" : "/fa"}>
+    <Link className="text-sm font-bold" href={local === "fa" ? "/en" : "/fa"}>
       {local === "fa" ? "EN" : "FA"}
     </Link>
   );

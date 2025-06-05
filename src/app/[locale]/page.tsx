@@ -1,5 +1,6 @@
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
+import Navbar from "@/components/navbar";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { apiEndPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
 import axios from "axios";
-import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Markdown from "react-markdown";
 
@@ -17,81 +17,81 @@ type Props = {
   params: { locale: string };
 };
 
-export const generateMetadata = async ({ params: { locale } }: Props) => {
-  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
-  const t = await getTranslations();
+// export const generateMetadata = async ({ params: { locale } }: Props) => {
+//   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
+//   const t = await getTranslations();
 
-  return {
-    metadataBase: new URL(data.user?.url || ""),
-    title: {
-      default: `${data.user?.fullName} | ${t("personalWebsite")}`,
-      template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
-    },
-    alternates: {
-      canonical: `${apiEndPoint}/${locale}`,
-      languages: {
-        fa: `${apiEndPoint}/fa`,
-        en: `${apiEndPoint}/en`,
-      },
-    },
-    description: data.user?.description,
-    openGraph: {
-      title: `${data.user?.name}`,
-      description: data.user?.description,
-      url: data.user?.url,
-      siteName: `${data.user?.fullName}`,
-      locale: locale === "fa" ? "fa_IR" : "en_US",
-      type: "website",
-    },
-    appLinks: {
-      web: {
-        url: "",
-        should_fallback: true,
-      },
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-    // icons: {
-    //   icon: [
-    //     { url: "/icon.png" },
-    //     new URL("/icon.png", "https://example.com"),
-    //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
-    //   ],
-    //   shortcut: ["/shortcut-icon.png"],
-    //   apple: [
-    //     { url: "/apple-icon.png" },
-    //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
-    //   ],
-    //   other: [
-    //     {
-    //       rel: "apple-touch-icon-precomposed",
-    //       url: "/apple-touch-icon-precomposed.png",
-    //     },
-    //   ],
-    // },
-    twitter: {
-      title: `${data.user?.name}`,
-      card: "summary_large_image",
-    },
-    verification: {
-      google: "google",
-      yandex: "yandex",
-      yahoo: "yahoo",
-      other: {
-        me: [data.user?.email],
-      },
-    },
-  } as Metadata;
-};
+//   return {
+//     metadataBase: new URL(data.user?.url || ""),
+//     title: {
+//       default: `${data.user?.fullName} | ${t("personalWebsite")}`,
+//       template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
+//     },
+//     alternates: {
+//       canonical: `${apiEndPoint}/${locale}`,
+//       languages: {
+//         fa: `${apiEndPoint}/fa`,
+//         en: `${apiEndPoint}/en`,
+//       },
+//     },
+//     description: data.user?.description,
+//     openGraph: {
+//       title: `${data.user?.name}`,
+//       description: data.user?.description,
+//       url: data.user?.url,
+//       siteName: `${data.user?.fullName}`,
+//       locale: locale === "fa" ? "fa_IR" : "en_US",
+//       type: "website",
+//     },
+//     appLinks: {
+//       web: {
+//         url: "",
+//         should_fallback: true,
+//       },
+//     },
+//     robots: {
+//       index: true,
+//       follow: true,
+//       googleBot: {
+//         index: true,
+//         follow: true,
+//         "max-video-preview": -1,
+//         "max-image-preview": "large",
+//         "max-snippet": -1,
+//       },
+//     },
+//     // icons: {
+//     //   icon: [
+//     //     { url: "/icon.png" },
+//     //     new URL("/icon.png", "https://example.com"),
+//     //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
+//     //   ],
+//     //   shortcut: ["/shortcut-icon.png"],
+//     //   apple: [
+//     //     { url: "/apple-icon.png" },
+//     //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
+//     //   ],
+//     //   other: [
+//     //     {
+//     //       rel: "apple-touch-icon-precomposed",
+//     //       url: "/apple-touch-icon-precomposed.png",
+//     //     },
+//     //   ],
+//     // },
+//     twitter: {
+//       title: `${data.user?.name}`,
+//       card: "summary_large_image",
+//     },
+//     verification: {
+//       google: "google",
+//       yandex: "yandex",
+//       yahoo: "yahoo",
+//       other: {
+//         me: [data.user?.email],
+//       },
+//     },
+//   } as Metadata;
+// };
 
 export default async function Page({ params: { locale } }: Props) {
   const t = await getTranslations();
@@ -100,8 +100,6 @@ export default async function Page({ params: { locale } }: Props) {
   const tContact = await getTranslations("contact");
 
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
-
-  // console.log(data);
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">
@@ -141,104 +139,112 @@ export default async function Page({ params: { locale } }: Props) {
         </BlurFade>
       </section>
       <section id="work">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 5}>
-            <h2 className="text-xl font-bold">{t("experience")}</h2>
-          </BlurFade>
-          {data.work?.map((work, id) => (
-            <BlurFade
-              key={work.company}
-              delay={BLUR_FADE_DELAY * 6 + id * 0.05}
-            >
-              <ResumeCard
-                key={work.company}
-                logoUrl={work.logoUrl}
-                altText={work.company}
-                title={work.company}
-                subtitle={work.title}
-                href={work.href}
-                badges={work.badges}
-                period={`${work.start} - ${work.end ?? "Present"}`}
-                description={work.description}
-              />
+        {data.works?.length && (
+          <div className="flex min-h-0 flex-col gap-y-3">
+            <BlurFade delay={BLUR_FADE_DELAY * 5}>
+              <h2 className="text-xl font-bold">{t("experience")}</h2>
             </BlurFade>
-          ))}
-        </div>
-      </section>
-      <section id="education">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 7}>
-            <h2 className="text-xl font-bold">{t("education")}</h2>
-          </BlurFade>
-          {data.education?.map((education, id) => (
-            <BlurFade
-              key={education.school}
-              delay={BLUR_FADE_DELAY * 8 + id * 0.05}
-            >
-              <ResumeCard
-                key={education.school}
-                href={education.href}
-                logoUrl={education.logoUrl}
-                altText={education.school}
-                title={education.school}
-                subtitle={education.degree}
-                period={`${education.start} - ${education.end}`}
-              />
-            </BlurFade>
-          ))}
-        </div>
-      </section>
-      <section id="skills">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 9}>
-            <h2 className="text-xl font-bold">{t("skills")}</h2>
-          </BlurFade>
-          <div className="flex flex-wrap gap-1">
-            {data.skills?.map((skill, id) => (
-              <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-                <Badge key={id}>{skill.name}</Badge>
-              </BlurFade>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section id="projects">
-        <div className="space-y-12 w-full py-12">
-          <BlurFade delay={BLUR_FADE_DELAY * 11}>
-            <div className="flex flex-col items-center justify-center space-y-5 text-center">
-              <div className="space-y-5">
-                <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                  {tProject("myProjects")}
-                </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  {tProject("title")}
-                </h2>
-                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  {tProject("subTitle")}
-                </p>
-              </div>
-            </div>
-          </BlurFade>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
-            {data.project?.map((project, id) => (
+            {data.works?.map((work, id) => (
               <BlurFade
-                key={project.title}
-                delay={BLUR_FADE_DELAY * 12 + id * 0.05}
+                key={work.company}
+                delay={BLUR_FADE_DELAY * 6 + id * 0.05}
               >
-                <ProjectCard
-                  href={project.href}
-                  key={project.title}
-                  title={project.title}
-                  description={project.description}
-                  dates={project.dates}
-                  tags={project.technologies}
-                  image={project.image}
-                  links={project.links}
+                <ResumeCard
+                  key={work.company}
+                  logoUrl={work.logoUrl}
+                  altText={work.company}
+                  title={work.company}
+                  subtitle={work.title}
+                  href={work.href}
+                  badges={work.badges}
+                  period={`${work.start} - ${work.end ?? "Present"}`}
+                  description={work.description}
                 />
               </BlurFade>
             ))}
           </div>
-        </div>
+        )}
+      </section>
+      <section id="education">
+        {data.educations?.length && (
+          <div className="flex min-h-0 flex-col gap-y-3">
+            <BlurFade delay={BLUR_FADE_DELAY * 7}>
+              <h2 className="text-xl font-bold">{t("education")}</h2>
+            </BlurFade>
+            {data.educations?.map((education, id) => (
+              <BlurFade
+                key={education.school}
+                delay={BLUR_FADE_DELAY * 8 + id * 0.05}
+              >
+                <ResumeCard
+                  key={education.school}
+                  href={education.href}
+                  logoUrl={education.logoUrl}
+                  altText={education.school}
+                  title={education.school}
+                  subtitle={education.degree}
+                  period={`${education.start} - ${education.end}`}
+                />
+              </BlurFade>
+            ))}
+          </div>
+        )}
+      </section>
+      <section id="skills">
+        {data.skills?.length && (
+          <div className="flex min-h-0 flex-col gap-y-3">
+            <BlurFade delay={BLUR_FADE_DELAY * 9}>
+              <h2 className="text-xl font-bold">{t("skills")}</h2>
+            </BlurFade>
+            <div className="flex flex-wrap gap-1">
+              {data.skills?.map((skill, id) => (
+                <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
+                  <Badge key={id}>{skill.name}</Badge>
+                </BlurFade>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+      <section id="projects">
+        {data.projects?.length && (
+          <div className="space-y-12 w-full py-12">
+            <BlurFade delay={BLUR_FADE_DELAY * 11}>
+              <div className="flex flex-col items-center justify-center space-y-5 text-center">
+                <div className="space-y-5">
+                  <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
+                    {tProject("myProjects")}
+                  </div>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                    {tProject("title")}
+                  </h2>
+                  <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    {tProject("subTitle")}
+                  </p>
+                </div>
+              </div>
+            </BlurFade>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
+              {data.projects?.map((project, id) => (
+                <BlurFade
+                  key={project.title}
+                  delay={BLUR_FADE_DELAY * 12 + id * 0.05}
+                >
+                  <ProjectCard
+                    href={project.href}
+                    key={project.title}
+                    title={project.title}
+                    description={project.description}
+                    dates={project.dates}
+                    tags={project.technologies}
+                    image={project.image}
+                    links={project.links}
+                  />
+                </BlurFade>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
       <section id="contact">
         <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
@@ -257,6 +263,7 @@ export default async function Page({ params: { locale } }: Props) {
           </BlurFade>
         </div>
       </section>
+      <Navbar socials={data.socials} />
     </main>
   );
 }

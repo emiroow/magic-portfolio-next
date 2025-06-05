@@ -4,9 +4,9 @@ import { ISocial } from "./ISocial";
 
 export interface IClientResponse {
   user?: IUser;
-  education?: IEducation[];
-  project?: IProject[];
-  work?: IWork[];
-  social?: ISocial[];
+  educations?: IEducation[];
+  projects?: IProject[];
+  works?: IWork[];
+  socials?: ISocial[];
   skills?: ISkill[];
 }
