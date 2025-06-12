@@ -3,7 +3,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
+import { useLocale } from "next-intl";
 import Link from "next/link";
 import React from "react";
 
@@ -36,6 +39,8 @@ export const ResumeCard = ({
     }
   };
 
+  const locale = useLocale();
+
   return (
     <Link
       href={href || "#"}
@@ -59,7 +64,7 @@ export const ResumeCard = ({
               <h3 className="inline-flex items-center justify-center font-semibold leading-none text-xs sm:text-sm">
                 {title}
                 {badges && (
-                  <span className="inline-flex gap-x-1">
+                  <span className="inline-flex">
                     {badges.map((badge, index) => (
                       <Badge
                         variant="secondary"
@@ -71,12 +76,18 @@ export const ResumeCard = ({
                     ))}
                   </span>
                 )}
-                {/* <ChevronRightIcon
+                <ChevronRightIcon
                   className={cn(
-                    "size-4 translate-x-0 transform opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100",
-                    isExpanded ? "rotate-90" : "rotate-0"
+                    "size-4 translate-x-0  mr-2 transform opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100",
+                    locale === "fa"
+                      ? isExpanded
+                        ? "rotate-90"
+                        : "rotate-180"
+                      : isExpanded
+                      ? "rotate-90"
+                      : "rotate-0"
                   )}
-                /> */}
+                />
               </h3>
               <div className="text-xs sm:text-sm tabular-nums text-muted-foreground text-right">
                 {period}
