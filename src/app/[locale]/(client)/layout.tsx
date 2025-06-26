@@ -4,7 +4,7 @@ import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
-import "./globals.css";
+import "../globals.css";
 
 export default function LocaleLayout({
   children,
