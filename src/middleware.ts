@@ -25,5 +25,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // Match only internationalized pathnames and API routes
-  matcher: ["/", "/(fa|en)/:path*", "/api/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/",
+    "/dashboard",
+    "/(fa|en)/:path*",
+    "/api/:path*",
+    "/api/admin/:path*",
+  ],
 };

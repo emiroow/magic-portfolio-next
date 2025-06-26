@@ -12,10 +12,21 @@
     "title": "Check out my latest work",
     "subTitle": "I've worked on a variety of projects, from simple websites to complex web applications. Here are a few of my favorites."
   },
+  "navbar": {
+    "social": {
+      "linkedin": "linkedin",
+      "github": "github",
+      "instagram": "instagram",
+      "telegram": "telegram",
+      "youtube": "youtube",
+      "whatsapp": "whatsapp",
+      "x": "x"
+    }
+  },
   "contact": {
     "contact": "contact",
     "title": "Get in Touch",
-    "subTitle": "Want to chat? Just shoot me a dm with a direct question on twitter and I'll respond whenever I can. I will ignore all soliciting."
+    "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
   },
   "NotFoundPage": {
     "title": "Not Found Page !"
