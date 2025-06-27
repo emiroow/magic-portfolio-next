@@ -1,14 +1,21 @@
 "use client";
-import { useLocale } from "next-intl";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 const ThemeToggle = () => {
-  const local = useLocale();
-  const router = useRouter();
+  const { locale } = useParams();
+  const pathName = usePathname();
+  const targetLocale = locale === "fa" ? "en" : "fa";
+  // Remove the current locale from the pathname
+  const pathWithoutLocale = pathName.replace(/^\/(fa|en)/, "");
+
+  const url = `/${targetLocale}${
+    pathWithoutLocale === "" ? "/" : pathWithoutLocale
+  }`;
+
   return (
-    <Link className="text-sm font-bold" href={local === "fa" ? "/en" : "/fa"}>
-      {local === "fa" ? "En" : "Fa"}
+    <Link className="text-sm" href={url}>
+      {targetLocale.toUpperCase()}
     </Link>
   );
 };

@@ -28,5 +28,14 @@
   },
   "NotFoundPage": {
     "title": "پیج مورد نظر یافت نشد !"
+  },
+  "dashboard": {
+    "menu": {
+      "Profile": "پروفایل",
+      "Work": "سابقه کار",
+      "Education": "تصحیلات",
+      "Skills": "مهارت",
+      "Projects": "پروژه"
+    }
   }
 }

@@ -10,6 +10,7 @@ import {
 import { NavbarRoutes } from "@/constants/global";
 import { ISocial } from "@/interface/ISocial";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { FC } from "react";
 import { iconDecider } from "./icons";
@@ -19,6 +20,8 @@ import ThemeToggle from "./theme-toggle";
 type Props = { socials?: ISocial[] };
 
 const Navbar: FC<Props> = ({ socials }) => {
+  const t = useTranslations("navbar.social");
+
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-30 mx-auto mb-4 flex origin-bottom h-full max-h-14">
       <div className="fixed bottom-0 inset-x-0 h-16 w-full bg-background to-transparent backdrop-blur-lg [-webkit-mask-image:linear-gradient(to_top,black,transparent)] dark:bg-background"></div>
@@ -58,7 +61,7 @@ const Navbar: FC<Props> = ({ socials }) => {
                 </Link>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{item.name}</p>
+                <p>{t(item.icon)}</p>
               </TooltipContent>
             </Tooltip>
           </DockIcon>

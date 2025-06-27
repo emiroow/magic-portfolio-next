@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { apiEndPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
 import axios from "axios";
+import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Markdown from "react-markdown";
 
@@ -17,81 +18,81 @@ type Props = {
   params: { locale: string };
 };
 
-// export const generateMetadata = async ({ params: { locale } }: Props) => {
-//   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
-//   const t = await getTranslations();
+export const generateMetadata = async ({ params: { locale } }: Props) => {
+  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
+  const t = await getTranslations();
 
-//   return {
-//     metadataBase: new URL(data.user?.url || ""),
-//     title: {
-//       default: `${data.user?.fullName} | ${t("personalWebsite")}`,
-//       template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
-//     },
-//     alternates: {
-//       canonical: `${apiEndPoint}/${locale}`,
-//       languages: {
-//         fa: `${apiEndPoint}/fa`,
-//         en: `${apiEndPoint}/en`,
-//       },
-//     },
-//     description: data.user?.description,
-//     openGraph: {
-//       title: `${data.user?.name}`,
-//       description: data.user?.description,
-//       url: data.user?.url,
-//       siteName: `${data.user?.fullName}`,
-//       locale: locale === "fa" ? "fa_IR" : "en_US",
-//       type: "website",
-//     },
-//     appLinks: {
-//       web: {
-//         url: "",
-//         should_fallback: true,
-//       },
-//     },
-//     robots: {
-//       index: true,
-//       follow: true,
-//       googleBot: {
-//         index: true,
-//         follow: true,
-//         "max-video-preview": -1,
-//         "max-image-preview": "large",
-//         "max-snippet": -1,
-//       },
-//     },
-//     // icons: {
-//     //   icon: [
-//     //     { url: "/icon.png" },
-//     //     new URL("/icon.png", "https://example.com"),
-//     //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
-//     //   ],
-//     //   shortcut: ["/shortcut-icon.png"],
-//     //   apple: [
-//     //     { url: "/apple-icon.png" },
-//     //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
-//     //   ],
-//     //   other: [
-//     //     {
-//     //       rel: "apple-touch-icon-precomposed",
-//     //       url: "/apple-touch-icon-precomposed.png",
-//     //     },
-//     //   ],
-//     // },
-//     twitter: {
-//       title: `${data.user?.name}`,
-//       card: "summary_large_image",
-//     },
-//     verification: {
-//       google: "google",
-//       yandex: "yandex",
-//       yahoo: "yahoo",
-//       other: {
-//         me: [data.user?.email],
-//       },
-//     },
-//   } as Metadata;
-// };
+  return {
+    metadataBase: new URL(data.user?.url || ""),
+    title: {
+      default: `${data.user?.fullName} | ${t("personalWebsite")}`,
+      template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
+    },
+    alternates: {
+      canonical: `${apiEndPoint}/${locale}`,
+      languages: {
+        fa: `${apiEndPoint}/fa`,
+        en: `${apiEndPoint}/en`,
+      },
+    },
+    description: data.user?.description,
+    openGraph: {
+      title: `${data.user?.name}`,
+      description: data.user?.description,
+      url: data.user?.url,
+      siteName: `${data.user?.fullName}`,
+      locale: locale === "fa" ? "fa_IR" : "en_US",
+      type: "website",
+    },
+    appLinks: {
+      web: {
+        url: "",
+        should_fallback: true,
+      },
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    // icons: {
+    //   icon: [
+    //     { url: "/icon.png" },
+    //     new URL("/icon.png", "https://example.com"),
+    //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
+    //   ],
+    //   shortcut: ["/shortcut-icon.png"],
+    //   apple: [
+    //     { url: "/apple-icon.png" },
+    //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
+    //   ],
+    //   other: [
+    //     {
+    //       rel: "apple-touch-icon-precomposed",
+    //       url: "/apple-touch-icon-precomposed.png",
+    //     },
+    //   ],
+    // },
+    twitter: {
+      title: `${data.user?.name}`,
+      card: "summary_large_image",
+    },
+    verification: {
+      google: "google",
+      yandex: "yandex",
+      yahoo: "yahoo",
+      other: {
+        me: [data.user?.email],
+      },
+    },
+  } as Metadata;
+};
 
 export default async function Page({ params: { locale } }: Props) {
   const t = await getTranslations();

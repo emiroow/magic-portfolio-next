@@ -30,5 +30,14 @@
   },
   "NotFoundPage": {
     "title": "Not Found Page !"
+  },
+  "dashboard": {
+    "menu": {
+      "Profile": "Profile",
+      "Work": "Work Experience",
+      "Education": "Education",
+      "Skills": "Skills",
+      "Projects": "Projects"
+    }
   }
 }

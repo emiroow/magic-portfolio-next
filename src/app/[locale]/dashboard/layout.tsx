@@ -2,7 +2,7 @@ import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
-export default function ClientLayout({
+export default function DashboardLayout({
   children,
   params: { locale },
 }: Readonly<{
