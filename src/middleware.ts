@@ -1,5 +1,5 @@
 import createMiddleware from "next-intl/middleware";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 
 // Middleware to enforce locale in API routes
@@ -7,15 +7,15 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the route is /api or /api/admin and does not end with /fa or /en
-  if (pathname.startsWith("/api") || pathname.startsWith("/api/admin")) {
-    if (!pathname.endsWith("/fa") && !pathname.endsWith("/en")) {
-      return NextResponse.json(
-        {
-          message: "Please use a locale in the last path of URL, /fa or /en",
-        },
-        { status: 500 }
-      );
-    }
+  if (pathname.startsWith("/api")) {
+    // if (!pathname.endsWith("/fa") && !pathname.endsWith("/en")) {
+    //   return NextResponse.json(
+    //     {
+    //       message: "Please use a locale in the last path of URL, /fa or /en",
+    //     },
+    //     { status: 500 }
+    //   );
+    // }
     return;
   }
 

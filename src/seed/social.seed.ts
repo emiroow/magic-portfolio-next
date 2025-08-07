@@ -17,11 +17,7 @@ export const seedSocialData = async () => {
       url: "",
       icon: "whatsapp",
     },
-    {
-      name: "youtube",
-      url: "",
-      icon: "youtube",
-    },
+
     {
       name: "telegram",
       url: "",

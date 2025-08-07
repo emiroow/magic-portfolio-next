@@ -3,7 +3,7 @@ import { ISkill } from "./ISkills";
 import { ISocial } from "./ISocial";
 
 export interface IClientResponse {
-  user?: IUser;
+  profile?: IProfile;
   educations?: IEducation[];
   projects?: IProject[];
   works?: IWork[];

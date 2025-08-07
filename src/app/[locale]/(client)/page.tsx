@@ -23,10 +23,10 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
   const t = await getTranslations();
 
   return {
-    metadataBase: new URL(data.user?.url || ""),
+    metadataBase: new URL(data.profile?.url || ""),
     title: {
-      default: `${data.user?.fullName} | ${t("personalWebsite")}`,
-      template: `%s | ${data.user?.fullName} | ${t("personalWebsite")}`,
+      default: `${data.profile?.fullName} | ${t("personalWebsite")}`,
+      template: `%s | ${data.profile?.fullName} | ${t("personalWebsite")}`,
     },
     alternates: {
       canonical: `${apiEndPoint}/${locale}`,
@@ -35,12 +35,12 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
         en: `${apiEndPoint}/en`,
       },
     },
-    description: data.user?.description,
+    description: data.profile?.description,
     openGraph: {
-      title: `${data.user?.name}`,
-      description: data.user?.description,
-      url: data.user?.url,
-      siteName: `${data.user?.fullName}`,
+      title: `${data.profile?.name}`,
+      description: data.profile?.description,
+      url: data.profile?.url,
+      siteName: `${data.profile?.fullName}`,
       locale: locale === "fa" ? "fa_IR" : "en_US",
       type: "website",
     },
@@ -80,7 +80,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     //   ],
     // },
     twitter: {
-      title: `${data.user?.name}`,
+      title: `${data.profile?.name}`,
       card: "summary_large_image",
     },
     verification: {
@@ -88,7 +88,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
       yandex: "yandex",
       yahoo: "yahoo",
       other: {
-        me: [data.user?.email],
+        me: [data.profile?.email],
       },
     },
   } as Metadata;
@@ -112,18 +112,21 @@ export default async function Page({ params: { locale } }: Props) {
                 delay={BLUR_FADE_DELAY}
                 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
                 yOffset={20}
-                text={`${tHero("hi")} ${data.user?.name} 👋`}
+                text={`${tHero("hi")} ${data.profile?.name} 👋`}
               />
               <BlurFadeText
                 className="max-w-[600px] md:text-xl"
                 delay={BLUR_FADE_DELAY}
-                text={data.user?.description}
+                text={data.profile?.description}
               />
             </div>
             <BlurFade delay={BLUR_FADE_DELAY}>
               <Avatar className="size-32 border">
-                <AvatarImage alt={data.user?.name} src={data.user?.avatarUrl} />
-                <AvatarFallback>{data.user?.initials}</AvatarFallback>
+                <AvatarImage
+                  alt={data.profile?.name}
+                  src={data.profile?.avatarUrl}
+                />
+                <AvatarFallback>{data.profile?.initials}</AvatarFallback>
               </Avatar>
             </BlurFade>
           </div>
@@ -135,7 +138,7 @@ export default async function Page({ params: { locale } }: Props) {
         </BlurFade>
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-            {data.user?.summary}
+            {data.profile?.summary}
           </Markdown>
         </BlurFade>
       </section>
@@ -248,7 +251,7 @@ export default async function Page({ params: { locale } }: Props) {
         )}
       </section>
       <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
+        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pb-12">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-6">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">

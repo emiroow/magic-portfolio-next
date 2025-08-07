@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-export const userSchema = new Schema<IUser>({
+export const profileSchema = new Schema<IProfile>({
   name: { type: String, required: true },
   fullName: { type: String, required: true },
   initials: { type: String },
@@ -15,5 +15,5 @@ export const userSchema = new Schema<IUser>({
   lang: { type: String },
 });
 
-export const userModel =
-  mongoose.models.user || mongoose.model<IUser>("user", userSchema);
+export const profileModel =
+  mongoose.models.profile || mongoose.model<IProfile>("profile", profileSchema);

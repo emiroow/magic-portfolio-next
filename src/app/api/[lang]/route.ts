@@ -1,9 +1,9 @@
 import { connectDB } from "@/config/dbConnection";
 import { educationModel } from "@/models/education";
+import { profileModel } from "@/models/profile";
 import { projectModel } from "@/models/project";
 import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
-import { userModel } from "@/models/user";
 import { workModel } from "@/models/work";
 import { NextRequest, NextResponse } from "next/server";
 export const GET = async (
@@ -13,14 +13,14 @@ export const GET = async (
   const lang = (await params).lang;
   await connectDB();
   try {
-    const user = await userModel.findOne({ lang });
+    const profile = await profileModel.findOne({ lang });
     const educations = await educationModel.find({ lang });
     const projects = await projectModel.find({ lang });
     const works = await workModel.find({ lang });
     const socials = await socialModel.find();
     const skills = await skillModel.find({ lang });
     return NextResponse.json(
-      { user, educations, projects, works, socials, skills },
+      { profile, educations, projects, works, socials, skills },
       { status: 200 }
     );
   } catch (error) {

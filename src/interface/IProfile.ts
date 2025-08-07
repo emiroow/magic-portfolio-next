@@ -1,4 +1,4 @@
-interface IUser {
+interface IProfile {
   name: string; // Required field
   fullName: string; // Required field
   initials?: string;

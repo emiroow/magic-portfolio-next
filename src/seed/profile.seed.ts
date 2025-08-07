@@ -1,7 +1,7 @@
-import { userModel } from "@/models/user";
+import { profileModel } from "@/models/profile";
 
 export const seedUserData = async () => {
-  const userData = [
+  const profileData = [
     {
       name: "Amir",
       fullName: "Amir esmaeelzadeh",
@@ -33,5 +33,5 @@ export const seedUserData = async () => {
       lang: "fa",
     },
   ];
-  await userModel.create(userData);
+  await profileModel.create(profileData);
 };
