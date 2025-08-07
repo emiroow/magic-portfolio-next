@@ -32,6 +32,7 @@
     "title": "Not Found Page !"
   },
   "dashboard": {
+    "title": "Dashboard",
     "menu": {
       "Profile": "Profile",
       "Work": "Work Experience",

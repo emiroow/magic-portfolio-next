@@ -30,7 +30,7 @@ const Tab = () => {
 
   return (
     <Fragment>
-      <div className="w-full bg-secondary rounded-md py-1.5 px-2 flex overflow-auto gap-3 text-sm mt-5 no-scrollbar overscroll-none justify-evenly">
+      <div className="w-full bg-secondary rounded-md py-1.5 px-2 flex overflow-auto gap-3 text-sm mt-12 no-scrollbar overscroll-none justify-evenly">
         {tab.map((item, index) => (
           <motion.div
             key={index}
