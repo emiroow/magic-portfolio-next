@@ -1,10 +1,6 @@
 interface IProfile {
-  name: string; // Required field
-  fullName: string; // Required field
-  initials?: string;
-  url?: string;
-  location?: string;
-  locationLink?: string;
+  name: string;
+  fullName: string;
   description?: string;
   summary?: string;
   avatarUrl?: string;

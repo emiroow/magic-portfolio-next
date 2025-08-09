@@ -1,5 +1,4 @@
-import { ModeToggle } from "@/components/mode-toggle";
-import ThemeToggle from "@/components/theme-toggle";
+import BlurFadeText from "@/components/magicui/blur-fade-text";
 import Tab from "@/components/ui/tab";
 import { useTranslations } from "next-intl";
 
@@ -7,11 +6,12 @@ const page = () => {
   const t = useTranslations("dashboard");
   return (
     <main className="w-full flex justify-center flex-col relative">
-      <div className="w-full flex justify-between absolute top-0 items-center">
-        <ThemeToggle />
-        <ModeToggle />
-      </div>
-      <p className="text-center text-5xl font-bold">{t("title")}</p>
+      <BlurFadeText
+        className="text-center text-5xl font-bold m-auto mt-10"
+        text={t("title")}
+        delay={0.04}
+        yOffset={20}
+      />
       <Tab />
     </main>
   );

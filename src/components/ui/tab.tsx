@@ -1,12 +1,13 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import EducationExperience from "../dashboard/Education";
 import Profile from "../dashboard/Profile";
 import Projects from "../dashboard/Projects";
 import Skills from "../dashboard/Skills";
 import WorkExperience from "../dashboard/WorkExperience";
+import BlurFade from "../magicui/blur-fade";
 
 const Tab = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -29,8 +30,8 @@ const Tab = () => {
   ];
 
   return (
-    <Fragment>
-      <div className="w-full bg-secondary rounded-md py-1.5 px-2 flex overflow-auto gap-3 text-sm mt-12 no-scrollbar overscroll-none justify-evenly">
+    <BlurFade yOffset={20} delay={0.04}>
+      <div className="dark:bg-secondary bg-black rounded-md py-1.5 px-2 flex overflow-auto max-sm:w-full gap-3 text-sm mt-7 m-auto">
         {tab.map((item, index) => (
           <motion.div
             key={index}
@@ -51,7 +52,8 @@ const Tab = () => {
         ))}
       </div>
       {/* content */}
-      <div className="w-full mt-3">
+      <hr className="h-1 mt-2 mb-3 dark:bg-secondary bg-black rounded-[300%]" />
+      <div className="w-full h-max">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -64,7 +66,7 @@ const Tab = () => {
           </motion.div>
         </AnimatePresence>
       </div>
-    </Fragment>
+    </BlurFade>
   );
 };
 

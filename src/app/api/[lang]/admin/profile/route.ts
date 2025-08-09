@@ -15,3 +15,22 @@ export async function GET(
     );
   }
 }
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  try {
+    const profile = await profileModel.findOneAndUpdate(
+      { lang: params.lang },
+      { ...request.body },
+      { new: true }
+    );
+    return NextResponse.json(profile, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

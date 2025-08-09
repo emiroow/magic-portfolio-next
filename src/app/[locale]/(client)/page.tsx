@@ -3,7 +3,7 @@ import BlurFadeText from "@/components/magicui/blur-fade-text";
 import Navbar from "@/components/navbar";
 import { ProjectCard } from "@/components/project-card";
 import { ResumeCard } from "@/components/resume-card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { apiEndPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
@@ -23,7 +23,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
   const t = await getTranslations();
 
   return {
-    metadataBase: new URL(data.profile?.url || ""),
+    // metadataBase: new URL(data.profile?.url || ""),
     title: {
       default: `${data.profile?.fullName} | ${t("personalWebsite")}`,
       template: `%s | ${data.profile?.fullName} | ${t("personalWebsite")}`,
@@ -39,7 +39,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     openGraph: {
       title: `${data.profile?.name}`,
       description: data.profile?.description,
-      url: data.profile?.url,
+      // url: data.profile?.url,
       siteName: `${data.profile?.fullName}`,
       locale: locale === "fa" ? "fa_IR" : "en_US",
       type: "website",
@@ -126,7 +126,6 @@ export default async function Page({ params: { locale } }: Props) {
                   alt={data.profile?.name}
                   src={data.profile?.avatarUrl}
                 />
-                <AvatarFallback>{data.profile?.initials}</AvatarFallback>
               </Avatar>
             </BlurFade>
           </div>
