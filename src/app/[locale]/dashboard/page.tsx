@@ -7,7 +7,7 @@ const page = () => {
   return (
     <main className="w-full flex justify-center flex-col relative">
       <BlurFadeText
-        className="text-center text-5xl font-bold m-auto mt-10"
+        className="text-center text-5xl font-bold m-auto mt-14"
         text={t("title")}
         delay={0.04}
         yOffset={20}

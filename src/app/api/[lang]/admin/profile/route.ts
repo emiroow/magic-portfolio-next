@@ -20,6 +20,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { lang: string } }
 ) {
+  console.log(request.body);
   try {
     const profile = await profileModel.findOneAndUpdate(
       { lang: params.lang },

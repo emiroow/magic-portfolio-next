@@ -31,7 +31,7 @@ const Tab = () => {
 
   return (
     <BlurFade yOffset={20} delay={0.04}>
-      <div className="dark:bg-secondary bg-black rounded-md py-1.5 px-2 flex overflow-auto max-sm:w-full gap-3 text-sm mt-7 m-auto">
+      <div className="dark:bg-secondary bg-black rounded-md py-1.5 px-2 flex overflow-auto sm:w-max w-full gap-3 text-sm mt-7 m-auto">
         {tab.map((item, index) => (
           <motion.div
             key={index}
