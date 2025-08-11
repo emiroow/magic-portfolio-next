@@ -1,5 +1,6 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import DashboardProvider from "@/providers/dashboardProvider";
 import { notFound } from "next/navigation";
 
 export default function DashboardLayout({
@@ -19,12 +20,12 @@ export default function DashboardLayout({
     <div
       dir={direction}
       className={cn(
-        `min-h-screen bg-background antialiased max-w-2xl mx-auto sm:py-24 px-6 ${
+        `min-h-screen bg-background antialiased max-w-2xl mx-auto sm:py-12 px-6 ${
           locale === "en" ? "font-robotRegular" : "font-estedadRegular"
         } `
       )}
     >
-      {children}
+      <DashboardProvider>{children}</DashboardProvider>
     </div>
   );
 }

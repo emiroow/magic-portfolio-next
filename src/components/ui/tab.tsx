@@ -2,11 +2,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import EducationExperience from "../dashboard/Education";
-import Profile from "../dashboard/Profile";
-import Projects from "../dashboard/Projects";
-import Skills from "../dashboard/Skills";
-import WorkExperience from "../dashboard/WorkExperience";
+import EducationExperience from "../dashboard/education";
+import Profile from "../dashboard/profile";
+import Projects from "../dashboard/projects";
+import Skills from "../dashboard/skills";
+import WorkExperience from "../dashboard/workExperience";
 import BlurFade from "../magicui/blur-fade";
 
 const Tab = () => {

@@ -20,11 +20,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { lang: string } }
 ) {
-  console.log(request.body);
   try {
+    const body = await request.json();
     const profile = await profileModel.findOneAndUpdate(
       { lang: params.lang },
-      { ...request.body },
+      { ...body },
       { new: true }
     );
     return NextResponse.json(profile, { status: 200 });
