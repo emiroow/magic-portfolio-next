@@ -3,6 +3,7 @@
   "experience": "تجربه کاری",
   "about": "درباه من",
   "education": "تحصیلات",
+
   "skills": "مهارت ها",
   "personalWebsite": "سایت شخصی",
   "project": {
@@ -31,6 +32,14 @@
   },
   "dashboard": {
     "title": "داشبورد",
+    "name": "نام",
+    "fullName": "نام و نام خانوادگی",
+    "save": "ذخیر",
+    "about": "برباره من",
+    "email": "ایمیل",
+    "summary": "خلاصه ای از خود",
+    "uploadImage": "بارگذاری تصویر",
+    "phoneNumber": "تلفن",
     "menu": {
       "Profile": "پروفایل",
       "Work": "سابقه کار",

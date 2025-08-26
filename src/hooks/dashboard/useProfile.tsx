@@ -72,11 +72,25 @@ const useProfile = () => {
 
   const { mutate: putProfile, status: mutationStatus } = useMutation({
     mutationFn: async (data: formType) => {
-      console.log(data);
       const res = await axios.put(`/api/${lang}/admin/profile`, data);
       return res.data;
     },
     onSuccess: () => {
+      reset();
+      refetchGetProfile();
+    },
+  });
+
+  const uploadAvatar = useMutation({
+    mutationFn: async (formData: any) => {
+      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
+        params: { lang },
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      reset();
       refetchGetProfile();
     },
   });
@@ -96,6 +110,7 @@ const useProfile = () => {
     pageLoading,
     error,
     profile,
+    uploadAvatar,
   };
 };
 

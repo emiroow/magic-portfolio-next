@@ -2,12 +2,12 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import EducationExperience from "../dashboard/education";
-import Profile from "../dashboard/profile";
-import Projects from "../dashboard/projects";
-import Skills from "../dashboard/skills";
-import WorkExperience from "../dashboard/workExperience";
 import BlurFade from "../magicui/blur-fade";
+import EducationExperience from "./education";
+import Profile from "./Profile";
+import Projects from "./projects";
+import Skills from "./skills";
+import WorkExperience from "./workExperience";
 
 const Tab = () => {
   const [activeTab, setActiveTab] = useState(0);

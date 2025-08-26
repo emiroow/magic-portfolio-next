@@ -1,7 +1,15 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import DashboardProvider from "@/providers/dashboardProvider";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return {
+    title: `${t("dashboard.title")} | ${t("personalWebsite")}`,
+  };
+}
 
 export default function DashboardLayout({
   children,

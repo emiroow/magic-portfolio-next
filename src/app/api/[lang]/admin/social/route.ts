@@ -1,5 +1,71 @@
-import { NextResponse } from "next/server";
+import { connectDB } from "@/config/dbConnection";
+import { socialModel } from "@/models/social";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  return NextResponse.json({ message: "get data" }, { status: 200 });
+// GET all socials for a language
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const socials = await socialModel.find({ lang: params.lang });
+    return NextResponse.json(socials, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT: Update a social by _id
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+    const { _id, ...updateData } = body;
+    if (!_id) {
+      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    }
+    const updated = await socialModel.findOneAndUpdate(
+      { _id, lang: params.lang },
+      updateData,
+      { new: true }
+    );
+    return NextResponse.json(updated, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: Remove a social by _id
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+    const { _id } = body;
+    if (!_id) {
+      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    }
+    await socialModel.deleteOne({ _id, lang: params.lang });
+    return NextResponse.json(
+      { message: "Deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

@@ -117,7 +117,7 @@ export default async function Page({ params: { locale } }: Props) {
               <BlurFadeText
                 className="max-w-[600px] md:text-xl"
                 delay={BLUR_FADE_DELAY}
-                text={data.profile?.description}
+                text={data.profile?.summary}
               />
             </div>
             <BlurFade delay={BLUR_FADE_DELAY}>
@@ -137,7 +137,7 @@ export default async function Page({ params: { locale } }: Props) {
         </BlurFade>
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-            {data.profile?.summary}
+            {data.profile?.description}
           </Markdown>
         </BlurFade>
       </section>

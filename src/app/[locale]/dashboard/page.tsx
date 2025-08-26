@@ -1,5 +1,6 @@
+import Footer from "@/components/dashboard/footer";
+import Tab from "@/components/dashboard/tab";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
-import Tab from "@/components/ui/tab";
 import { useTranslations } from "next-intl";
 
 const page = () => {
@@ -13,6 +14,7 @@ const page = () => {
         yOffset={20}
       />
       <Tab />
+      <Footer />
     </main>
   );
 };

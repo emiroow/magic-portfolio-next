@@ -5,8 +5,8 @@
   "experience": "Work Experience",
   "about": "About",
   "education": "Education",
-  "skills": "skills",
-  "personalWebsite": "personal website",
+  "skills": "Skills",
+  "personalWebsite": "Personal Website",
   "project": {
     "myProjects": "My Projects",
     "title": "Check out my latest work",
@@ -24,7 +24,7 @@
     }
   },
   "contact": {
-    "contact": "contact",
+    "contact": "Contact",
     "title": "Get in Touch",
     "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
   },
@@ -33,6 +33,14 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "name": "Name",
+    "fullName": "FullName",
+    "save": "Save",
+    "about": "About",
+    "summary": "Summary",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "uploadImage": "Upload Image",
     "menu": {
       "Profile": "Profile",
       "Work": "Work Experience",
