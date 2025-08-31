@@ -36,6 +36,7 @@
     "name": "Name",
     "fullName": "FullName",
     "save": "Save",
+    "cancelForm": "Cancel",
     "about": "About",
     "summary": "Summary",
     "email": "Email",

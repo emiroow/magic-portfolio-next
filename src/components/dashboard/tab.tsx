@@ -31,7 +31,7 @@ const Tab = () => {
 
   return (
     <BlurFade yOffset={20} delay={0.04}>
-      <div className="dark:bg-secondary bg-black rounded-md py-1.5 px-2 flex overflow-auto sm:w-max w-full gap-3 text-sm mt-7 m-auto">
+      <div className=" bg-muted rounded-md py-1.5 px-2 flex overflow-auto sm:w-max w-full gap-3 text-sm mt-7 m-auto">
         {tab.map((item, index) => (
           <motion.div
             key={index}
@@ -40,7 +40,7 @@ const Tab = () => {
               ${
                 index === activeTab
                   ? "bg-white text-black border border-white shadow"
-                  : "bg-black text-white"
+                  : " dark:bg-black dark:text-white"
               }
             `}
             whileTap={{ scale: 0.99 }}
@@ -52,10 +52,11 @@ const Tab = () => {
         ))}
       </div>
       {/* content */}
-      <hr className="h-1 mt-2 mb-3 dark:bg-secondary bg-black rounded-[300%]" />
+      <hr className="h-1 mt-2 mb-3 dark:bg-secondary bg-muted  rounded-[300%]" />
       <div className="w-full h-max">
         <AnimatePresence mode="wait">
           <motion.div
+            layout
             key={activeTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

@@ -55,13 +55,14 @@ export async function POST(req: NextRequest) {
 
     await writeFile(filePath, buffer);
 
-    const updateUrl = await profileModel.updateOne(
+    const updateUrl = await profileModel.findOneAndUpdate<IProfile>(
       { lang },
       { avatarUrl: `/avatar/${fileName}` }
     );
 
     return NextResponse.json({
-      url: updateUrl,
+      avatarUrl: updateUrl?.avatarUrl,
+      message: "Upload successful",
     });
   } catch (err) {
     console.error("Upload error:", err);
