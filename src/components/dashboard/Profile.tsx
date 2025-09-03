@@ -2,6 +2,7 @@
 import useProfile from "@/hooks/dashboard/useProfile";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useRef } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -44,7 +45,7 @@ const Profile = () => {
           <div className="flex items-center gap-4 mb-2">
             <div className="w-full flex flex-row items-center gap-3">
               <div className="relative w-32 h-32 border-2 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
-                {profile.avatarUrl ? (
+                {profile?.avatarUrl ? (
                   <>
                     {profileImageShowImageFromUrlLoading ||
                       (uploadAvatar.isPending && (
@@ -53,9 +54,11 @@ const Profile = () => {
                           size="sm"
                         />
                       ))}
-                    <img
-                      src={profile.avatarUrl}
-                      alt="avatar"
+                    <Image
+                      src={profile?.avatarUrl}
+                      alt={profile?.fullName}
+                      width={150}
+                      height={150}
                       className="object-cover w-full h-full rounded-full"
                       onLoad={() => {
                         setProfileImageShowImageFromUrlLoading(false);

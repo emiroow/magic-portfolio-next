@@ -3,12 +3,6 @@ import { unlink, writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export async function POST(req: NextRequest) {
   const lang = req.nextUrl.searchParams.get("lang");
   try {
@@ -30,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Convert file to Buffer
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer: any = Buffer.from(bytes);
 
     // Save in public/avatar
     const uploadDir = path.join(process.cwd(), "public", "avatar");

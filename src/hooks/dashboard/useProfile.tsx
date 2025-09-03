@@ -2,11 +2,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as yup from "yup";
+
 const useProfile = () => {
+  const locale = useLocale();
+  const t = useTranslations();
   const lang = useLocale();
   const [
     profileImageShowImageFromUrlLoading,
@@ -61,9 +65,13 @@ const useProfile = () => {
     error,
     refetch: refetchGetProfile,
   } = useQuery({
+    enabled: !!lang,
+    retryOnMount: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     queryKey: ["profile", lang],
     queryFn: async () => {
-      const res = await axios.get(`/api/${lang}/admin/profile`);
+      const res = await axios.get<IProfile>(`/api/${lang}/admin/profile`);
       // Add cache-busting param to avatarUrl
       const avatarUrl = res.data.avatarUrl
         ? `${res.data.avatarUrl}?cb=${Date.now()}`
@@ -85,6 +93,10 @@ const useProfile = () => {
       return res.data;
     },
     onSuccess: () => {
+      toast(t("dashboard.successMessage"), {
+        style: { direction: locale === "fa" ? "rtl" : "ltr" },
+        position: "top-center",
+      });
       reset();
       refetchGetProfile();
     },
@@ -127,6 +139,7 @@ const useProfile = () => {
     uploadAvatar,
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
+
     refetchGetProfile,
   };
 };

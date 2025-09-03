@@ -6,7 +6,6 @@ export const seedWorkData = async () => {
     {
       company: "Atomic Finance",
       href: "https://atomic.finance",
-      badges: [],
       location: "Remote",
       title: "Bitcoin Protocol Engineer",
       logoUrl:
@@ -20,7 +19,6 @@ export const seedWorkData = async () => {
     {
       company: "اتومیک فاینانس",
       href: "https://atomic.finance",
-      badges: [],
       location: "دورکاری",
       title: "مهندس پروتکل بیت‌کوین",
       logoUrl:

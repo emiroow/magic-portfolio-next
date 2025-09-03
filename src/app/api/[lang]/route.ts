@@ -6,6 +6,7 @@ import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
 import { workModel } from "@/models/work";
 import { NextRequest, NextResponse } from "next/server";
+
 export const GET = async (
   request: NextRequest,
   { params }: { params: Promise<{ lang: string }> }

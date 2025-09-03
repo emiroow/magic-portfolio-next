@@ -5,7 +5,6 @@ const useWorkExperience = () => {
   type formType = {
     company: string;
     href: string;
-    badges: string;
     location: string;
     title: string;
     logoUrl: string;
@@ -17,7 +16,6 @@ const useWorkExperience = () => {
   const FormSchema = yup.object().shape({
     company: yup.string().required("فیلد اجباری"),
     href: yup.string().required("فیلد اجباری"),
-    badges: yup.string().required("فیلد اجباری"),
     location: yup.string().required("فیلد اجباری"),
     title: yup.string().required("فیلد اجباری"),
     logoUrl: yup.string().required("فیلد اجباری"),
@@ -37,7 +35,6 @@ const useWorkExperience = () => {
     defaultValues: {
       company: "",
       href: "",
-      badges: "",
       location: "",
       title: "",
       logoUrl: "",

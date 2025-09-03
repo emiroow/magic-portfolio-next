@@ -159,7 +159,6 @@ export default async function Page({ params: { locale } }: Props) {
                   title={work.company}
                   subtitle={work.title}
                   href={work.href}
-                  badges={work.badges}
                   period={`${work.start} - ${work.end ?? "Present"}`}
                   description={work.description}
                 />

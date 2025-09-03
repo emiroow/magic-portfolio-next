@@ -32,6 +32,8 @@
     "title": "Not Found Page !"
   },
   "dashboard": {
+    "successMessage": "Operation completed successfully.",
+    "errorMessage": "An error occurred. Please try again.",
     "title": "Dashboard",
     "name": "Name",
     "fullName": "FullName",
