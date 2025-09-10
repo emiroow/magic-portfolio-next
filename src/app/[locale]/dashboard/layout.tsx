@@ -1,7 +1,7 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import DashboardProvider from "@/providers/dashboardProvider";
-import { getTranslations } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 export async function generateMetadata() {
@@ -11,7 +11,7 @@ export async function generateMetadata() {
   };
 }
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
   params: { locale },
 }: Readonly<{
@@ -19,6 +19,7 @@ export default function DashboardLayout({
   params: { locale: string };
 }>) {
   const direction = locale === "fa" ? "rtl" : "ltr";
+  const messages = await getMessages();
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
@@ -33,7 +34,9 @@ export default function DashboardLayout({
         } `
       )}
     >
-      <DashboardProvider>{children}</DashboardProvider>
+      <DashboardProvider locale={locale} messages={messages}>
+        {children}
+      </DashboardProvider>
     </div>
   );
 }

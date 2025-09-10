@@ -6,7 +6,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   // experimental: { serverComponentsHmrCache: false, turbo: { caches: false } },
   images: {
-    // domains: ["api.emiroow.ir"],
+    domains: ["api.emiroow.ir"],
   },
   reactStrictMode: true,
 };

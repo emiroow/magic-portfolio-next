@@ -1,10 +1,8 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import ClientProvider from "@/providers/clientProvider";
-import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-export default async function ClientLayout({
+export default async function LocaleLayout({
   children,
   params: { locale },
 }: Readonly<{
@@ -12,7 +10,7 @@ export default async function ClientLayout({
   params: { locale: string };
 }>) {
   const direction = locale === "fa" ? "rtl" : "ltr";
-  const messages = await getMessages();
+
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
@@ -26,7 +24,7 @@ export default async function ClientLayout({
         } `
       )}
     >
-      <ClientProvider locale={locale}>{children}</ClientProvider>
+      {children}
     </div>
   );
 }

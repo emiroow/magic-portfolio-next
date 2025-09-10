@@ -2,9 +2,9 @@ import Footer from "@/components/dashboard/footer";
 import Tab from "@/components/dashboard/tab";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { useTranslations } from "next-intl";
-
 const Page = () => {
   const t = useTranslations("dashboard");
+
   return (
     <main className="w-full flex justify-center flex-col relative">
       <BlurFadeText

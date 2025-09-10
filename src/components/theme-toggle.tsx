@@ -1,6 +1,6 @@
 "use client";
-import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
+import { useParams } from "next/navigation";
 
 const ThemeToggle = () => {
   const { locale } = useParams();
@@ -9,12 +9,10 @@ const ThemeToggle = () => {
   // Remove the current locale from the pathname
   const pathWithoutLocale = pathName.replace(/^\/(fa|en)/, "");
 
-  const url = `/${targetLocale}${
-    pathWithoutLocale === "" ? "/" : pathWithoutLocale
-  }`;
+  const url = `${pathWithoutLocale === "" ? "/" : pathWithoutLocale}`;
 
   return (
-    <Link className="text-sm" href={url}>
+    <Link className="text-sm" href={url} locale={targetLocale}>
       {targetLocale.toUpperCase()}
     </Link>
   );
