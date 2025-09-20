@@ -7,6 +7,7 @@
   "education": "Education",
   "skills": "Skills",
   "personalWebsite": "Personal Website",
+  "requiredField": "This field is required",
   "project": {
     "myProjects": "My Projects",
     "title": "Check out my latest work",
@@ -44,6 +45,22 @@
     "email": "Email",
     "phoneNumber": "Phone Number",
     "uploadImage": "Upload Image",
+    "workExperience": {
+      "experience": "Work Experience",
+      "cancel": "close",
+      "createWork": "Create new work experience",
+      "editWork": "Edit work experience",
+      "company": "company",
+      "href": "company url",
+      "location": "location",
+      "title": "title",
+      "logoUrl": "logo url",
+      "start": "start",
+      "end": "end",
+      "save": "Save",
+      "cancelForm": "Cancel",
+      "description": "description"
+    },
     "menu": {
       "Profile": "Profile",
       "Work": "Work Experience",

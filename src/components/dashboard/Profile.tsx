@@ -15,13 +15,11 @@ const Profile = () => {
   const {
     handleSubmit,
     register,
-    setValue,
     formState: { errors, isDirty, defaultValues },
     btnLoading,
     pageLoading,
     onsubmit,
     reset,
-    resetField,
     profile,
     uploadAvatar,
     profileImageShowImageFromUrlLoading,
@@ -41,10 +39,11 @@ const Profile = () => {
           refetchGetProfile();
         }}
       >
-        <div className="flex flex-col gap-1 mb-2">
+        {/* inputs */}
+        <div className="flex flex-col gap-1 mb-2 mt-8">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-full flex flex-row items-center gap-3">
-              <div className="relative w-32 h-32 border-2 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
+              <div className="relative w-32 h-32 border-2 mb-3 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
                 {profile?.avatarUrl ? (
                   <>
                     {profileImageShowImageFromUrlLoading ||

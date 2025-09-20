@@ -1,4 +1,5 @@
 interface IWork {
+  _id?: string;
   company?: string;
   href?: string;
   location?: string;

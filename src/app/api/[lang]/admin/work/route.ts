@@ -19,7 +19,7 @@ export async function GET(
   }
 }
 
-// PUT: Update a work experience by _id
+// PUT: Update a work experience by id
 export async function PUT(
   request: NextRequest,
   { params }: { params: { lang: string } }
@@ -27,12 +27,12 @@ export async function PUT(
   await connectDB();
   try {
     const body = await request.json();
-    const { _id, ...updateData } = body;
-    if (!_id) {
-      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    const { id, ...updateData } = body;
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
     const updated = await workModel.findOneAndUpdate(
-      { _id, lang: params.lang },
+      { _id: id, lang: params.lang },
       updateData,
       { new: true }
     );
@@ -45,7 +45,7 @@ export async function PUT(
   }
 }
 
-// DELETE: Remove a work experience by _id
+// DELETE: Remove a work experience by id
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { lang: string } }
@@ -53,11 +53,11 @@ export async function DELETE(
   await connectDB();
   try {
     const body = await request.json();
-    const { _id } = body;
-    if (!_id) {
-      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    const { id } = body;
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
-    await workModel.deleteOne({ _id, lang: params.lang });
+    await workModel.findOneAndDelete({ _id: id, lang: params.lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }

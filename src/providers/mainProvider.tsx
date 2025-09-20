@@ -1,5 +1,3 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
 import { Fragment } from "react";
 
 interface Props {
@@ -8,15 +6,7 @@ interface Props {
 }
 
 const MainProvider = async ({ children, locale }: Props) => {
-  const messages = await getMessages();
-
-  return (
-    <Fragment>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        {children}
-      </NextIntlClientProvider>
-    </Fragment>
-  );
+  return <Fragment>{children}</Fragment>;
 };
 
 export default MainProvider;

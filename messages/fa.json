@@ -3,7 +3,7 @@
   "experience": "تجربه کاری",
   "about": "درباه من",
   "education": "تحصیلات",
-
+  "requiredField": "این فیلد الزامی است",
   "skills": "مهارت ها",
   "personalWebsite": "سایت شخصی",
   "project": {
@@ -49,6 +49,22 @@
       "Education": "تصحیلات",
       "Skills": "مهارت",
       "Projects": "پروژه"
+    },
+    "workExperience": {
+      "experience": "تجربه کاری",
+      "cancel": "انصراف",
+      "createWork": "ایجاد تجربه کاری جدید",
+      "editWork": "ویرایش تجربه کاری ",
+      "company": "شرکت",
+      "href": "لینک",
+      "location": "موقعیت",
+      "title": "عنوان",
+      "logoUrl": "لینک لوگو شرکت",
+      "start": "شروع",
+      "end": "اتمام",
+      "description": "توضیحات",
+      "cancelForm": "لغو",
+      "save": "ذخیر"
     }
   }
 }

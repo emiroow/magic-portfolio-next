@@ -28,15 +28,15 @@ const useProfile = () => {
   };
 
   const FormSchema = yup.object().shape({
-    name: yup.string().required("فیلد اجباری"),
-    fullName: yup.string().required("فیلد اجباری"),
-    email: yup.string().required("فیلد اجباری"),
+    name: yup.string().required(t("requiredField")),
+    fullName: yup.string().required(t("requiredField")),
+    email: yup.string().required(t("requiredField")),
     tel: yup
       .string()
-      .required("فیلد اجباری")
+      .required(t("requiredField"))
       .matches(/^09\d{9}$/, "شماره موبایل معتبر وارد کنید"),
-    summary: yup.string().required("فیلد اجباری"),
-    description: yup.string().required("فیلد اجباری"),
+    summary: yup.string().required(t("requiredField")),
+    description: yup.string().required(t("requiredField")),
   });
 
   const {
@@ -66,9 +66,6 @@ const useProfile = () => {
     refetch: refetchGetProfile,
   } = useQuery({
     enabled: !!lang,
-    retryOnMount: true,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
     queryKey: ["profile", lang],
     queryFn: async () => {
       const res = await axios.get<IProfile>(`/api/${lang}/admin/profile`);
@@ -139,7 +136,6 @@ const useProfile = () => {
     uploadAvatar,
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
-
     refetchGetProfile,
   };
 };

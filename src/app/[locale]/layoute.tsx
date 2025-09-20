@@ -1,5 +1,6 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import MainProvider from "@/providers/mainProvider";
 import { notFound } from "next/navigation";
 
 export default async function LocaleLayout({
@@ -24,7 +25,7 @@ export default async function LocaleLayout({
         } `
       )}
     >
-      {children}
+      <MainProvider>{children}</MainProvider>
     </div>
   );
 }
