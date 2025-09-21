@@ -18,6 +18,7 @@ import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
+import { Textarea } from "../ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const WorkExperience = () => {
@@ -43,6 +44,7 @@ const WorkExperience = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const locale = useLocale();
   const t = useTranslations("dashboard.workExperience");
+  const tBase = useTranslations("");
   const { theme } = useTheme();
 
   if (isLoading) return <Loading className="h-[50vh]" />;
@@ -153,6 +155,15 @@ const WorkExperience = () => {
                 placeholder={t("location")}
               />
               <p className="text-red-600 text-xs">{errors.location?.message}</p>
+
+              <Textarea
+                className="text-sm"
+                {...register("description")}
+                placeholder={t("description")}
+              />
+              <p className="text-red-600 text-xs">
+                {errors.description?.message}
+              </p>
 
               {/* year Picker */}
               <div className="w-full flex flex-row gap-2">
@@ -318,41 +329,51 @@ const WorkExperience = () => {
               </Tooltip>
             </div>
             <Fragment>
-              {workExperienceData?.map((item, index) => (
-                <BlurFade
-                  key={index}
-                  delay={BLUR_FADE_DELAY * 8 + (index + index++) * 0.05}
-                >
-                  <ResumeCard
+              {workExperienceData?.length ? (
+                workExperienceData?.map((item, index) => (
+                  <BlurFade
                     key={index}
-                    logoUrl={item.logoUrl}
-                    altText={item.company}
-                    title={item.company}
-                    subtitle={item.title}
-                    href={item.href}
-                    period={`${item.start} - ${item.end}`}
-                    description={item.description}
-                    isExpanded={expandedIndex === index}
-                    onToggle={() => {
-                      setExpandedIndex(expandedIndex === index ? null : index);
-                    }}
-                    onCancel={() => console.log("cancel")}
-                    onEdit={() => {
-                      setValue("id", item._id || "");
-                      setValue("company", item.company || "");
-                      setValue("description", item.description || "");
-                      setValue("end", item.end || "");
-                      setValue("href", item.href || "");
-                      setValue("location", item.location || "");
-                      setValue("start", item.start || "");
-                      setValue("logoUrl", item.logoUrl || "");
-                      setValue("title", item.title || "");
-                      setIsEdit(true);
-                    }}
-                    onDelete={() => deleteWorkExperience(item._id)}
-                  />
+                    delay={BLUR_FADE_DELAY * 8 + (index + index++) * 0.05}
+                  >
+                    <ResumeCard
+                      key={index}
+                      logoUrl={item.logoUrl}
+                      altText={item.company}
+                      title={item.company}
+                      subtitle={item.title}
+                      href={item.href}
+                      period={`${item.start} - ${item.end}`}
+                      description={item.description}
+                      isExpanded={expandedIndex === index}
+                      onToggle={() => {
+                        setExpandedIndex(
+                          expandedIndex === index ? null : index
+                        );
+                      }}
+                      onCancel={() => console.log("cancel")}
+                      onEdit={() => {
+                        setValue("id", item._id || "");
+                        setValue("company", item.company || "");
+                        setValue("description", item.description || "");
+                        setValue("end", item.end || "");
+                        setValue("href", item.href || "");
+                        setValue("location", item.location || "");
+                        setValue("start", item.start || "");
+                        setValue("logoUrl", item.logoUrl || "");
+                        setValue("title", item.title || "");
+                        setIsEdit(true);
+                      }}
+                      onDelete={() => deleteWorkExperience(item._id)}
+                    />
+                  </BlurFade>
+                ))
+              ) : (
+                <BlurFade delay={BLUR_FADE_DELAY * 8}>
+                  <div className="bg-muted rounded-xl p-5 w-full flex justify-center items-center h-[50vh]">
+                    {tBase("notFound")}
+                  </div>
                 </BlurFade>
-              ))}
+              )}
             </Fragment>
           </motion.div>
         )}

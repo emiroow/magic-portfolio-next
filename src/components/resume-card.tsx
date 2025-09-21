@@ -58,23 +58,25 @@ export const ResumeCard = ({
   const locale = useLocale();
 
   return (
-    <div className="block cursor-pointer">
-      <Card className="flex items-center">
+    <div className="block cursor-pointer w-full">
+      <Card className="flex items-center w-full">
         <Link
           href={href || "#"}
-          className="flex items-center"
+          className="flex items-center w-full"
           onClick={handleClick}
         >
-          <div className="flex-none">
-            <Avatar className="border size-12 m-auto bg-muted-background dark:bg-foreground">
-              <AvatarImage
-                src={logoUrl}
-                alt={altText}
-                className="object-contain"
-              />
-              <AvatarFallback>{altText && altText[0]}</AvatarFallback>
-            </Avatar>
-          </div>
+          {logoUrl && (
+            <div className="flex-none">
+              <Avatar className="border size-12 m-auto bg-muted-background dark:bg-foreground">
+                <AvatarImage
+                  src={logoUrl}
+                  alt={altText}
+                  className="object-contain"
+                />
+                <AvatarFallback>{altText && altText[0]}</AvatarFallback>
+              </Avatar>
+            </div>
+          )}
           <div className="flex-grow mx-4 items-center flex-col group">
             <CardHeader>
               <div className="flex items-center justify-between gap-x-2 text-base">

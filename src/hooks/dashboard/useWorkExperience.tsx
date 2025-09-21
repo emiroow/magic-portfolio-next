@@ -58,6 +58,8 @@ const useWorkExperience = () => {
     },
   });
 
+  const { id: IsEditItem } = getValues();
+
   const {
     data: workExperienceData,
     isLoading,
@@ -72,6 +74,7 @@ const useWorkExperience = () => {
 
   const { mutate: putWorkExperience, status: mutationStatus } = useMutation({
     mutationFn: async (data: formType) => {
+      console.log(data);
       const res = await axios.put(`/api/${lang}/admin/work`, data);
       return res.data;
     },
@@ -113,9 +116,31 @@ const useWorkExperience = () => {
       },
     });
 
+  const { mutate: postWorkExperience, isPending: isPostingWorkExperience } =
+    useMutation({
+      mutationFn: async (data: formType) => {
+        const res = await axios.post(`/api/${lang}/admin/work`, data);
+        return res.data;
+      },
+      onSuccess: () => {
+        toast(t("dashboard.successMessage"), {
+          style: {
+            direction: locale === "fa" ? "rtl" : "ltr",
+            backgroundColor: theme === "dark" ? "white" : "black",
+            color: theme === "dark" ? "black" : "white",
+          },
+          position: "top-center",
+        });
+        reset();
+        setIsEdit(false);
+        refetchGetWorkExperience();
+      },
+    });
+
   const btnLoading = mutationStatus === "pending";
 
-  const onsubmit = (data: formType) => putWorkExperience(data);
+  const onsubmit = (data: formType) =>
+    IsEditItem ? putWorkExperience(data) : postWorkExperience(data);
 
   return {
     handleSubmit,
@@ -135,6 +160,8 @@ const useWorkExperience = () => {
     setIsEdit,
     isDeletingWorkExperience,
     deleteWorkExperience,
+    mutate: postWorkExperience,
+    isPending: isPostingWorkExperience,
   };
 };
 

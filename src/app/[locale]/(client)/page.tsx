@@ -142,7 +142,7 @@ export default async function Page({ params: { locale } }: Props) {
         </BlurFade>
       </section>
       <section id="work">
-        {data.works?.length && (
+        {data.works?.length ? (
           <div className="flex min-h-0 flex-col gap-y-3">
             <BlurFade delay={BLUR_FADE_DELAY * 5}>
               <h2 className="text-xl font-bold">{t("experience")}</h2>
@@ -165,10 +165,10 @@ export default async function Page({ params: { locale } }: Props) {
               </BlurFade>
             ))}
           </div>
-        )}
+        ) : null}
       </section>
       <section id="education">
-        {data.educations?.length && (
+        {data.educations?.length ? (
           <div className="flex min-h-0 flex-col gap-y-3">
             <BlurFade delay={BLUR_FADE_DELAY * 7}>
               <h2 className="text-xl font-bold">{t("education")}</h2>
@@ -190,10 +190,10 @@ export default async function Page({ params: { locale } }: Props) {
               </BlurFade>
             ))}
           </div>
-        )}
+        ) : null}
       </section>
       <section id="skills">
-        {data.skills?.length && (
+        {data.skills?.length ? (
           <div className="flex min-h-0 flex-col gap-y-3">
             <BlurFade delay={BLUR_FADE_DELAY * 9}>
               <h2 className="text-xl font-bold">{t("skills")}</h2>
@@ -206,10 +206,10 @@ export default async function Page({ params: { locale } }: Props) {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
       </section>
       <section id="projects">
-        {data.projects?.length && (
+        {data.projects?.length ? (
           <div className="space-y-12 w-full py-12">
             <BlurFade delay={BLUR_FADE_DELAY * 11}>
               <div className="flex flex-col items-center justify-center space-y-5 text-center">
@@ -246,7 +246,7 @@ export default async function Page({ params: { locale } }: Props) {
               ))}
             </div>
           </div>
-        )}
+        ) : null}
       </section>
       <section id="contact">
         <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pb-12">

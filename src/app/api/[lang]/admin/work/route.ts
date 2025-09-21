@@ -69,3 +69,21 @@ export async function DELETE(
     );
   }
 }
+
+// POST: Update a work experience by id
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+    const created = await workModel.create({ ...body, lang: params.lang });
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
