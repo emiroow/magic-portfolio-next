@@ -5,33 +5,56 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider, useTheme } from "next-themes"; // Add this import if you use next-themes
-import React, { Fragment } from "react";
+import React from "react";
 import { Toaster } from "sonner";
 
 interface Props {
   children: React.ReactNode;
-  locale?: string;
+  locale: string;
   messages: Record<string, string>;
 }
 
-const DashboardProvider = async ({ children, locale, messages }: Props) => {
+const DashboardProvider = ({ children, locale, messages }: Props) => {
   const queryClient = new QueryClient();
-
-  const { theme } = useTheme(); // Get the current theme
   return (
-    <Fragment>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <main>{children}</main>
-            </TooltipProvider>
-            <Toaster theme={theme as "light" | "dark" | "system" | undefined} />
-            <ReactQueryDevtools />
-          </QueryClientProvider>
-        </ThemeProvider>
-      </NextIntlClientProvider>
-    </Fragment>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <ThemedContent locale={locale}>{children}</ThemedContent>
+          </TooltipProvider>
+          <ReactQueryDevtools />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </NextIntlClientProvider>
+  );
+};
+
+const ThemedContent = ({
+  children,
+  locale,
+}: {
+  children: React.ReactNode;
+  locale: string;
+}) => {
+  const { theme } = useTheme();
+
+  return (
+    <>
+      <main>{children}</main>
+      <Toaster
+        toastOptions={{
+          style: {
+            direction: locale === "fa" ? "rtl" : "ltr",
+            background: theme === "dark" ? "black" : "white",
+            color: theme === "dark" ? "white" : "black",
+            border: theme === "dark" ? "1px solid black" : "1px solid white",
+          },
+        }}
+        theme={theme as "light" | "dark" | undefined}
+        position="top-center"
+      />
+    </>
   );
 };
 

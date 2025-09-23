@@ -3,6 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ const useProfile = () => {
   const locale = useLocale();
   const t = useTranslations();
   const lang = useLocale();
+  const { theme } = useTheme();
   const [
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
@@ -90,10 +92,7 @@ const useProfile = () => {
       return res.data;
     },
     onSuccess: () => {
-      toast(t("dashboard.successMessage"), {
-        style: { direction: locale === "fa" ? "rtl" : "ltr" },
-        position: "top-center",
-      });
+      toast(t("dashboard.successMessage"));
       reset();
       refetchGetProfile();
     },

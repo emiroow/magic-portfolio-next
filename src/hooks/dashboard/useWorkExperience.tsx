@@ -79,14 +79,7 @@ const useWorkExperience = () => {
       return res.data;
     },
     onSuccess: () => {
-      toast(t("dashboard.successMessage"), {
-        style: {
-          direction: locale === "fa" ? "rtl" : "ltr",
-          backgroundColor: theme === "dark" ? "white" : "black",
-          color: theme === "dark" ? "black" : "white",
-        },
-        position: "top-center",
-      });
+      toast(t("dashboard.successMessage"));
       reset();
       setIsEdit(false);
       refetchGetWorkExperience();
@@ -102,14 +95,7 @@ const useWorkExperience = () => {
         return res.data;
       },
       onSuccess: () => {
-        toast(t("dashboard.successMessage"), {
-          style: {
-            direction: locale === "fa" ? "rtl" : "ltr",
-            backgroundColor: theme === "dark" ? "white" : "black",
-            color: theme === "dark" ? "black" : "white",
-          },
-          position: "top-center",
-        });
+        toast(t("dashboard.successMessage"));
         reset();
         setIsEdit(false);
         refetchGetWorkExperience();
@@ -123,14 +109,7 @@ const useWorkExperience = () => {
         return res.data;
       },
       onSuccess: () => {
-        toast(t("dashboard.successMessage"), {
-          style: {
-            direction: locale === "fa" ? "rtl" : "ltr",
-            backgroundColor: theme === "dark" ? "white" : "black",
-            color: theme === "dark" ? "black" : "white",
-          },
-          position: "top-center",
-        });
+        toast(t("dashboard.successMessage"));
         reset();
         setIsEdit(false);
         refetchGetWorkExperience();

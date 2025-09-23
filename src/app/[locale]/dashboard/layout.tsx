@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   params: { locale: string };
 }>) {
   const direction = locale === "fa" ? "rtl" : "ltr";
-  const messages = await getMessages();
+  const messages: any = await getMessages();
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
