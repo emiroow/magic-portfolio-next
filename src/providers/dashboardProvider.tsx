@@ -1,4 +1,3 @@
-// Update the import path to the correct location of get-query-client
 "use client";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
