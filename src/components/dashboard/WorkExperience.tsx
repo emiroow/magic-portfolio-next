@@ -3,6 +3,7 @@ import useWorkExperience from "@/hooks/dashboard/useWorkExperience";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { Fragment, useState } from "react";
 import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
@@ -12,7 +13,7 @@ import { Controller } from "react-hook-form";
 import { GoPlus } from "react-icons/go";
 import { IoMdClose } from "react-icons/io";
 import DatePicker, { DateObject } from "react-multi-date-picker";
-import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
+// import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
 import BlurFade from "../magicui/blur-fade";
 import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
@@ -38,8 +39,11 @@ const WorkExperience = () => {
     setIsEdit,
     deleteWorkExperience,
     isDeletingWorkExperience,
+    uploadWorkExperienceImage,
+    fileInputRef,
+    deleteUploadedWorkExperienceImage,
   } = useWorkExperience();
-  const { id: IsEditItem } = getValues();
+  const { id: IsEditItem, logoUrl, title } = getValues();
   const BLUR_FADE_DELAY = 0.04;
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const locale = useLocale();
@@ -48,11 +52,12 @@ const WorkExperience = () => {
   const { theme } = useTheme();
 
   if (isLoading) return <Loading className="h-[50vh]" />;
+
   return (
     <section className="flex flex-col">
       <AnimatePresence mode="wait">
         {isEdit ? (
-          // Edit
+          // Edit & create
           <motion.div
             key="edit-form"
             initial={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
@@ -116,6 +121,68 @@ const WorkExperience = () => {
               }}
               className="flex flex-col gap-1 mb-2 mt-3"
             >
+              <div className="w-full flex flex-row items-center gap-3">
+                <div className="relative w-32 h-32 border-2 mb-3 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt={title}
+                      width={150}
+                      height={150}
+                      className="object-cover w-full h-full rounded-full"
+                    />
+                  ) : (
+                    <span className="text-muted-foreground text-xs">
+                      {t("noImage")}
+                    </span>
+                  )}
+                </div>
+                <div className="w-max flex items-center">
+                  {logoUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => deleteUploadedWorkExperienceImage.mutate()}
+                    >
+                      <IoMdClose className="text-red-700 text-lg" />
+                    </Button>
+                  )}
+                  {!logoUrl && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mb-1"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadWorkExperienceImage.isPending}
+                      >
+                        {t("uploadImage")}
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("image", file);
+                          uploadWorkExperienceImage.mutate(formData);
+                        }}
+                        disabled={uploadWorkExperienceImage.isPending}
+                      />
+                      <p className="text-red-600 text-xs mt-1">
+                        {errors.logoUrl?.message}{" "}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
               <Input
                 type="text"
                 className="text-sm"
@@ -139,14 +206,6 @@ const WorkExperience = () => {
                 placeholder={t("href")}
               />
               <p className="text-red-600 text-xs">{errors.href?.message}</p>
-
-              <Input
-                type="text"
-                className="text-sm"
-                {...register("logoUrl")}
-                placeholder={t("logoUrl")}
-              />
-              <p className="text-red-600 text-xs">{errors.logoUrl?.message}</p>
 
               <Input
                 type="text"
@@ -264,34 +323,13 @@ const WorkExperience = () => {
 
               <div className="flex gap-2 max-sm:flex-col mb-24">
                 <Button
-                  disabled={!isDirty || btnLoading}
+                  disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
                   type="submit"
                   variant="secondary"
                   size="sm"
                 >
                   {btnLoading ? <Loading size="sm" /> : t("save")}
                 </Button>
-                {/* <AnimatePresence>
-                  {isDirty && (
-                    <motion.div
-                      key="cancel-btn"
-                      layout
-                      initial={{ opacity: 0, x: 0 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                    >
-                      <Button
-                        type="reset"
-                        className="w-full"
-                        variant="outline"
-                        size="sm"
-                      >
-                        {t("cancelForm")}
-                      </Button>
-                    </motion.div>
-                  )}
-                </AnimatePresence> */}
               </div>
             </form>
           </motion.div>

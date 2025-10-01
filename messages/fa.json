@@ -65,6 +65,8 @@
       "end": "اتمام",
       "description": "توضیحات",
       "cancelForm": "لغو",
+      "uploadImage": "بارگذاری تصویر",
+      "noImage": "تصویری وجود ندارد",
       "save": "ذخیر"
     }
   }

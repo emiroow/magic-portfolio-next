@@ -60,7 +60,9 @@
       "end": "end",
       "save": "Save",
       "cancelForm": "Cancel",
-      "description": "description"
+      "description": "description",
+      "noImage": "No Image",
+      "uploadImage": "Upload Image"
     },
     "menu": {
       "Profile": "Profile",

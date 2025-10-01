@@ -5,6 +5,9 @@ import path from "path";
 
 export async function POST(req: NextRequest) {
   const lang = req.nextUrl.searchParams.get("lang");
+  const type = req.nextUrl.searchParams.get("type");
+  // const UploadItemId = req.nextUrl.searchParams.get("fileName");
+
   try {
     const formData = await req.formData();
     const file = formData.get("image") as File;
@@ -22,42 +25,119 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // folder types
+    let folder = "others";
+    switch (type) {
+      case "avatar":
+        folder = "avatar";
+        break;
+      case "project":
+        folder = "projects";
+        break;
+      case "education":
+        folder = "education";
+        break;
+      case "experience":
+        folder = "experience";
+        break;
+    }
+
     // Convert file to Buffer
     const bytes = await file.arrayBuffer();
     const buffer: any = Buffer.from(bytes);
 
-    // Save in public/avatar
-    const uploadDir = path.join(process.cwd(), "public", "avatar");
+    const uploadDir = path.join(process.cwd(), "public", folder);
     const ext =
       file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-    const fileName = `avatarImage.${ext}`;
+    var fileName = ``;
+
+    if (type === "avatar") {
+      fileName = `avatarImage.${ext}`;
+    } else {
+      fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(7)}.${ext}`;
+    }
+
     const filePath = path.join(uploadDir, fileName);
 
-    // Delete previous avatar files (png, jpg, jpeg)
-    const avatarFiles = [
-      "avatarImage.png",
-      "avatarImage.jpg",
-      "avatarImage.jpeg",
-    ];
-    for (const f of avatarFiles) {
-      try {
-        await unlink(path.join(uploadDir, f));
-      } catch (e) {
-        // ignore if file does not exist
+    // clean before Avatar Image
+    if (type === "avatar") {
+      const avatarFiles = [
+        "avatarImage.png",
+        "avatarImage.jpg",
+        "avatarImage.jpeg",
+      ];
+      for (const f of avatarFiles) {
+        try {
+          await unlink(path.join(uploadDir, f));
+        } catch (e) {
+          // ignore if file does not exist
+        }
       }
     }
 
+    // create file
     await writeFile(filePath, buffer);
 
-    const updateUrl = await profileModel.findOneAndUpdate<IProfile>(
-      { lang },
-      { avatarUrl: `/avatar/${fileName}` }
-    );
+    // Update in database
+    if (type === "avatar") {
+      await profileModel.findOneAndUpdate<IProfile>(
+        { lang },
+        { avatarUrl: `/avatar/${fileName}` }
+      );
+    }
 
+    // return URL
     return NextResponse.json({
-      avatarUrl: updateUrl?.avatarUrl,
+      fileUrl: `/${folder}/${fileName}`,
       message: "Upload successful",
     });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const fileName = req.nextUrl.searchParams.get("fileName");
+  const type = req.nextUrl.searchParams.get("type");
+
+  try {
+    // folder types
+    let folder = "others";
+    switch (type) {
+      case "avatar":
+        folder = "avatar";
+        break;
+      case "project":
+        folder = "projects";
+        break;
+      case "education":
+        folder = "education";
+        break;
+      case "experience":
+        folder = "experience";
+        break;
+    }
+
+    if (!fileName) {
+      return NextResponse.json(
+        { message: "Filename required" },
+        { status: 400 }
+      );
+    }
+
+    const filePath = path.join(process.cwd(), `public/${folder}`, fileName);
+    await unlink(filePath);
+
+    // return URL
+    return NextResponse.json(
+      {
+        message: "Delete successful",
+      },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

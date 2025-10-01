@@ -87,11 +87,7 @@ const Profile = () => {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadAvatar.isPending}
                   >
-                    {uploadAvatar.isPending ? (
-                      <Loading size="sm" />
-                    ) : (
-                      t("uploadImage")
-                    )}
+                    {t("uploadImage")}
                   </Button>
                   <input
                     ref={fileInputRef}

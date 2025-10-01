@@ -3,7 +3,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,7 +12,7 @@ const useProfile = () => {
   const locale = useLocale();
   const t = useTranslations();
   const lang = useLocale();
-  const { theme } = useTheme();
+
   const [
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
@@ -101,16 +100,14 @@ const useProfile = () => {
   const uploadAvatar = useMutation({
     mutationFn: async (formData: any) => {
       const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
-        params: { lang },
+        params: { lang, type: "avatar" },
       });
       return res.data;
     },
     onSuccess: (data) => {
       reset();
       // Add cache-busting param to avatarUrl
-      const avatarUrl = data.avatarUrl
-        ? `${data.avatarUrl}?cb=${Date.now()}`
-        : "";
+      const avatarUrl = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : "";
       setValue("avatarUrl", avatarUrl);
       refetchGetProfile();
     },

@@ -2,8 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as yup from "yup";
@@ -12,7 +11,7 @@ const useWorkExperience = () => {
   const t = useTranslations();
   const lang = useLocale();
   const [isEdit, setIsEdit] = useState(false);
-  const { theme } = useTheme();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   type formType = {
     id?: string;
@@ -116,6 +115,38 @@ const useWorkExperience = () => {
       },
     });
 
+  const uploadWorkExperienceImage = useMutation({
+    mutationFn: async (formData: any) => {
+      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
+        params: { lang, type: "experience" },
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      reset();
+      // Add cache-busting param to avatarUrl
+      const Url = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : "";
+      setValue("logoUrl", Url);
+    },
+  });
+
+  const deleteUploadedWorkExperienceImage = useMutation({
+    mutationFn: async () => {
+      const res = await axios.delete(`/api/${lang}/admin/upload`, {
+        params: {
+          lang,
+          type: "experience",
+          fileName: getValues("logoUrl")?.split("/").pop(),
+        },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast(t("dashboard.successMessage"));
+      setValue("logoUrl", "");
+    },
+  });
+
   const btnLoading = mutationStatus === "pending";
 
   const onsubmit = (data: formType) =>
@@ -141,6 +172,9 @@ const useWorkExperience = () => {
     deleteWorkExperience,
     mutate: postWorkExperience,
     isPending: isPostingWorkExperience,
+    fileInputRef,
+    uploadWorkExperienceImage,
+    deleteUploadedWorkExperienceImage,
   };
 };
 
