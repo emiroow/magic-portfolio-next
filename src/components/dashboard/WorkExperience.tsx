@@ -50,7 +50,6 @@ const WorkExperience = () => {
   const t = useTranslations("dashboard.workExperience");
   const tBase = useTranslations("");
   const { theme } = useTheme();
-
   if (isLoading) return <Loading className="h-[50vh]" />;
 
   return (

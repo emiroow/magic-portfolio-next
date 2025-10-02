@@ -32,6 +32,9 @@ const useWorkExperience = () => {
     start: yup.string().required(t("requiredField")),
     end: yup.string().required(t("requiredField")),
     description: yup.string().required(t("requiredField")),
+    id: yup.string().optional(),
+    href: yup.string().optional(),
+    logoUrl: yup.string().optional(),
   });
 
   const {
@@ -43,7 +46,7 @@ const useWorkExperience = () => {
     formState: { errors, isDirty },
     getValues,
   } = useForm<formType>({
-    resolver: yupResolver(FormSchema),
+    resolver: yupResolver(FormSchema) as any,
     defaultValues: {
       id: "",
       company: "",
@@ -83,6 +86,9 @@ const useWorkExperience = () => {
       setIsEdit(false);
       refetchGetWorkExperience();
     },
+    onError: (data) => {
+      toast(data.message);
+    },
   });
 
   const { mutate: deleteWorkExperience, isPending: isDeletingWorkExperience } =
@@ -99,6 +105,9 @@ const useWorkExperience = () => {
         setIsEdit(false);
         refetchGetWorkExperience();
       },
+      onError: (data) => {
+        toast(data.message);
+      },
     });
 
   const { mutate: postWorkExperience, isPending: isPostingWorkExperience } =
@@ -113,6 +122,9 @@ const useWorkExperience = () => {
         setIsEdit(false);
         refetchGetWorkExperience();
       },
+      onError: (data) => {
+        toast(data.message);
+      },
     });
 
   const uploadWorkExperienceImage = useMutation({
@@ -123,10 +135,16 @@ const useWorkExperience = () => {
       return res.data;
     },
     onSuccess: (data) => {
-      reset();
       // Add cache-busting param to avatarUrl
       const Url = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : "";
-      setValue("logoUrl", Url);
+      setValue("logoUrl", Url, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    },
+    onError: (data) => {
+      toast(data.message);
     },
   });
 
@@ -136,14 +154,21 @@ const useWorkExperience = () => {
         params: {
           lang,
           type: "experience",
-          fileName: getValues("logoUrl")?.split("/").pop(),
+          fileName: getValues("logoUrl")?.split("/").pop()?.split("?")[0],
         },
       });
       return res.data;
     },
     onSuccess: () => {
       toast(t("dashboard.successMessage"));
-      setValue("logoUrl", "");
+      setValue("logoUrl", "", {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    },
+    onError: (data) => {
+      toast(data.message);
     },
   });
 
