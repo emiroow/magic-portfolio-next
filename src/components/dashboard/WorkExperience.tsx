@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
@@ -38,20 +38,21 @@ const WorkExperience = () => {
     isEdit,
     setIsEdit,
     deleteWorkExperience,
-    isDeletingWorkExperience,
     uploadWorkExperienceImage,
     fileInputRef,
     deleteUploadedWorkExperienceImage,
+    expandedIndex,
+    setExpandedIndex,
   } = useWorkExperience();
+
   const { id: IsEditItem, logoUrl, title } = getValues();
-  const BLUR_FADE_DELAY = 0.04;
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const locale = useLocale();
   const t = useTranslations("dashboard.workExperience");
   const tBase = useTranslations("");
   const { theme } = useTheme();
-  if (isLoading) return <Loading className="h-[50vh]" />;
+  const locale = useLocale();
+  const BLUR_FADE_DELAY = 0.04;
 
+  if (isLoading) return <Loading className="h-[50vh]" />;
   return (
     <section className="flex flex-col">
       <AnimatePresence mode="wait">
@@ -347,6 +348,7 @@ const WorkExperience = () => {
             }}
             className="flex flex-col gap-5"
           >
+            {/* Title & create btn */}
             <div className="flex flex-row justify-between items-center mb-3">
               <h3 className="text-xl font-bold mt-3">{t("experience")}</h3>
               <Tooltip>
@@ -365,6 +367,7 @@ const WorkExperience = () => {
                 </TooltipContent>
               </Tooltip>
             </div>
+            {/* List */}
             <Fragment>
               {workExperienceData?.length ? (
                 workExperienceData?.map((item, index) => (
@@ -405,8 +408,9 @@ const WorkExperience = () => {
                   </BlurFade>
                 ))
               ) : (
+                // not found
                 <BlurFade delay={BLUR_FADE_DELAY * 8}>
-                  <div className="bg-muted rounded-xl p-5 w-full flex justify-center items-center h-[50vh]">
+                  <div className="bg-muted/30 shadow-red-500 rounded-xl p-5 w-full flex justify-center items-center h-[50vh]">
                     {tBase("notFound")}
                   </div>
                 </BlurFade>

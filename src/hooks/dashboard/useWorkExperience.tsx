@@ -12,6 +12,7 @@ const useWorkExperience = () => {
   const lang = useLocale();
   const [isEdit, setIsEdit] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   type formType = {
     id?: string;
@@ -200,6 +201,8 @@ const useWorkExperience = () => {
     fileInputRef,
     uploadWorkExperienceImage,
     deleteUploadedWorkExperienceImage,
+    expandedIndex,
+    setExpandedIndex,
   };
 };
 
