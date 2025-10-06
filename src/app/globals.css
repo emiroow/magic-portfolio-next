@@ -5,20 +5,19 @@
 @layer base {
   @font-face {
     font-family: "robot Regular";
-    src: local("robot Regular"), url("../../../public/fonts/Roboto-Regular.ttf");
+    src: local("robot Regular"), url("../../public/fonts/Roboto-Regular.ttf");
     font-display: swap;
   }
 
   @font-face {
     font-family: "robot bold";
-    src: local("robot bold"), url("../../../public/fonts/Roboto-Bold.ttf");
+    src: local("robot bold"), url("../../public/fonts/Roboto-Bold.ttf");
     font-display: swap;
   }
 
   @font-face {
     font-family: "estedad regular";
-    src: local("estedad regular"),
-      url("../../../public/fonts/Estedad-Regular.ttf");
+    src: local("estedad regular"), url("../../public/fonts/Estedad-Regular.ttf");
     font-display: swap;
   }
 
