@@ -77,7 +77,6 @@ const useWorkExperience = () => {
 
   const { mutate: putWorkExperience, status: mutationStatus } = useMutation({
     mutationFn: async (data: formType) => {
-      console.log(data);
       const res = await axios.put(`/api/${lang}/admin/work`, data);
       return res.data;
     },
