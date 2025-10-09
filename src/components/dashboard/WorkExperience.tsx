@@ -119,7 +119,7 @@ const WorkExperience = () => {
                   title: "",
                 });
               }}
-              className="flex flex-col gap-1 mb-2 mt-3"
+              className="flex flex-col gap-1 mb-2 mt-5"
             >
               <div className="w-full flex flex-row items-center gap-3">
                 <div className="relative w-32 h-32 border-2 mb-3 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
