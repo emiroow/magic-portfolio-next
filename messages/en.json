@@ -64,6 +64,20 @@
       "noImage": "No Image",
       "uploadImage": "Upload Image"
     },
+    "education": {
+      "educationTitle": "Education",
+      "createEducation": "Create education",
+      "editTitle": " Edit education",
+      "cancel": "cancel",
+      "start": "start",
+      "end": "end",
+      "save": "Save",
+      "cancelForm": "cancel form",
+      "uploadImage": "upload image",
+      "noImage": "No Image",
+      "title": "title",
+      "href": "url"
+    },
     "menu": {
       "Profile": "Profile",
       "Work": "Work Experience",

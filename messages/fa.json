@@ -44,6 +44,20 @@
     "summary": "خلاصه ای از خود",
     "uploadImage": "بارگذاری تصویر",
     "phoneNumber": "تلفن",
+    "education": {
+      "educationTitle": "تحصیلات",
+      "createEducation": "ایجاد تصحیلات جدید",
+      "editTitle": "ویرایش تحصیلات",
+      "cancel": "انصراف",
+      "start": "شروع",
+      "end": "اتمام",
+      "save": "ذخیر",
+      "cancelForm": "لغو",
+      "uploadImage": "بارگذاری تصویر",
+      "noImage": "تصویری وجود ندارد",
+      "title": "عنوان",
+      "href": "لینک"
+    },
     "menu": {
       "Profile": "پروفایل",
       "Work": "سابقه کار",

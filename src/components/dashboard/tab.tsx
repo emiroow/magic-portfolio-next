@@ -3,11 +3,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import BlurFade from "../magicui/blur-fade";
-import EducationExperience from "./education";
+import EducationExperience from "./Education";
 import Profile from "./Profile";
-import Projects from "./projects";
-import Skills from "./skills";
-import WorkExperience from "./workExperience";
+import Projects from "./Projects";
+import Skills from "./Skills";
+import WorkExperience from "./WorkExperience";
 
 const Tab = () => {
   const [activeTab, setActiveTab] = useState(0); // default = Profile

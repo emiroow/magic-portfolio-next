@@ -13,7 +13,7 @@ import { Controller } from "react-hook-form";
 import { GoPlus } from "react-icons/go";
 import { IoMdClose } from "react-icons/io";
 import DatePicker, { DateObject } from "react-multi-date-picker";
-// import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
+import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
 import BlurFade from "../magicui/blur-fade";
 import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
