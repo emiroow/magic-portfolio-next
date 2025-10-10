@@ -1,7 +1,14 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-#folders
-/public/experience
+#ignore the contents of these folders, but keep the folders themselves
+public/avatar/*
+!public/avatar/.gitkeep
+public/projects/*
+!public/projects/.gitkeep
+public/works/*
+!public/works/.gitkeep
+public/education/*
+!public/education/.gitkeep
 
 # dependencies
 /node_modules
