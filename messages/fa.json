@@ -45,6 +45,8 @@
     "uploadImage": "بارگذاری تصویر",
     "phoneNumber": "تلفن",
     "education": {
+      "school": "مدرسه / دانشگاه",
+      "degree": "مدرک",
       "educationTitle": "تحصیلات",
       "createEducation": "ایجاد تصحیلات جدید",
       "editTitle": "ویرایش تحصیلات",

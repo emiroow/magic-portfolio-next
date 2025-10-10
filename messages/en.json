@@ -65,6 +65,8 @@
       "uploadImage": "Upload Image"
     },
     "education": {
+      "school": "school / university",
+      "degree": "degree",
       "educationTitle": "Education",
       "createEducation": "Create education",
       "editTitle": " Edit education",
