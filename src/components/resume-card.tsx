@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import React from "react";
-import { FcCancel } from "react-icons/fc";
 import { FiEdit2 } from "react-icons/fi";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 
@@ -25,7 +24,6 @@ interface ResumeCardProps {
   description?: string;
   onEdit?: () => void;
   onDelete?: () => void;
-  onCancel?: () => void;
   onToggle?: () => void;
 }
 
@@ -40,7 +38,6 @@ export const ResumeCard = ({
   description,
   onDelete,
   onEdit,
-  onCancel,
   isExpanded: isExpandedOuter,
   onToggle,
 }: ResumeCardProps) => {
@@ -141,10 +138,10 @@ export const ResumeCard = ({
         </Link>
         <div
           className={`flex flex-col ${
-            isExpanded ? "gap-5" : "gap-3"
+            isExpanded ? "gap-4" : "gap-2"
           } z-50 transition-discrete transition-all delay-150 duration-300`}
         >
-          {!!onEdit && isExpanded && (
+          {!!onEdit && (
             <button
               type="button"
               className=""
@@ -152,7 +149,7 @@ export const ResumeCard = ({
                 onEdit?.();
               }}
             >
-              <FiEdit2 className="hover:text-green-600" />
+              <FiEdit2 className="hover:text-green-600 text-sm" />
             </button>
           )}
           {!!onDelete && (
@@ -163,19 +160,7 @@ export const ResumeCard = ({
                 onDelete?.();
               }}
             >
-              <MdOutlineDeleteOutline className="hover:text-red-600 text-xl" />
-            </button>
-          )}
-          {!!onCancel && isExpandedInner && (
-            <button
-              type="button"
-              className=""
-              onClick={() => {
-                if (isExpandedOuter) onToggle?.();
-                else setIsExpandedInner(!isExpandedInner);
-              }}
-            >
-              <FcCancel className="text-xl" />
+              <MdOutlineDeleteOutline className="hover:text-red-600 text-md" />
             </button>
           )}
         </div>
