@@ -390,7 +390,6 @@ const WorkExperience = () => {
                           expandedIndex === index ? null : index
                         );
                       }}
-                      onCancel={() => console.log("cancel")}
                       onEdit={() => {
                         setValue("id", item._id || "");
                         setValue("company", item.company || "");
