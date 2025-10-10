@@ -31,7 +31,7 @@ const useEducation = () => {
     school: yup.string().required(t("requiredField")),
     href: yup.string().optional(),
     degree: yup.string().required(t("requiredField")),
-    logoUrl: yup.string().required(t("requiredField")),
+    logoUrl: yup.string().optional(),
     start: yup.string().required(t("requiredField")),
     end: yup.string().required(t("requiredField")),
     id: yup.string().optional(),
@@ -76,6 +76,7 @@ const useEducation = () => {
 
   const { mutate: postEducation, isPending: isPostingEducation } = useMutation({
     mutationFn: async (data: formType) => {
+      delete data.id;
       const res = await axios.post(`/api/${lang}/admin/education`, data);
       return res.data;
     },
@@ -92,7 +93,7 @@ const useEducation = () => {
 
   const { mutate: putEducation, status: mutationStatus } = useMutation({
     mutationFn: async (data: formType) => {
-      const res = await axios.put(`/api/${lang}/admin/work`, data);
+      const res = await axios.put(`/api/${lang}/admin/education`, data);
       return res.data;
     },
     onSuccess: () => {
@@ -109,7 +110,7 @@ const useEducation = () => {
   const { mutate: deleteEducation, isPending: isDeletingEducation } =
     useMutation({
       mutationFn: async (id?: string) => {
-        const res = await axios.delete(`/api/${lang}/admin/work`, {
+        const res = await axios.delete(`/api/${lang}/admin/education`, {
           data: { id },
         });
         return res.data;
@@ -127,7 +128,7 @@ const useEducation = () => {
 
   const uploadEducationImage = useMutation({
     mutationFn: async (formData: any) => {
-      const res = await axios.post(`/api/${lang}/admin/education`, formData, {
+      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
         params: { lang, type: "education" },
       });
       return res.data;
@@ -148,7 +149,7 @@ const useEducation = () => {
 
   const deleteUploadedEducationImage = useMutation({
     mutationFn: async () => {
-      const res = await axios.delete(`/api/${lang}/admin/education`, {
+      const res = await axios.delete(`/api/${lang}/admin/upload`, {
         params: {
           lang,
           type: "education",

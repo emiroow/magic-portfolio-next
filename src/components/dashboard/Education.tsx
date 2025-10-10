@@ -73,7 +73,7 @@ const EducationExperience = () => {
             {/* create */}
             <div className="flex flex-row justify-between items-center ">
               <h3 className="text-xl font-bold mt-3">
-                {IsEditItem ? t("editEducation") : t("createEducation")}
+                {IsEditItem ? t("editTitle") : t("createEducation")}
               </h3>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -173,9 +173,9 @@ const EducationExperience = () => {
                         }}
                         disabled={uploadEducationImage.isPending}
                       />
-                      <p className="text-red-600 text-xs mt-1">
+                      {/* <p className="text-red-600 text-xs mt-1">
                         {errors.logoUrl?.message}{" "}
-                      </p>
+                      </p> */}
                     </>
                   )}
                 </div>
@@ -185,7 +185,7 @@ const EducationExperience = () => {
                 type="text"
                 className="text-sm"
                 {...register("school")}
-                // placeholder={t("title")}
+                placeholder={t("school")}
               />
               <p className="text-red-600 text-xs">{errors.school?.message}</p>
 
@@ -193,7 +193,7 @@ const EducationExperience = () => {
                 type="text"
                 className="text-sm"
                 {...register("href")}
-                // placeholder={t("company")}
+                placeholder={t("href")}
               />
               <p className="text-red-600 text-xs">{errors.href?.message}</p>
 
@@ -201,7 +201,7 @@ const EducationExperience = () => {
                 type="text"
                 className="text-sm"
                 {...register("degree")}
-                // placeholder={t("href")}
+                placeholder={t("degree")}
               />
               <p className="text-red-600 text-xs">{errors.degree?.message}</p>
 
@@ -304,12 +304,12 @@ const EducationExperience = () => {
 
               <div className="flex gap-2 max-sm:flex-col mb-24">
                 <Button
-                  // disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
+                  disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
                   type="submit"
                   variant="secondary"
                   size="sm"
                 >
-                  {/* {btnLoading ? <Loading size="sm" /> : t("save")} */}
+                  {btnLoading ? <Loading size="sm" /> : t("save")}
                 </Button>
               </div>
             </form>
@@ -344,7 +344,7 @@ const EducationExperience = () => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t("createWork")}</p>
+                  <p>{t("createEducation")}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -364,7 +364,6 @@ const EducationExperience = () => {
                       title={item.school}
                       subtitle={item.degree}
                       period={`${item.start} - ${item.end}`}
-                      onCancel={() => console.log("cancel")}
                       onEdit={() => {
                         setValue("id", item._id || "");
                         setValue("degree", item.degree || "");
@@ -375,7 +374,7 @@ const EducationExperience = () => {
                         setValue("school", item.school || "");
                         setIsEdit(true);
                       }}
-                      // onDelete={() => deleteWorkExperience(item._id)}
+                      onDelete={() => deleteEducation(item._id)}
                     />
                   </BlurFade>
                 ))
