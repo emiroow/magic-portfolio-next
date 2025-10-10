@@ -19,7 +19,6 @@ export async function GET(
   }
 }
 
-// PUT: Update an education by _id
 export async function PUT(
   request: NextRequest,
   { params }: { params: { lang: string } }
@@ -27,12 +26,12 @@ export async function PUT(
   await connectDB();
   try {
     const body = await request.json();
-    const { _id, ...updateData } = body;
-    if (!_id) {
-      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    const { id, ...updateData } = body;
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
     const updated = await educationModel.findOneAndUpdate(
-      { _id, lang: params.lang },
+      { _id: id, lang: params.lang },
       updateData,
       { new: true }
     );
@@ -45,7 +44,23 @@ export async function PUT(
   }
 }
 
-// DELETE: Remove an education by _id
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+    const created = await educationModel.create({ ...body, lang: params.lang });
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { lang: string } }
@@ -53,11 +68,11 @@ export async function DELETE(
   await connectDB();
   try {
     const body = await request.json();
-    const { _id } = body;
-    if (!_id) {
-      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    const { id } = body;
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
-    await educationModel.deleteOne({ _id, lang: params.lang });
+    await educationModel.findOneAndDelete({ _id: id, lang: params.lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }
