@@ -1,12 +1,11 @@
 import { profileModel } from "@/models/profile";
-import { unlink, writeFile } from "fs/promises";
+import { access, constants, mkdir, unlink, writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
 export async function POST(req: NextRequest) {
   const lang = req.nextUrl.searchParams.get("lang");
   const type = req.nextUrl.searchParams.get("type");
-  // const UploadItemId = req.nextUrl.searchParams.get("fileName");
 
   try {
     const formData = await req.formData();
@@ -47,6 +46,13 @@ export async function POST(req: NextRequest) {
     const buffer: any = Buffer.from(bytes);
 
     const uploadDir = path.join(process.cwd(), "public", folder);
+
+    try {
+      await access(uploadDir, constants.F_OK);
+    } catch {
+      await mkdir(uploadDir, { recursive: true });
+    }
+
     const ext =
       file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
     var fileName = ``;
