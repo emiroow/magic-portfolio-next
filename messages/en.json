@@ -36,16 +36,18 @@
   "dashboard": {
     "successMessage": "Operation completed successfully.",
     "errorMessage": "An error occurred. Please try again.",
-    "title": "Dashboard",
-    "name": "Name",
-    "fullName": "FullName",
-    "save": "Save",
-    "cancelForm": "Cancel",
-    "about": "About",
-    "summary": "Summary",
-    "email": "Email",
-    "phoneNumber": "Phone Number",
-    "uploadImage": "Upload Image",
+    "profile": {
+      "title": "Dashboard",
+      "name": "Name",
+      "fullName": "FullName",
+      "save": "Save",
+      "cancelForm": "Cancel",
+      "about": "About",
+      "summary": "Summary",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "uploadImage": "Upload Image"
+    },
     "workExperience": {
       "experience": "Work Experience",
       "cancel": "close",
@@ -86,6 +88,10 @@
       "Education": "Education Experience",
       "Skills": "Skills",
       "Projects": "Projects"
+    },
+    "skill": {
+      "title": "Skills",
+      "add": "Add"
     }
   }
 }

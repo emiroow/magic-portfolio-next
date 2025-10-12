@@ -32,18 +32,20 @@
     "title": "پیج مورد نظر یافت نشد !"
   },
   "dashboard": {
+    "title": "داشبورد",
     "successMessage": "عملیات با موفقیت انجام شد.",
     "errorMessage": "خطایی رخ داده است. لطفاً دوباره تلاش کنید.",
-    "title": "داشبورد",
-    "name": "نام",
-    "fullName": "نام و نام خانوادگی",
-    "save": "ذخیر",
-    "cancelForm": "لغو",
-    "about": "برباره من",
-    "email": "ایمیل",
-    "summary": "خلاصه ای از خود",
-    "uploadImage": "بارگذاری تصویر",
-    "phoneNumber": "تلفن",
+    "profile": {
+      "name": "نام",
+      "fullName": "نام و نام خانوادگی",
+      "save": "ذخیر",
+      "cancelForm": "لغو",
+      "about": "برباره من",
+      "email": "ایمیل",
+      "summary": "خلاصه ای از خود",
+      "uploadImage": "بارگذاری تصویر",
+      "phoneNumber": "تلفن"
+    },
     "education": {
       "school": "مدرسه / دانشگاه",
       "degree": "مدرک",
@@ -84,6 +86,10 @@
       "uploadImage": "بارگذاری تصویر",
       "noImage": "تصویری وجود ندارد",
       "save": "ذخیر"
+    },
+    "skill": {
+      "title": "مهارت ها",
+      "add": "اضافه"
     }
   }
 }

@@ -10,7 +10,7 @@ import Loading from "../ui/loading";
 import { Textarea } from "../ui/textarea";
 
 const Profile = () => {
-  const t = useTranslations("dashboard");
+  const t = useTranslations("dashboard.profile");
 
   const {
     handleSubmit,
