@@ -53,7 +53,7 @@ const Skills = () => {
       {getSkillsIsLoading ? (
         <Loading size="lg" className="h-96" />
       ) : (
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap gap-2">
           {getSkills?.map((skill, id) => (
             <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
               <Badge

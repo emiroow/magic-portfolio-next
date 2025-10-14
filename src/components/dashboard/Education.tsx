@@ -94,7 +94,11 @@ const EducationExperience = () => {
                     size={"icon"}
                     className="size-8"
                   >
-                    <IoMdClose className="text-red-700 text-lg" />
+                    {deleteUploadedEducationImage.isPending ? (
+                      <Loading size="sm" />
+                    ) : (
+                      <IoMdClose className="text-red-700 text-lg" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
