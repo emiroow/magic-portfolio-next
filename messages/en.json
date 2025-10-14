@@ -91,7 +91,9 @@
     },
     "skill": {
       "title": "Skills",
-      "add": "Add"
+      "add": "Add",
+      "inputPlaceholder": "Skill name",
+      "addSkillBtn": "َAdd"
     }
   }
 }
