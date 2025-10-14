@@ -69,3 +69,34 @@ export async function DELETE(
     );
   }
 }
+
+// POST: Create a new project for a language
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+
+    // Basic validation: ensure we have at least a title or name (adjust as needed)
+    if (!body || Object.keys(body).length === 0) {
+      return NextResponse.json(
+        { error: "Request body is required" },
+        { status: 400 }
+      );
+    }
+
+    // Ensure the document has the correct lang field from route params
+    const projectData = { ...body, lang: params.lang };
+
+    const created = await projectModel.create(projectData);
+
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

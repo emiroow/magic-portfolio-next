@@ -1,3 +1,4 @@
+import { iconDecider } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -20,7 +21,7 @@ interface Props {
   link?: string;
   image?: string;
   links?: readonly {
-    icon: React.ReactNode;
+    icon: string;
     type: string;
     href: string;
   }[];
@@ -91,7 +92,7 @@ export function ProjectCard({
             {links?.map((link, idx) => (
               <Link href={link?.href} key={idx} target="_blank">
                 <Badge key={idx} className="flex gap-2 px-2 py-1 text-[10px]">
-                  {link.icon}
+                  {iconDecider(link.icon)}
                   {link.type}
                 </Badge>
               </Link>
