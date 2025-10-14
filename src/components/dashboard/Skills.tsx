@@ -5,32 +5,69 @@ import BlurFade from "../magicui/blur-fade";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import Loading from "../ui/loading";
 
 const Skills = () => {
   const t = useTranslations("dashboard.skill");
-  const { getSkills, locale, BLUR_FADE_DELAY } = useSkills();
+  const {
+    getSkills,
+    locale,
+    BLUR_FADE_DELAY,
+    getSkillsIsLoading,
+    formState: { dirtyFields, isDirty },
+    register,
+    setValue,
+    handleSubmit,
+    onSubmit,
+    addSkillIsLoading,
+    addSkillMutate,
+    deleteSkillIsLoading,
+    deleteSkillMutate,
+  } = useSkills();
 
   return (
     <section>
       {/* Add Skill Form */}
-      <div className="w-full flex gap-2">
-        <Input type="text" />
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full flex gap-2 items-center mt-5"
+      >
+        <Input
+          className="text-center"
+          type="text"
+          placeholder={t("inputPlaceholder")}
+          {...register("name")}
+          autoComplete="off"
+        />
         <Button
-          // disabled={!isDirty || btnLoading}
+          disabled={!isDirty || deleteSkillIsLoading || addSkillIsLoading}
           type="submit"
           variant="secondary"
           size="sm"
-        ></Button>
-      </div>
+        >
+          {addSkillIsLoading ? <Loading size="sm" /> : t("add")}
+        </Button>
+      </form>
       {/* List */}
-      <h3 className="font-bold text-2xl text-center my-5">{t("title")}</h3>
-      <div className="flex flex-wrap justify-center gap-1">
-        {getSkills?.map((skill, id) => (
-          <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-            <Badge key={id}>{skill.name}</Badge>
-          </BlurFade>
-        ))}
-      </div>
+      <h3 className="font-bold text-2xl mt-8 mb-5">{t("title")}</h3>
+      {getSkillsIsLoading ? (
+        <Loading size="lg" className="h-96" />
+      ) : (
+        <div className="flex flex-wrap justify-center gap-2">
+          {getSkills?.map((skill, id) => (
+            <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
+              <Badge
+                onDelete={() => {
+                  deleteSkillMutate({ id: skill._id });
+                }}
+                key={id}
+              >
+                {skill.name}
+              </Badge>
+            </BlurFade>
+          ))}
+        </div>
+      )}
     </section>
   );
 };
