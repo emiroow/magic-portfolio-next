@@ -50,7 +50,7 @@ const Profile = () => {
         <div className="flex flex-col gap-1 mb-2 mt-8">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-full flex flex-row items-center gap-3">
-              <div className="relative w-full sm:w-32 sm:h-32 h-40 border-2 mb-1 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
+              <div className="border-2 dark:border-white border-black rounded-full">
                 {profile?.avatarUrl ? (
                   <>
                     {profileImageShowImageFromUrlLoading ||
@@ -65,7 +65,7 @@ const Profile = () => {
                       alt={profile?.fullName}
                       width={150}
                       height={150}
-                      className="object-cover w-full h-full rounded-full"
+                      className="object-cover rounded-full"
                       onLoad={() => {
                         setProfileImageShowImageFromUrlLoading(false);
                       }}

@@ -62,7 +62,7 @@ const WorkExperience = () => {
 
   if (isLoading) return <Loading className="h-[50vh]" />;
   return (
-    <section className="flex flex-col">
+    <section className="flex flex-col mb-20">
       <AnimatePresence mode="wait">
         {isEdit ? (
           // Edit & create

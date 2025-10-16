@@ -46,11 +46,11 @@ export function ConfirmDialog({
         }`}
       >
         <DialogHeader
-          className={`${dir === "rtl" ? "text-right" : "text-left"}`}
+          className={`${locale === "fa" ? "text-right" : "text-left"}`}
         >
           <DialogTitle
             className={`flex items-center gap-2 ${
-              dir === "rtl" ? "flex-row-reverse" : ""
+              locale === "fa" ? "float-right" : "float-left"
             }`}
           >
             <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
@@ -62,7 +62,7 @@ export function ConfirmDialog({
         {itemName && (
           <div
             className={`space-y-2 ${
-              dir === "rtl" ? "text-right" : "text-left"
+              locale === "fa" ? "text-right" : "text-left"
             }`}
           >
             <p className="text-sm">
@@ -71,7 +71,9 @@ export function ConfirmDialog({
           </div>
         )}
         <DialogFooter
-          className={`flex gap-2 ${dir === "rtl" ? "flex-row-reverse" : ""}`}
+          className={`flex gap-2 ${
+            locale === "fa" ? "flex-row-reverse" : "flex-row justify-end"
+          }`}
         >
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {cancelText ?? t("cancel", { defaultValue: "Cancel" })}

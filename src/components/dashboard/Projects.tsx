@@ -79,7 +79,7 @@ const Projects = () => {
 
   if (isLoading) return <Loading className="h-[50vh]" />;
   return (
-    <section className="flex flex-col">
+    <section className="flex flex-col mb-20">
       <AnimatePresence mode="wait">
         {isEdit ? (
           // Edit & create form
@@ -282,7 +282,7 @@ const Projects = () => {
                   <DatePicker
                     range
                     onlyMonthPicker
-                    className={theme === "dark" ? "bg-dark" : "bg-muted"}
+                    className={`${theme === "dark" ? "bg-dark" : "bg-muted"}`}
                     onChange={(dates: any) => {
                       if (dates && dates.length === 2) {
                         const [start, end] = dates;
@@ -303,6 +303,7 @@ const Projects = () => {
                     containerStyle={{ width: "100%" }}
                     style={{
                       width: "100%",
+                      fontSize: "10px",
                       height: "36px",
                       borderRadius: "6px",
                       border: errors.dates

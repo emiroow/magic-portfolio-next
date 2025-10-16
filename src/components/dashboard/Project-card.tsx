@@ -105,7 +105,7 @@ const ProjectCard = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row sm:p-3  gap-2">
+        <div className="flex flex-col sm:flex-row sm:px-3 sm:pb-3 gap-2">
           {project.image && (
             <div className="flex-shrink-0">
               <Image

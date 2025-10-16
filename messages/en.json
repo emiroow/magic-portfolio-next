@@ -34,6 +34,7 @@
     "title": "Not Found Page !"
   },
   "dashboard": {
+    "title": "Dashboard",
     "confirmTitle": "Are you sure?",
     "cancel": "Cancel",
     "delete": "Delete",
