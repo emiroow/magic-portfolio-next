@@ -51,11 +51,14 @@ function Badge({ className, variant, onDelete, ...props }: BadgeProps) {
       {onDelete && (
         <button
           type="button"
-          onClick={(e) => onDelete(e)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(e);
+          }}
           aria-label="Delete badge"
-          className="p-0 m-0 rounded"
+          className="ml-1 p-0 m-0 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
         >
-          <MdOutlineDeleteOutline className="hover:text-red-600 p-0 m-0 text-lg" />
+          <MdOutlineDeleteOutline className="text-red-500 hover:text-red-700 p-0 m-0 text-lg transition-colors" />
         </button>
       )}
     </div>

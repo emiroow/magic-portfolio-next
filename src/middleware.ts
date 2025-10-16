@@ -3,6 +3,7 @@ import { type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 
 // Middleware to enforce locale in API routes
+// This middleware ensures localized routing using next-intl
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 

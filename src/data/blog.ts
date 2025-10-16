@@ -64,5 +64,6 @@ async function getAllPosts(dir: string) {
 }
 
 export async function getBlogPosts() {
+  // Returns all posts from the /content folder with frontmatter & HTML string
   return getAllPosts(path.join(process.cwd(), "content"));
 }

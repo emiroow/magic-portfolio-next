@@ -32,19 +32,30 @@
     "title": "پیج مورد نظر یافت نشد !"
   },
   "dashboard": {
+    "confirmTitle": "آیا از حذف مطمئن هستید؟",
+    "cancel": "انصراف",
+    "delete": "حذف",
     "title": "داشبورد",
     "successMessage": "عملیات با موفقیت انجام شد.",
     "errorMessage": "خطایی رخ داده است. لطفاً دوباره تلاش کنید.",
     "profile": {
       "name": "نام",
       "fullName": "نام و نام خانوادگی",
-      "save": "ذخیر",
+      "save": "ذخیره",
       "cancelForm": "لغو",
-      "about": "برباره من",
+      "about": "درباره من",
       "email": "ایمیل",
-      "summary": "خلاصه ای از خود",
+      "summary": "خلاصه",
       "uploadImage": "بارگذاری تصویر",
-      "phoneNumber": "تلفن"
+      "profileImage": "تصویر پروفایل",
+      "noImage": "تصویری وجود ندارد",
+      "phoneNumber": "تلفن",
+      "namePlaceholder": "نام شما (مثلاً: امیر)",
+      "fullNamePlaceholder": "نام کامل شما (مثلاً: امیر کریمی)",
+      "emailPlaceholder": "ایمیل (مثلاً: name@example.com)",
+      "telPlaceholder": "شماره تماس (مثلاً: ۰۹۱۲ ۰۰۰ ۰۰۰۰)",
+      "summaryPlaceholder": "خلاصه کوتاه (مثلاً: توسعه‌دهنده فرانت‌اند)",
+      "aboutPlaceholder": "چند خط درباره خودتان"
     },
     "education": {
       "school": "مدرسه / دانشگاه",
@@ -55,12 +66,18 @@
       "cancel": "انصراف",
       "start": "شروع",
       "end": "اتمام",
-      "save": "ذخیر",
+      "save": "ذخیره",
       "cancelForm": "لغو",
       "uploadImage": "بارگذاری تصویر",
       "noImage": "تصویری وجود ندارد",
+      "logoImage": "لوگوی مدرسه/دانشگاه",
+      "uploading": "در حال بارگذاری...",
+      "uploadImageHint": "JPG, PNG حداکثر 10 مگابایت",
       "title": "عنوان",
-      "href": "لینک"
+      "href": "لینک",
+      "schoolPlaceholder": "نام مدرسه/دانشگاه (مثلاً: شریف)",
+      "hrefPlaceholder": "آدرس وب‌سایت (https://example.edu)",
+      "degreePlaceholder": "مدرک (مثلاً: کارشناسی علوم کامپیوتر)"
     },
     "menu": {
       "Profile": "پروفایل",
@@ -85,12 +102,20 @@
       "cancelForm": "لغو",
       "uploadImage": "بارگذاری تصویر",
       "noImage": "تصویری وجود ندارد",
-      "save": "ذخیر"
+      "save": "ذخیره",
+      "logoImage": "لوگوی شرکت",
+      "uploading": "در حال بارگذاری...",
+      "uploadImageHint": "JPG, PNG حداکثر 10 مگابایت",
+      "titlePlaceholder": "عنوان شغلی (مثلاً: توسعه‌دهنده فرانت‌اند)",
+      "companyPlaceholder": "نام شرکت (مثلاً: ACME)",
+      "hrefPlaceholder": "آدرس شرکت (https://example.com)",
+      "locationPlaceholder": "موقعیت (مثلاً: تهران، ایران)",
+      "descriptionPlaceholder": "توضیحی درباره نقش و دستاوردها"
     },
     "skill": {
       "title": "مهارت ها",
       "add": "افزودن",
-      "inputPlaceholder": "نام مهارت"
+      "inputPlaceholder": "نام مهارت (مثلاً: Next.js)"
     },
     "projects": {
       "title": "پروژه ها",
@@ -116,7 +141,7 @@
       "createFirstProject": "اولین پروژه خود را ایجاد کنید",
       "projectUrlPlaceholder": "آدرس پروژه (https://example.com)",
       "projectTitlePlaceholder": "عنوان پروژه",
-      "projectDatesPlaceholder": "تاریخ پروژه (۱۴۰۲ - اکنون)",
+      "projectDatesPlaceholder": "انتخاب بازه تاریخ (فروردین 1403 - اردیبهشت 1403)",
       "projectImagePlaceholder": "آدرس تصویر (https://example.com/image.jpg)",
       "projectDescriptionPlaceholder": "توضیحات پروژه",
       "technologyPlaceholder": "افزودن تکنولوژی (React، Next.js و غیره)",
@@ -135,6 +160,12 @@
       "uploading": "در حال بارگذاری...",
       "uploadImageHint": "JPG, PNG حداکثر 10 مگابایت",
       "imageUploaded": "تصویر با موفقیت بارگذاری شد"
+    },
+    "crop": {
+      "title": "برش تصویر",
+      "apply": "اعمال",
+      "zoom": "بزرگ‌نمایی",
+      "move": "برای جابه‌جایی تصویر را بکشید"
     }
   }
 }

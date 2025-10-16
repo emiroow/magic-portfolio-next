@@ -16,6 +16,8 @@ const useProjects = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [imageShowFromUrlLoading, setImageShowFromUrlLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [newTech, setNewTech] = useState("");
+  const [newLink, setNewLink] = useState({ type: "", href: "", icon: "" });
 
   type formType = {
     _id?: string;
@@ -56,6 +58,7 @@ const useProjects = () => {
     reset,
     control,
     getValues,
+    trigger, // اضافه شد
     formState: { errors, isDirty, dirtyFields },
   } = useForm<formType>({
     resolver: yupResolver(Schema),
@@ -173,6 +176,42 @@ const useProjects = () => {
     setIsEdit(true);
   };
 
+  const addTechnology = () => {
+    if (newTech.trim()) {
+      const currentTech = getValues("technologies") || [];
+      setValue("technologies", [...currentTech, newTech.trim()]);
+      setNewTech("");
+      trigger("technologies");
+    }
+  };
+
+  const removeTechnology = (index: number) => {
+    const currentTech = getValues("technologies") || [];
+    setValue(
+      "technologies",
+      currentTech.filter((_, i) => i !== index)
+    );
+    trigger("technologies");
+  };
+
+  const addLink = () => {
+    if (newLink.type.trim() && newLink.href.trim() && newLink.icon.trim()) {
+      const currentLinks = getValues("links") || [];
+      setValue("links", [...currentLinks, { ...newLink }]);
+      setNewLink({ type: "", href: "", icon: "" });
+      trigger("links");
+    }
+  };
+
+  const removeLink = (index: number) => {
+    const currentLinks = getValues("links") || [];
+    setValue(
+      "links",
+      currentLinks.filter((_, i) => i !== index)
+    );
+    trigger("links");
+  };
+
   return {
     register,
     handleSubmit,
@@ -180,6 +219,7 @@ const useProjects = () => {
     reset,
     control,
     getValues,
+    trigger,
     formState: { errors, isDirty, dirtyFields },
     onsubmit,
     btnLoading,
@@ -200,6 +240,14 @@ const useProjects = () => {
     setImageShowFromUrlLoading,
     fileInputRef,
     resetMutation,
+    newTech,
+    setNewTech,
+    newLink,
+    setNewLink,
+    addTechnology,
+    removeTechnology,
+    addLink,
+    removeLink,
   };
 };
 

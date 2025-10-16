@@ -1,3 +1,4 @@
+import { JsonLd } from "@/components/JsonLd";
 import BlurFade from "@/components/magicui/blur-fade";
 import BlurFadeText from "@/components/magicui/blur-fade-text";
 import Navbar from "@/components/navbar";
@@ -21,32 +22,34 @@ type Props = {
 export const generateMetadata = async ({ params: { locale } }: Props) => {
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
   const t = await getTranslations();
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 
   return {
-    // metadataBase: new URL(data.profile?.url || ""),
+    metadataBase: site ? new URL(site) : undefined,
     title: {
       default: `${data.profile?.fullName} | ${t("personalWebsite")}`,
       template: `%s | ${data.profile?.fullName} | ${t("personalWebsite")}`,
     },
     alternates: {
-      canonical: `${apiEndPoint}/${locale}`,
+      canonical: site ? `${site}/${locale}` : undefined,
       languages: {
-        fa: `${apiEndPoint}/fa`,
-        en: `${apiEndPoint}/en`,
+        fa: site ? `${site}/fa` : undefined,
+        en: site ? `${site}/en` : undefined,
+        "x-default": site ? `${site}/${locale}` : undefined,
       },
     },
     description: data.profile?.description,
     openGraph: {
       title: `${data.profile?.name}`,
       description: data.profile?.description,
-      // url: data.profile?.url,
+      url: site ? `${site}/${locale}` : undefined,
       siteName: `${data.profile?.fullName}`,
       locale: locale === "fa" ? "fa_IR" : "en_US",
       type: "website",
     },
     appLinks: {
       web: {
-        url: "",
+        url: site ? `${site}/${locale}` : undefined,
         should_fallback: true,
       },
     },
@@ -94,16 +97,47 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
   } as Metadata;
 };
 
+// Avoid build-time data fetching for this route
+export const dynamic = "force-dynamic";
+
 export default async function Page({ params: { locale } }: Props) {
   const t = await getTranslations();
   const tHero = await getTranslations("hero");
   const tProject = await getTranslations("project");
   const tContact = await getTranslations("contact");
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">
+      {/* Structured data for rich results */}
+      <JsonLd
+        item={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: data.profile?.fullName ?? data.profile?.name,
+          image: data.profile?.avatarUrl,
+          email: data.profile?.email,
+          description: data.profile?.description,
+          sameAs: data.socials?.map((s) => s.url).filter(Boolean),
+        }}
+      />
+      {/* Breadcrumb structured data */}
+      <JsonLd
+        item={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: site ? `${site}/${locale}` : `/${locale}`,
+            },
+          ],
+        }}
+      />
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
           <div className="gap-2 flex justify-between max-md:items-center">

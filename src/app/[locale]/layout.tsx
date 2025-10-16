@@ -1,10 +1,13 @@
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import ClientProvider from "@/providers/clientProvider";
-import { getMessages } from "next-intl/server";
+import MainProvider from "@/providers/mainProvider";
 import { notFound } from "next/navigation";
 
-export default async function ClientLayout({
+/**
+ * Locale layout: wraps all localized routes with direction and font classes.
+ * Note: <html> and <body> are defined only in the root layout (app/layout.tsx).
+ */
+export default async function LocaleLayout({
   children,
   params: { locale },
 }: Readonly<{
@@ -12,8 +15,8 @@ export default async function ClientLayout({
   params: { locale: string };
 }>) {
   const direction = locale === "fa" ? "rtl" : "ltr";
-  // Load messages to ensure client translations are available
-  await getMessages();
+
+  // Guard against unknown locales early
   if (!routing.locales.includes(locale as any)) {
     notFound();
   }
@@ -27,7 +30,8 @@ export default async function ClientLayout({
         } `
       )}
     >
-      <ClientProvider locale={locale}>{children}</ClientProvider>
+      {/* Global providers needed on both client and server paths */}
+      <MainProvider>{children}</MainProvider>
     </div>
   );
 }

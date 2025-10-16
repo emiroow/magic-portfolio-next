@@ -2,13 +2,22 @@
 import { Badge } from "@/components/ui/badge";
 import useProjects from "@/hooks/dashboard/useProjects";
 import { AnimatePresence, motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useState } from "react";
+import gregorian from "react-date-object/calendars/gregorian";
+import persian from "react-date-object/calendars/persian";
+import gregorian_en from "react-date-object/locales/gregorian_en";
+import persian_fa from "react-date-object/locales/persian_fa";
 import { GoPlus } from "react-icons/go";
 import { IoMdClose } from "react-icons/io";
+import DatePicker from "react-multi-date-picker";
+import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
+import "react-multi-date-picker/styles/backgrounds/bg-gray.css";
 import BlurFade from "../magicui/blur-fade";
 import { Button } from "../ui/button";
+import ImageCropperDialog from "../ui/image-cropper";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
 import { Textarea } from "../ui/textarea";
@@ -17,12 +26,13 @@ import ProjectCard from "./Project-card";
 
 const Projects = () => {
   const t = useTranslations("dashboard.projects");
-  const tBase = useTranslations("");
-  const [newTech, setNewTech] = useState("");
-  const [newLink, setNewLink] = useState({ type: "", href: "", icon: "" });
+  const tcrop = useTranslations("dashboard.crop");
+  const locale = useLocale();
+  const { theme } = useTheme();
   const BLUR_FADE_DELAY = 0.04;
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
-  // لیست آیکون‌های موجود
   const availableIcons = [
     { value: "github", label: "GitHub", emoji: "🔗" },
     { value: "demo", label: "Demo", emoji: "🌐" },
@@ -55,53 +65,19 @@ const Projects = () => {
     deleteUploadedProjectImage,
     imageShowFromUrlLoading,
     setImageShowFromUrlLoading,
+    newTech,
+    setNewTech,
+    newLink,
+    setNewLink,
+    addTechnology,
+    removeTechnology,
+    addLink,
+    removeLink,
     fileInputRef,
     resetMutation,
   } = useProjects();
 
   if (isLoading) return <Loading className="h-[50vh]" />;
-
-  const addTechnology = () => {
-    if (newTech.trim()) {
-      const currentTech = getValues("technologies") || [];
-      setValue("technologies", [...currentTech, newTech.trim()]);
-      setNewTech("");
-    }
-  };
-
-  const removeTechnology = (index: number) => {
-    const currentTech = getValues("technologies") || [];
-    setValue(
-      "technologies",
-      currentTech.filter((_, i) => i !== index)
-    );
-  };
-
-  const addLink = () => {
-    if (newLink.type.trim() && newLink.href.trim() && newLink.icon.trim()) {
-      const currentLinks = getValues("links") || [];
-      setValue("links", [...currentLinks, { ...newLink }]);
-      setNewLink({ type: "", href: "", icon: "" });
-    }
-  };
-
-  const removeLink = (index: number) => {
-    const currentLinks = getValues("links") || [];
-    setValue(
-      "links",
-      currentLinks.filter((_, i) => i !== index)
-    );
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append("image", file);
-      uploadProjectImage.mutate(formData);
-    }
-  };
-
   return (
     <section className="flex flex-col">
       <AnimatePresence mode="wait">
@@ -155,8 +131,8 @@ const Projects = () => {
                   {t("projectImage")}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 items-start">
-                  <div className="relative">
-                    <div className="w-32 h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
+                  <div className="relative w-full sm:w-auto">
+                    <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
                       {getValues("image") ? (
                         <Image
                           src={getValues("image")}
@@ -217,20 +193,54 @@ const Projects = () => {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
-                            const formData = new FormData();
-                            formData.append("image", file);
-                            uploadProjectImage.mutate(formData);
+                            const url = URL.createObjectURL(file);
+                            setCropSrc(url);
+                            setCropOpen(true);
                           }}
                           disabled={uploadProjectImage.isPending}
                         />
                         <p className="text-xs text-muted-foreground">
-                          {t("uploadImageHint") || "JPG, PNG up to 10MB"}
+                          {t("uploadImageHint")}
                         </p>
                       </>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* Cropper Dialog */}
+              <ImageCropperDialog
+                open={cropOpen}
+                onOpenChange={(v) => {
+                  setCropOpen(v);
+                  if (!v && cropSrc) {
+                    URL.revokeObjectURL(cropSrc);
+                    setCropSrc(null);
+                    if (fileInputRef.current) {
+                      // reset input to allow picking the same file again
+                      // @ts-ignore
+                      fileInputRef.current.value = "";
+                    }
+                  }
+                }}
+                src={cropSrc}
+                aspect={1}
+                labels={{
+                  title: tcrop("title"),
+                  apply: tcrop("apply"),
+                  cancel: t("cancel"),
+                  zoom: tcrop("zoom"),
+                  move: tcrop("move"),
+                }}
+                dir={locale === "fa" ? "rtl" : "ltr"}
+                isDark={theme === "dark"}
+                outputSize={512}
+                onCropped={(file) => {
+                  const formData = new FormData();
+                  formData.append("image", file);
+                  uploadProjectImage.mutate(formData);
+                }}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -269,10 +279,40 @@ const Projects = () => {
                   <label className="text-sm font-medium text-muted-foreground">
                     {t("projectDates")}
                   </label>
-                  <Input
-                    {...register("dates")}
+                  <DatePicker
+                    range
+                    onlyMonthPicker
+                    className={theme === "dark" ? "bg-dark" : "bg-muted"}
+                    onChange={(dates: any) => {
+                      if (dates && dates.length === 2) {
+                        const [start, end] = dates;
+                        const formattedRange = `${start.format(
+                          "MMMM YYYY"
+                        )} - ${end.format("MMMM YYYY")}`;
+                        setValue("dates", formattedRange);
+                      } else if (dates && dates.length === 1) {
+                        setValue("dates", dates[0].format("MMMM YYYY"));
+                      } else {
+                        setValue("dates", "");
+                      }
+                    }}
+                    calendar={locale === "fa" ? persian : gregorian}
+                    locale={locale === "fa" ? persian_fa : gregorian_en}
+                    format="MMMM YYYY"
                     placeholder={t("projectDatesPlaceholder")}
-                    className={errors.dates ? "border-red-500" : ""}
+                    containerStyle={{ width: "100%" }}
+                    style={{
+                      width: "100%",
+                      height: "36px",
+                      borderRadius: "6px",
+                      border: errors.dates
+                        ? "1px solid rgb(239 68 68)"
+                        : "1px solid hsl(var(--input))",
+                      padding: "0 12px",
+                      backgroundColor: "hsl(var(--background))",
+                      color: "hsl(var(--foreground))",
+                    }}
+                    inputClass={errors.dates ? "border-red-500" : ""}
                   />
                   {errors.dates && (
                     <p className="text-red-500 text-xs mt-1">
@@ -409,8 +449,12 @@ const Projects = () => {
                 </label>
               </div>
 
-              <div className="flex gap-2">
-                <Button type="submit" disabled={btnLoading}>
+              <div className="flex gap-2 max-sm:flex-col mt-4">
+                <Button
+                  type="submit"
+                  disabled={btnLoading}
+                  className="w-full sm:w-auto"
+                >
                   {btnLoading ? (
                     <Loading size="sm" />
                   ) : getValues("_id") ? (
@@ -427,6 +471,7 @@ const Projects = () => {
                     resetMutation();
                     setIsEdit(false);
                   }}
+                  className="w-full sm:w-auto"
                 >
                   {t("cancel")}
                 </Button>

@@ -4,9 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Loading from "@/components/ui/loading";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { useState } from "react";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { ConfirmDialog } from "../ui/confirm-dialog";
 
 interface Link {
   type: string;
@@ -41,6 +43,9 @@ const ProjectCard = ({
   isDeleting,
 }: ProjectItemProps) => {
   const t = useTranslations("dashboard.projects");
+  const tBase = useTranslations("dashboard");
+  const locale = useLocale();
+  const [open, setOpen] = useState(false);
 
   return (
     <Card className="relative transition-shadow hover:shadow-md bg-card border">
@@ -58,7 +63,7 @@ const ProjectCard = ({
           </CardTitle>
           <p className="text-sm text-muted-foreground">{project.dates}</p>
         </div>
-        <div className="flex gap-1 flex-shrink-0 ml-2">
+        <div className="flex flex-shrink-0 ml-2">
           <Button
             size="icon"
             variant="ghost"
@@ -72,7 +77,7 @@ const ProjectCard = ({
             size="icon"
             variant="ghost"
             className="h-8 w-8 text-red-500 hover:text-red-700"
-            onClick={() => onDelete(project._id)}
+            onClick={() => setOpen(true)}
             disabled={isDeleting}
             title={t("delete")}
           >
@@ -82,10 +87,25 @@ const ProjectCard = ({
               <MdDelete className="h-4 w-4" />
             )}
           </Button>
+          <ConfirmDialog
+            open={open}
+            onOpenChange={setOpen}
+            title={tBase("confirmTitle")}
+            confirmText={t("delete")}
+            cancelText={t("cancel")}
+            danger
+            dir={locale === "fa" ? "rtl" : "ltr"}
+            locale={locale}
+            itemName={project.title}
+            onConfirm={() => {
+              setOpen(false);
+              onDelete(project._id);
+            }}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row sm:p-3  gap-2">
           {project.image && (
             <div className="flex-shrink-0">
               <Image
@@ -97,7 +117,7 @@ const ProjectCard = ({
               />
             </div>
           )}
-          <div className="flex-1 space-y-3 min-w-0 mb-3 px-3">
+          <div className="flex-1 space-y-3 min-w-0 max-sm:p-2">
             <p className="text-sm text-muted-foreground leading-relaxed ">
               {project.description}
             </p>

@@ -34,19 +34,30 @@
     "title": "Not Found Page !"
   },
   "dashboard": {
+    "confirmTitle": "Are you sure?",
+    "cancel": "Cancel",
+    "delete": "Delete",
     "successMessage": "Operation completed successfully.",
     "errorMessage": "An error occurred. Please try again.",
     "profile": {
       "title": "Dashboard",
       "name": "Name",
-      "fullName": "FullName",
+      "fullName": "Full Name",
       "save": "Save",
       "cancelForm": "Cancel",
       "about": "About",
       "summary": "Summary",
       "email": "Email",
       "phoneNumber": "Phone Number",
-      "uploadImage": "Upload Image"
+      "uploadImage": "Upload Image",
+      "profileImage": "Profile Image",
+      "noImage": "No Image",
+      "namePlaceholder": "Your name (e.g., Amir)",
+      "fullNamePlaceholder": "Your full name (e.g., Amir Karimi)",
+      "emailPlaceholder": "Email address (e.g., name@example.com)",
+      "telPlaceholder": "Phone number (e.g., +98 912 000 0000)",
+      "summaryPlaceholder": "Short summary (e.g., Frontend Developer)",
+      "aboutPlaceholder": "About you (a brief bio)"
     },
     "workExperience": {
       "experience": "Work Experience",
@@ -64,7 +75,15 @@
       "cancelForm": "Cancel",
       "description": "description",
       "noImage": "No Image",
-      "uploadImage": "Upload Image"
+      "uploadImage": "Upload Image",
+      "logoImage": "Company Logo",
+      "uploading": "Uploading...",
+      "uploadImageHint": "JPG, PNG up to 10MB",
+      "titlePlaceholder": "Job title (e.g., Frontend Developer)",
+      "companyPlaceholder": "Company name (e.g., ACME Co.)",
+      "hrefPlaceholder": "Company URL (https://example.com)",
+      "locationPlaceholder": "Location (e.g., Tehran, Iran)",
+      "descriptionPlaceholder": "Describe your role and achievements"
     },
     "education": {
       "school": "school / university",
@@ -77,10 +96,16 @@
       "end": "end",
       "save": "Save",
       "cancelForm": "cancel form",
-      "uploadImage": "upload image",
+      "uploadImage": "Upload Image",
       "noImage": "No Image",
+      "logoImage": "School Logo",
+      "uploading": "Uploading...",
+      "uploadImageHint": "JPG, PNG up to 10MB",
       "title": "title",
-      "href": "url"
+      "href": "url",
+      "schoolPlaceholder": "School / university (e.g., MIT)",
+      "hrefPlaceholder": "Website URL (https://example.edu)",
+      "degreePlaceholder": "Degree (e.g., B.Sc. Computer Science)"
     },
     "menu": {
       "Profile": "Profile",
@@ -92,7 +117,7 @@
     "skill": {
       "title": "Skills",
       "add": "Add",
-      "inputPlaceholder": "Skill name",
+      "inputPlaceholder": "Skill name (e.g., Next.js)",
       "addSkillBtn": "َAdd"
     },
     "projects": {
@@ -119,7 +144,7 @@
       "createFirstProject": "Create your first project",
       "projectUrlPlaceholder": "Project URL (https://example.com)",
       "projectTitlePlaceholder": "Project title",
-      "projectDatesPlaceholder": "Project dates (2023 - Present)",
+      "projectDatesPlaceholder": "Select date range (January 2024 - February 2024)",
       "projectImagePlaceholder": "Image URL (https://example.com/image.jpg)",
       "projectDescriptionPlaceholder": "Project description",
       "technologyPlaceholder": "Add technology (React, Next.js, etc.)",
@@ -138,6 +163,12 @@
       "uploading": "Uploading...",
       "uploadImageHint": "JPG, PNG up to 10MB",
       "imageUploaded": "Image uploaded successfully"
+    },
+    "crop": {
+      "title": "Crop Image",
+      "apply": "Apply",
+      "zoom": "Zoom",
+      "move": "Drag to reposition"
     }
   }
 }

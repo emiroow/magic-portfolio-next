@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
@@ -17,6 +17,8 @@ import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
 import BlurFade from "../magicui/blur-fade";
 import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
+import { ConfirmDialog } from "../ui/confirm-dialog";
+import ImageCropperDialog from "../ui/image-cropper";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
 import { Textarea } from "../ui/textarea";
@@ -47,10 +49,16 @@ const WorkExperience = () => {
 
   const { id: IsEditItem, logoUrl, title } = getValues();
   const t = useTranslations("dashboard.workExperience");
+  const tDash = useTranslations("dashboard");
   const tBase = useTranslations("");
+  const tCrop = useTranslations("dashboard.crop");
   const { theme } = useTheme();
   const locale = useLocale();
   const BLUR_FADE_DELAY = 0.04;
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   if (isLoading) return <Loading className="h-[50vh]" />;
   return (
@@ -121,104 +129,195 @@ const WorkExperience = () => {
               }}
               className="flex flex-col gap-1 mb-2 mt-5"
             >
-              <div className="w-full flex flex-row items-center gap-3">
-                <div className="relative w-32 h-32 border-2 mb-3 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
-                  {logoUrl ? (
-                    <Image
-                      src={logoUrl}
-                      alt={title}
-                      width={150}
-                      height={150}
-                      className="object-cover w-full h-full rounded-full"
-                    />
-                  ) : (
-                    <span className="text-muted-foreground text-xs">
-                      {t("noImage")}
-                    </span>
-                  )}
-                </div>
-                <div className="w-max flex items-center">
-                  {logoUrl && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => deleteUploadedWorkExperienceImage.mutate()}
-                    >
-                      <IoMdClose className="text-red-700 text-lg" />
-                    </Button>
-                  )}
-                  {!logoUrl && (
-                    <>
+              {/* Image Upload Section */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t("logoImage")}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  <div className="relative w-full sm:w-auto">
+                    <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
+                      {logoUrl ? (
+                        <Image
+                          src={logoUrl}
+                          alt={title || "Work experience logo"}
+                          width={120}
+                          height={120}
+                          className="object-cover w-full h-full rounded-md"
+                        />
+                      ) : (
+                        <div className="text-center p-2">
+                          <div className="text-muted-foreground text-2xl mb-1">
+                            📷
+                          </div>
+                          <span className="text-muted-foreground text-xs">
+                            {t("noImage")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {logoUrl && (
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mb-1"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadWorkExperienceImage.isPending}
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={() =>
+                          deleteUploadedWorkExperienceImage.mutate()
+                        }
+                        disabled={deleteUploadedWorkExperienceImage.isPending}
                       >
-                        {t("uploadImage")}
+                        <IoMdClose className="h-3 w-3" />
                       </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const formData = new FormData();
-                          formData.append("image", file);
-                          uploadWorkExperienceImage.mutate(formData);
-                        }}
-                        disabled={uploadWorkExperienceImage.isPending}
-                      />
-                      <p className="text-red-600 text-xs mt-1">
-                        {errors.logoUrl?.message}{" "}
-                      </p>
-                    </>
-                  )}
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {!logoUrl && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadWorkExperienceImage.isPending}
+                          className="w-full sm:w-auto"
+                        >
+                          {uploadWorkExperienceImage.isPending ? (
+                            <>
+                              <Loading size="sm" className="mr-2" />
+                              {t("uploading")}
+                            </>
+                          ) : (
+                            <>📷 {t("uploadImage")}</>
+                          )}
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const url = URL.createObjectURL(file);
+                            setCropSrc(url);
+                            setCropOpen(true);
+                          }}
+                          disabled={uploadWorkExperienceImage.isPending}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {t("uploadImageHint")}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Cropper Dialog */}
+              <ImageCropperDialog
+                open={cropOpen}
+                onOpenChange={(v) => {
+                  setCropOpen(v);
+                  if (!v && cropSrc) {
+                    URL.revokeObjectURL(cropSrc);
+                    setCropSrc(null);
+                    if (fileInputRef.current) {
+                      // @ts-ignore
+                      fileInputRef.current.value = "";
+                    }
+                  }
+                }}
+                src={cropSrc}
+                aspect={1}
+                labels={{
+                  title: t("editWork"),
+                  apply: t("save"),
+                  cancel: t("cancel"),
+                  zoom: tCrop("zoom"),
+                  move: tCrop("move"),
+                }}
+                dir={locale === "fa" ? "rtl" : "ltr"}
+                isDark={theme === "dark"}
+                outputSize={512}
+                onCropped={(file) => {
+                  const formData = new FormData();
+                  formData.append("image", file);
+                  uploadWorkExperienceImage.mutate(formData);
+                }}
+              />
+
+              <label
+                htmlFor="work-title"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("title")}
+              </label>
               <Input
+                id="work-title"
                 type="text"
                 className="text-sm"
                 {...register("title")}
-                placeholder={t("title")}
+                placeholder={t("titlePlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.title?.message}</p>
 
+              <label
+                htmlFor="work-company"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("company")}
+              </label>
               <Input
+                id="work-company"
                 type="text"
                 className="text-sm"
                 {...register("company")}
-                placeholder={t("company")}
+                placeholder={t("companyPlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.company?.message}</p>
 
+              <label
+                htmlFor="work-href"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("href")}
+              </label>
               <Input
+                id="work-href"
                 type="text"
                 className="text-sm"
                 {...register("href")}
-                placeholder={t("href")}
+                placeholder={t("hrefPlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.href?.message}</p>
 
+              <label
+                htmlFor="work-location"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("location")}
+              </label>
               <Input
+                id="work-location"
                 type="text"
                 className="text-sm"
                 {...register("location")}
-                placeholder={t("location")}
+                placeholder={t("locationPlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.location?.message}</p>
 
+              <label
+                htmlFor="work-description"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("description")}
+              </label>
               <Textarea
+                id="work-description"
                 className="text-sm"
                 {...register("description")}
-                placeholder={t("description")}
+                placeholder={t("descriptionPlaceholder")}
               />
               <p className="text-red-600 text-xs">
                 {errors.description?.message}
@@ -226,12 +325,19 @@ const WorkExperience = () => {
 
               {/* year Picker */}
               <div className="w-full flex flex-row gap-2">
-                <div>
+                <div className="flex-1">
+                  <label
+                    htmlFor="work-start"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    {t("start")}
+                  </label>
                   <Controller
                     control={control}
                     name="start"
                     render={({ field: { ref, value, onChange, ...field } }) => (
                       <DatePicker
+                        id="work-start"
                         {...field}
                         value={
                           value
@@ -274,12 +380,19 @@ const WorkExperience = () => {
                   </p>
                 </div>
 
-                <div>
+                <div className="flex-1">
+                  <label
+                    htmlFor="work-end"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    {t("end")}
+                  </label>
                   <Controller
                     control={control}
                     name="end"
                     render={({ field: { ref, value, onChange, ...field } }) => (
                       <DatePicker
+                        id="work-end"
                         {...field}
                         value={
                           value
@@ -321,12 +434,11 @@ const WorkExperience = () => {
                 </div>
               </div>
 
-              <div className="flex gap-2 max-sm:flex-col mb-24">
+              <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
                 <Button
                   disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
                   type="submit"
-                  variant="secondary"
-                  size="sm"
+                  className="w-full sm:w-auto"
                 >
                   {btnLoading ? <Loading size="sm" /> : t("save")}
                 </Button>
@@ -402,7 +514,10 @@ const WorkExperience = () => {
                         setValue("title", item.title || "");
                         setIsEdit(true);
                       }}
-                      onDelete={() => deleteWorkExperience(item._id)}
+                      onDelete={() => {
+                        setSelectedId(item._id || "");
+                        setConfirmOpen(true);
+                      }}
                     />
                   </BlurFade>
                 ))
@@ -415,6 +530,24 @@ const WorkExperience = () => {
                 </BlurFade>
               )}
             </Fragment>
+            <ConfirmDialog
+              open={confirmOpen}
+              onOpenChange={setConfirmOpen}
+              title={tDash("confirmTitle")}
+              confirmText={tDash("delete")}
+              cancelText={t("cancel")}
+              danger
+              dir={locale === "fa" ? "rtl" : "ltr"}
+              locale={locale}
+              itemName={
+                workExperienceData?.find((e) => e._id === selectedId)?.company
+              }
+              onConfirm={() => {
+                if (selectedId) deleteWorkExperience(selectedId);
+                setConfirmOpen(false);
+                setSelectedId(null);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

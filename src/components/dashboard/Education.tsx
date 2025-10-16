@@ -3,7 +3,7 @@ import useEducation from "@/hooks/dashboard/useEducation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
 import gregorian_en from "react-date-object/locales/gregorian_en";
@@ -15,12 +15,20 @@ import DatePicker, { DateObject } from "react-multi-date-picker";
 import BlurFade from "../magicui/blur-fade";
 import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
+import { ConfirmDialog } from "../ui/confirm-dialog";
+import ImageCropperDialog from "../ui/image-cropper";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const EducationExperience = () => {
   const t = useTranslations("dashboard.education");
+  const tcrop = useTranslations("dashboard.crop");
+  const tDash = useTranslations("dashboard");
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const tBase = useTranslations("");
 
   const {
@@ -123,100 +131,182 @@ const EducationExperience = () => {
               }}
               className="flex flex-col gap-1 mb-2 mt-5"
             >
-              <div className="w-full flex flex-row items-center gap-3">
-                <div className="relative w-32 h-32 border-2 mb-3 dark:border-white p-1 rounded-full overflow-hidden  flex items-center justify-center bg-background">
-                  {logoUrl ? (
-                    <Image
-                      src={logoUrl}
-                      alt={school}
-                      width={150}
-                      height={150}
-                      className="object-cover w-full h-full rounded-full"
-                    />
-                  ) : (
-                    <span className="text-muted-foreground text-xs">
-                      {t("noImage")}
-                    </span>
-                  )}
-                </div>
-                <div className="w-max flex items-center">
-                  {logoUrl && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => deleteUploadedEducationImage.mutate()}
-                    >
-                      <IoMdClose className="text-red-700 text-lg" />
-                    </Button>
-                  )}
-                  {!logoUrl && (
-                    <>
+              {/* Image Upload Section */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t("logoImage")}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  <div className="relative w-full sm:w-auto">
+                    <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
+                      {logoUrl ? (
+                        <Image
+                          src={logoUrl}
+                          alt={school || "Education logo"}
+                          width={120}
+                          height={120}
+                          className="object-cover w-full h-full rounded-md"
+                        />
+                      ) : (
+                        <div className="text-center p-2">
+                          <div className="text-muted-foreground text-2xl mb-1">
+                            📷
+                          </div>
+                          <span className="text-muted-foreground text-xs">
+                            {t("noImage")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {logoUrl && (
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mb-1"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadEducationImage.isPending}
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={() => deleteUploadedEducationImage.mutate()}
+                        disabled={deleteUploadedEducationImage.isPending}
                       >
-                        {t("uploadImage")}
+                        <IoMdClose className="h-3 w-3" />
                       </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          const formData = new FormData();
-                          formData.append("image", file);
-                          uploadEducationImage.mutate(formData);
-                        }}
-                        disabled={uploadEducationImage.isPending}
-                      />
-                      {/* <p className="text-red-600 text-xs mt-1">
-                        {errors.logoUrl?.message}{" "}
-                      </p> */}
-                    </>
-                  )}
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    {!logoUrl && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadEducationImage.isPending}
+                          className="w-full sm:w-auto"
+                        >
+                          {uploadEducationImage.isPending ? (
+                            <>
+                              <Loading size="sm" className="mr-2" />
+                              {t("uploading")}
+                            </>
+                          ) : (
+                            <>📷 {t("uploadImage")}</>
+                          )}
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const url = URL.createObjectURL(file);
+                            setCropSrc(url);
+                            setCropOpen(true);
+                          }}
+                          disabled={uploadEducationImage.isPending}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {t("uploadImageHint")}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Cropper Dialog */}
+              <ImageCropperDialog
+                open={cropOpen}
+                onOpenChange={(v) => {
+                  setCropOpen(v);
+                  if (!v && cropSrc) {
+                    URL.revokeObjectURL(cropSrc);
+                    setCropSrc(null);
+                    if (fileInputRef.current) {
+                      // @ts-ignore
+                      fileInputRef.current.value = "";
+                    }
+                  }
+                }}
+                src={cropSrc}
+                aspect={1}
+                labels={{
+                  title: tcrop("title"),
+                  apply: tcrop("apply"),
+                  cancel: t("cancel"),
+                  zoom: tcrop("zoom"),
+                  move: tcrop("move"),
+                }}
+                dir={locale === "fa" ? "rtl" : "ltr"}
+                isDark={theme === "dark"}
+                outputSize={512}
+                onCropped={(file) => {
+                  const formData = new FormData();
+                  formData.append("image", file);
+                  uploadEducationImage.mutate(formData);
+                }}
+              />
+
+              <label
+                htmlFor="education-school"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("school")}
+              </label>
               <Input
+                id="education-school"
                 type="text"
                 className="text-sm"
                 {...register("school")}
-                placeholder={t("school")}
+                placeholder={t("schoolPlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.school?.message}</p>
 
+              <label
+                htmlFor="education-href"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("href")}
+              </label>
               <Input
+                id="education-href"
                 type="text"
                 className="text-sm"
                 {...register("href")}
-                placeholder={t("href")}
+                placeholder={t("hrefPlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.href?.message}</p>
 
+              <label
+                htmlFor="education-degree"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                {t("degree")}
+              </label>
               <Input
+                id="education-degree"
                 type="text"
                 className="text-sm"
                 {...register("degree")}
-                placeholder={t("degree")}
+                placeholder={t("degreePlaceholder")}
               />
               <p className="text-red-600 text-xs">{errors.degree?.message}</p>
 
               {/* year Picker */}
               <div className="w-full flex flex-row gap-2">
-                <div>
+                <div className="flex-1">
+                  <label
+                    htmlFor="education-start"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    {t("start")}
+                  </label>
                   <Controller
                     control={control}
                     name="start"
                     render={({ field: { ref, value, onChange, ...field } }) => (
                       <DatePicker
+                        id="education-start"
                         {...field}
                         value={
                           value
@@ -259,12 +349,19 @@ const EducationExperience = () => {
                   </p>
                 </div>
 
-                <div>
+                <div className="flex-1">
+                  <label
+                    htmlFor="education-end"
+                    className="text-sm font-medium text-muted-foreground"
+                  >
+                    {t("end")}
+                  </label>
                   <Controller
                     control={control}
                     name="end"
                     render={({ field: { ref, value, onChange, ...field } }) => (
                       <DatePicker
+                        id="education-end"
                         {...field}
                         value={
                           value
@@ -306,12 +403,11 @@ const EducationExperience = () => {
                 </div>
               </div>
 
-              <div className="flex gap-2 max-sm:flex-col mb-24">
+              <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
                 <Button
                   disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
                   type="submit"
-                  variant="secondary"
-                  size="sm"
+                  className="w-full sm:w-auto"
                 >
                   {btnLoading ? <Loading size="sm" /> : t("save")}
                 </Button>
@@ -360,6 +456,8 @@ const EducationExperience = () => {
                     key={index}
                     delay={BLUR_FADE_DELAY * 8 + (index + index++) * 0.05}
                   >
+                    {/* Confirm Delete Dialog per-item */}
+                    {/* Using local state per item key is heavier; instead open with selected id */}
                     <ResumeCard
                       key={item.school}
                       href={item.href}
@@ -378,7 +476,10 @@ const EducationExperience = () => {
                         setValue("school", item.school || "");
                         setIsEdit(true);
                       }}
-                      onDelete={() => deleteEducation(item._id)}
+                      onDelete={() => {
+                        setSelectedId(item._id);
+                        setConfirmOpen(true);
+                      }}
                     />
                   </BlurFade>
                 ))
@@ -391,6 +492,24 @@ const EducationExperience = () => {
                 </BlurFade>
               )}
             </Fragment>
+            <ConfirmDialog
+              open={confirmOpen}
+              onOpenChange={setConfirmOpen}
+              title={tDash("confirmTitle")}
+              confirmText={tDash("delete")}
+              cancelText={t("cancel")}
+              danger
+              dir={locale === "fa" ? "rtl" : "ltr"}
+              locale={locale}
+              itemName={
+                getEducations?.find((e) => e._id === selectedId)?.school
+              }
+              onConfirm={() => {
+                if (selectedId) deleteEducation(selectedId);
+                setConfirmOpen(false);
+                setSelectedId(null);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

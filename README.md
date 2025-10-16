@@ -42,6 +42,38 @@ Built with next.js, [shadcn/ui](https://ui.shadcn.com/), and [magic ui](https://
 
 5. Open the [Config file](./src/data/resume.tsx) and make changes
 
+## Environment Variables
+
+Create a `.env.local` with:
+
+```
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_API_BASE_URL=https://api.your-domain.com
+```
+
+These are used for metadata canonical URLs and API requests.
+
+## SEO & Sitemaps
+
+- `src/app/robots.ts` generates robots.txt
+- `src/app/sitemap.ts` generates a localized sitemap including blog posts
+- `src/app/manifest.ts` adds a web manifest
+- Root metadata in `src/app/layout.tsx` and page-specific metadata in `src/app/[locale]/(client)/page.tsx`
+
+## Build & Run
+
+```bash
+pnpm build
+pnpm start
+```
+
+Or with npm:
+
+```bash
+npm run build
+npm start
+```
+
 # License
 
 Licensed under the [MIT license](https://github.com/dillionverma/portfolio/blob/main/LICENSE.md).

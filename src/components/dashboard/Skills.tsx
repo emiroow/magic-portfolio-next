@@ -1,14 +1,19 @@
 "use client";
 import useSkills from "@/hooks/dashboard/useSkills";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import BlurFade from "../magicui/blur-fade";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { ConfirmDialog } from "../ui/confirm-dialog";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
 
 const Skills = () => {
   const t = useTranslations("dashboard.skill");
+  const tDash = useTranslations("dashboard");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const {
     getSkills,
     locale,
@@ -30,20 +35,28 @@ const Skills = () => {
       {/* Add Skill Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full flex gap-2 items-center mt-5"
+        className="w-full mt-5 sm:flex sm:items-end sm:gap-2"
       >
-        <Input
-          className="text-center"
-          type="text"
-          placeholder={t("inputPlaceholder")}
-          {...register("name")}
-          autoComplete="off"
-        />
+        <div className="flex-1 space-y-1">
+          <label
+            htmlFor="skill-name"
+            className="text-sm font-medium text-muted-foreground"
+          >
+            {t("inputPlaceholder")}
+          </label>
+          <Input
+            id="skill-name"
+            className="text-center"
+            type="text"
+            placeholder={t("inputPlaceholder")}
+            {...register("name")}
+            autoComplete="off"
+          />
+        </div>
         <Button
           disabled={!isDirty || deleteSkillIsLoading || addSkillIsLoading}
           type="submit"
-          variant="secondary"
-          size="sm"
+          className="w-full sm:w-auto mt-2 sm:mt-0"
         >
           {addSkillIsLoading ? <Loading size="sm" /> : t("add")}
         </Button>
@@ -58,7 +71,8 @@ const Skills = () => {
             <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
               <Badge
                 onDelete={() => {
-                  deleteSkillMutate({ id: skill._id });
+                  setSelectedId(skill._id);
+                  setConfirmOpen(true);
                 }}
                 key={id}
               >
@@ -68,6 +82,22 @@ const Skills = () => {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={tDash("confirmTitle")}
+        confirmText={tDash("delete")}
+        cancelText={tDash("cancel")}
+        danger
+        dir={locale === "fa" ? "rtl" : "ltr"}
+        locale={locale}
+        itemName={getSkills?.find((s) => s._id === selectedId)?.name}
+        onConfirm={() => {
+          if (selectedId) deleteSkillMutate({ id: selectedId });
+          setConfirmOpen(false);
+          setSelectedId(null);
+        }}
+      />
     </section>
   );
 };
