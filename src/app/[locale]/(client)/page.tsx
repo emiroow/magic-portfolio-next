@@ -123,6 +123,7 @@ export default async function Page({ params: { locale } }: Props) {
           sameAs: data.socials?.map((s) => s.url).filter(Boolean),
         }}
       />
+
       {/* Breadcrumb structured data */}
       <JsonLd
         item={{
@@ -138,6 +139,7 @@ export default async function Page({ params: { locale } }: Props) {
           ],
         }}
       />
+
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
           <div className="gap-2 flex justify-between max-md:items-center">
@@ -261,23 +263,26 @@ export default async function Page({ params: { locale } }: Props) {
               </div>
             </BlurFade>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
-              {data.projects?.map((project, id) => (
-                <BlurFade
-                  key={project.title}
-                  delay={BLUR_FADE_DELAY * 12 + id * 0.05}
-                >
-                  <ProjectCard
-                    href={project.href}
-                    key={project.title}
-                    title={project.title}
-                    description={project.description}
-                    dates={project.dates}
-                    tags={project.technologies}
-                    image={project.image}
-                    links={project.links}
-                  />
-                </BlurFade>
-              ))}
+              {data.projects?.map(
+                (project, id) =>
+                  project.active && (
+                    <BlurFade
+                      key={project.title}
+                      delay={BLUR_FADE_DELAY * 12 + id * 0.05}
+                    >
+                      <ProjectCard
+                        href={project.href}
+                        key={project.title}
+                        title={project.title}
+                        description={project.description}
+                        dates={project.dates}
+                        tags={project.technologies}
+                        image={project.image}
+                        links={project.links}
+                      />
+                    </BlurFade>
+                  )
+              )}
             </div>
           </div>
         ) : null}

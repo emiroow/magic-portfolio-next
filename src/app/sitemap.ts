@@ -16,11 +16,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   for (const locale of routing.locales) {
     for (const path of basePaths) {
+      const url = `${base}/${locale}${path}`.replace(/\/$/, "");
       entries.push({
-        url: `${base}/${locale}${path}`.replace(/\/$/, ""),
+        url,
         lastModified: now,
         changeFrequency: "weekly",
         priority: 0.7,
+        alternates: {
+          languages: {
+            en: `${base}/en${path}`.replace(/\/$/, ""),
+            fa: `${base}/fa${path}`.replace(/\/$/, ""),
+            "x-default": `${base}/${routing.defaultLocale}${path}`.replace(
+              /\/$/,
+              ""
+            ),
+          },
+        },
       });
     }
   }
@@ -30,11 +41,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const posts = await getBlogPosts();
     for (const post of posts) {
       for (const locale of routing.locales) {
+        const path = `/blog/${post.slug}`;
         entries.push({
-          url: `${base}/${locale}/blog/${post.slug}`,
+          url: `${base}/${locale}${path}`,
           lastModified: now,
           changeFrequency: "monthly",
           priority: 0.5,
+          alternates: {
+            languages: {
+              en: `${base}/en${path}`,
+              fa: `${base}/fa${path}`,
+              "x-default": `${base}/${routing.defaultLocale}${path}`,
+            },
+          },
         });
       }
     }

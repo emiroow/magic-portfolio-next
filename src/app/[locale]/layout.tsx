@@ -1,6 +1,7 @@
-import { routing } from "@/i18n/routing";
+import { getPathname, routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import MainProvider from "@/providers/mainProvider";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 /**
@@ -34,4 +35,30 @@ export default async function LocaleLayout({
       <MainProvider>{children}</MainProvider>
     </div>
   );
+}
+
+// Provide sensible defaults for SEO across all localized routes
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+  const currentFa = getPathname({ href: "/", locale: "fa" });
+  const currentEn = getPathname({ href: "/", locale: "en" });
+
+  return {
+    metadataBase: site ? new URL(site) : undefined,
+    alternates: {
+      canonical: getPathname({ href: "/", locale }),
+      languages: {
+        fa: currentFa,
+        en: currentEn,
+        "x-default": getPathname({ href: "/", locale }),
+      },
+    },
+    openGraph: {
+      locale: locale === "fa" ? "fa_IR" : "en_US",
+    },
+  } satisfies Metadata;
 }

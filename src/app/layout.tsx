@@ -1,9 +1,13 @@
 import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
+import { getLocale } from "next-intl/server";
 
 // Base SEO metadata applied across the app
+const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+
 export const metadata: Metadata = {
-  metadataBase: undefined, // Consider setting this from env in production for absolute URLs
+  // Setting a metadataBase ensures canonical/alternate links are absolute
+  metadataBase: site ? new URL(site) : undefined,
   title: {
     default: "Portfolio",
     template: "%s | Portfolio",
@@ -55,8 +59,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Use the active locale to set correct html lang and text direction
+  const locale = await getLocale();
+  const dir = locale === "fa" ? "rtl" : "ltr";
   return (
-    <html lang="fa" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
