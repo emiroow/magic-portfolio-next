@@ -147,6 +147,7 @@
       "technologies": "Technologies",
       "addTechnology": "Add Technology",
       "active": "Active Project",
+      "disabled": "Disabled Project",
       "noProjects": "No projects found.",
       "createFirstProject": "Create your first project",
       "projectUrlPlaceholder": "Project URL (https://example.com)",

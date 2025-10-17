@@ -137,12 +137,19 @@ const ProjectCard = ({
             )}
 
             <div className="flex flex-wrap items-center gap-2">
-              {project.active && (
+              {project.active ? (
                 <Badge
                   variant="outline"
                   className="text-green-600 border-green-600"
                 >
                   {t("active")}
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="text-red-600 border-red-600"
+                >
+                  {t("disabled")}
                 </Badge>
               )}
 

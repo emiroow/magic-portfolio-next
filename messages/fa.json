@@ -124,6 +124,7 @@
       "createFirstSkill": "اولین مهارت خود را اضافه کنید"
     },
     "projects": {
+      "disabled": "پروژه غیرفعال",
       "title": "پروژه ها",
       "createProject": "ایجاد پروژه",
       "editProject": "ویرایش پروژه",
