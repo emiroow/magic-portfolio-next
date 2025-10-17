@@ -66,20 +66,39 @@ const Skills = () => {
       {getSkillsIsLoading ? (
         <Loading size="lg" className="h-96" />
       ) : (
-        <div className="flex flex-wrap gap-2">
-          {getSkills?.map((skill, id) => (
-            <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-              <Badge
-                onDelete={() => {
-                  setSelectedId(skill._id);
-                  setConfirmOpen(true);
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-wrap gap-2">
+            {getSkills?.map((skill, id) => (
+              <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
+                <Badge
+                  onDelete={() => {
+                    setSelectedId(skill._id);
+                    setConfirmOpen(true);
+                  }}
+                  key={id}
+                >
+                  {skill.name}
+                </Badge>
+              </BlurFade>
+            ))}
+          </div>
+
+          {(!getSkills || getSkills.length === 0) && (
+            <div className="text-center py-8 mt-24">
+              <p className="text-muted-foreground">{t("noSkills")}</p>
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => {
+                  const el = document.getElementById("skill-name");
+                  // @ts-ignore
+                  el?.focus?.();
                 }}
-                key={id}
               >
-                {skill.name}
-              </Badge>
-            </BlurFade>
-          ))}
+                {t("createFirstSkill")}
+              </Button>
+            </div>
+          )}
         </div>
       )}
       <ConfirmDialog

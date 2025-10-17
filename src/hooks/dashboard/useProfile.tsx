@@ -63,6 +63,7 @@ const useProfile = () => {
   const {
     data: profile,
     isLoading: pageLoading,
+    isFetching: pageFetching,
     error,
     refetch: refetchGetProfile,
   } = useQuery({
@@ -133,6 +134,7 @@ const useProfile = () => {
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
     refetchGetProfile,
+    pageFetching,
   };
 };
 

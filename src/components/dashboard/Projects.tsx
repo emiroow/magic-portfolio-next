@@ -529,7 +529,7 @@ const Projects = () => {
             </div>
 
             {(!projects || projects.length === 0) && (
-              <div className="text-center py-8">
+              <div className="text-center py-8 mt-24">
                 <p className="text-muted-foreground">{t("noProjects")}</p>
                 <Button
                   onClick={() => setIsEdit(true)}

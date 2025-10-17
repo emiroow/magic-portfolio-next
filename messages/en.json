@@ -84,7 +84,9 @@
       "companyPlaceholder": "Company name (e.g., ACME Co.)",
       "hrefPlaceholder": "Company URL (https://example.com)",
       "locationPlaceholder": "Location (e.g., Tehran, Iran)",
-      "descriptionPlaceholder": "Describe your role and achievements"
+      "descriptionPlaceholder": "Describe your role and achievements",
+      "noWorkExperiences": "No work experience added.",
+      "createFirstWorkExperience": "Create your first work experience"
     },
     "education": {
       "school": "school / university",
@@ -106,7 +108,9 @@
       "href": "url",
       "schoolPlaceholder": "School / university (e.g., MIT)",
       "hrefPlaceholder": "Website URL (https://example.edu)",
-      "degreePlaceholder": "Degree (e.g., B.Sc. Computer Science)"
+      "degreePlaceholder": "Degree (e.g., B.Sc. Computer Science)",
+      "noEducations": "No education records found.",
+      "createFirstEducation": "Create your first education"
     },
     "menu": {
       "Profile": "Profile",
@@ -119,7 +123,9 @@
       "title": "Skills",
       "add": "Add",
       "inputPlaceholder": "Skill name (e.g., Next.js)",
-      "addSkillBtn": "َAdd"
+      "addSkillBtn": "َAdd",
+      "noSkills": "No skills added yet.",
+      "createFirstSkill": "Add your first skill"
     },
     "projects": {
       "title": "Projects",
@@ -150,7 +156,6 @@
       "projectDescriptionPlaceholder": "Project description",
       "technologyPlaceholder": "Add technology (React, Next.js, etc.)",
       "deleteSuccessMessage": "Project deleted successfully",
-      "noImage": "No Image",
       "uploadImage": "Upload Image",
       "removeImage": "Remove Image",
       "linkType": "Link Type",

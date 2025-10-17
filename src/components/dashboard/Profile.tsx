@@ -30,6 +30,7 @@ const Profile = () => {
     profileImageShowImageFromUrlLoading,
     setProfileImageShowImageFromUrlLoading,
     refetchGetProfile,
+    pageFetching,
   } = useProfile();
 
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -77,7 +77,9 @@
       "href": "لینک",
       "schoolPlaceholder": "نام مدرسه/دانشگاه (مثلاً: شریف)",
       "hrefPlaceholder": "آدرس وب‌سایت (https://example.edu)",
-      "degreePlaceholder": "مدرک (مثلاً: کارشناسی علوم کامپیوتر)"
+      "degreePlaceholder": "مدرک (مثلاً: کارشناسی علوم کامپیوتر)",
+      "noEducations": "رکورد تحصیلی یافت نشد.",
+      "createFirstEducation": "اولین مورد تحصیلی خود را ایجاد کنید"
     },
     "menu": {
       "Profile": "پروفایل",
@@ -110,12 +112,16 @@
       "companyPlaceholder": "نام شرکت (مثلاً: ACME)",
       "hrefPlaceholder": "آدرس شرکت (https://example.com)",
       "locationPlaceholder": "موقعیت (مثلاً: تهران، ایران)",
-      "descriptionPlaceholder": "توضیحی درباره نقش و دستاوردها"
+      "descriptionPlaceholder": "توضیحی درباره نقش و دستاوردها",
+      "noWorkExperiences": "هیچ سابقه کاری اضافه نشده است.",
+      "createFirstWorkExperience": "اولین سابقه کاری خود را ایجاد کنید"
     },
     "skill": {
       "title": "مهارت ها",
       "add": "افزودن",
-      "inputPlaceholder": "نام مهارت (مثلاً: Next.js)"
+      "inputPlaceholder": "نام مهارت (مثلاً: Next.js)",
+      "noSkills": "هنوز مهارتی اضافه نشده است.",
+      "createFirstSkill": "اولین مهارت خود را اضافه کنید"
     },
     "projects": {
       "title": "پروژه ها",

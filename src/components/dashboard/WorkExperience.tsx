@@ -522,12 +522,19 @@ const WorkExperience = () => {
                   </BlurFade>
                 ))
               ) : (
-                // not found
-                <BlurFade delay={BLUR_FADE_DELAY * 8}>
-                  <div className="bg-muted/30 shadow-red-500 rounded-xl p-5 w-full flex justify-center items-center h-[50vh]">
-                    {tBase("notFound")}
-                  </div>
-                </BlurFade>
+                // empty state
+                <div className="text-center py-8 mt-24">
+                  <p className="text-muted-foreground">
+                    {t("noWorkExperiences")}
+                  </p>
+                  <Button
+                    onClick={() => setIsEdit(true)}
+                    variant="outline"
+                    className="mt-2"
+                  >
+                    {t("createFirstWorkExperience")}
+                  </Button>
+                </div>
               )}
             </Fragment>
             <ConfirmDialog
