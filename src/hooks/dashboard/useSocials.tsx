@@ -25,9 +25,21 @@ const useSocials = () => {
     setValue,
     reset,
     watch,
-    formState: { errors, isDirty, dirtyFields },
+    formState: { errors, isDirty, dirtyFields, isValid },
   } = useForm<SocialForm>({
     defaultValues: { name: "", url: "", icon: "" },
+    mode: "onChange",
+    criteriaMode: "all",
+  });
+
+  // Register validations
+  const registerName = register("name", { required: true, minLength: 2 });
+  const registerIcon = register("icon", { required: true });
+  const urlPattern =
+    /^(https?:\/\/)([\w\-]+\.)+[\w\-]+(\:[0-9]+)?(\/[^\s]*)?$/i;
+  const registerUrl = register("url", {
+    required: true,
+    pattern: urlPattern,
   });
 
   const {
@@ -110,11 +122,14 @@ const useSocials = () => {
     socials,
     isLoading,
     register,
+    registerName,
+    registerUrl,
+    registerIcon,
     handleSubmit,
     setValue,
     reset,
     watch,
-    formState: { errors, isDirty, dirtyFields },
+    formState: { errors, isDirty, dirtyFields, isValid },
     onsubmit,
     isEdit,
     setIsEdit,

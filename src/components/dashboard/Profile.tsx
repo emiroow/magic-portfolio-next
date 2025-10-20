@@ -63,8 +63,8 @@ const Profile = () => {
                   <Image
                     src={profile?.avatarUrl}
                     alt={profile?.fullName}
-                    width={150}
-                    height={150}
+                    width={100}
+                    height={100}
                     className="object-cover rounded-full"
                     onLoad={() => {
                       setProfileImageShowImageFromUrlLoading(false);

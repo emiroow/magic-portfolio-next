@@ -31,11 +31,14 @@ const Socials = () => {
     socials,
     isLoading,
     register,
+    registerName,
+    registerUrl,
+    registerIcon,
     handleSubmit,
     setValue,
     reset,
     watch,
-    formState: { isDirty },
+    formState: { isDirty, isValid, errors },
     onsubmit,
     isEdit,
     setIsEdit,
@@ -55,35 +58,46 @@ const Socials = () => {
       {/* Create/Edit Form */}
       <form
         onSubmit={handleSubmit(onsubmit)}
-        className="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-5"
+        className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-5 items-end"
       >
-        <div className="space-y-1">
+        <div className="space-y-1 md:col-span-3">
           <label className="text-sm font-medium text-muted-foreground">
             {t("name")}
           </label>
           <Input
-            {...register("name")}
+            {...registerName}
             placeholder={t("namePlaceholder")}
             autoComplete="off"
           />
+          {errors?.name?.type === "required" && (
+            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
+          )}
+          {errors?.name?.type === "minLength" && (
+            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
+          )}
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1 md:col-span-4">
           <label className="text-sm font-medium text-muted-foreground">
             {t("url")}
           </label>
           <Input
-            {...register("url")}
+            {...registerUrl}
             placeholder={t("urlPlaceholder")}
             type="url"
           />
+          {errors?.url?.type === "required" && (
+            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
+          )}
+          {errors?.url?.type === "pattern" && (
+            <p className="text-xs text-red-500">Must be a valid URL</p>
+          )}
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-1 md:col-span-3">
           <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             {locale === "fa" ? (
               <>
-                {t("icon")}
                 {selectedIcon ? (
                   <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted text-foreground">
                     {(() => {
@@ -94,6 +108,7 @@ const Socials = () => {
                     })()}
                   </span>
                 ) : null}
+                {t("icon")}
               </>
             ) : (
               <>
@@ -113,7 +128,7 @@ const Socials = () => {
           </label>
           <select
             className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            {...register("icon")}
+            {...registerIcon}
           >
             <option value="">{t("selectIcon")}</option>
             {availableIcons.map((ic) => (
@@ -122,15 +137,31 @@ const Socials = () => {
               </option>
             ))}
           </select>
+          {errors?.icon && (
+            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
+          )}
         </div>
 
-        <div className="flex items-end gap-2">
+        <div
+          className={`flex items-end gap-2 md:col-span-2 ${
+            locale === "fa" ? "md:justify-start" : "md:justify-end"
+          }`}
+        >
           <Button
             type="submit"
-            disabled={creating || updating || (socials?.length || 0) >= 4}
-            className="w-full"
+            disabled={
+              creating || updating || (socials?.length || 0) >= 4 || !isValid
+            }
+            className="w-full md:w-auto"
           >
-            {creating || updating ? <Loading size="sm" /> : t("save")}
+            {creating || updating ? (
+              <span className="inline-flex items-center gap-2">
+                <Loading size="sm" />
+                {t("save")}
+              </span>
+            ) : (
+              t("save")
+            )}
           </Button>
           {isEdit && (
             <Button
@@ -140,6 +171,7 @@ const Socials = () => {
                 reset();
                 setIsEdit(false);
               }}
+              className="w-full md:w-auto"
             >
               {tDash("cancel")}
             </Button>
@@ -152,7 +184,7 @@ const Socials = () => {
         <Loading className="h-64" />
       ) : (
         <div className="flex flex-col gap-4 mt-8">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 flex-wrap md:flex-nowrap md:overflow-x-auto md:whitespace-nowrap">
             {socials?.map((s) => (
               <Badge
                 key={s._id}
