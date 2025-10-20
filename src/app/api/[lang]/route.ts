@@ -18,7 +18,7 @@ export const GET = async (
     const educations = await educationModel.find({ lang });
     const projects = await projectModel.find({ lang });
     const works = await workModel.find({ lang });
-    const socials = await socialModel.find();
+    const socials = await socialModel.find({ lang });
     const skills = await skillModel.find({ lang });
     return NextResponse.json(
       { profile, educations, projects, works, socials, skills },

@@ -51,39 +51,37 @@ const Profile = () => {
         <div className="flex flex-col gap-1 mb-2 mt-8">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-full flex flex-row items-center gap-3">
-              <div className="border-2 dark:border-white border-black rounded-full">
-                {profile?.avatarUrl ? (
-                  <>
-                    {profileImageShowImageFromUrlLoading ||
-                      (uploadAvatar.isPending && (
-                        <Loading
-                          className="absolute inset-0 flex items-center justify-center bg-background/75"
-                          size="sm"
-                        />
-                      ))}
-                    <Image
-                      src={profile?.avatarUrl}
-                      alt={profile?.fullName}
-                      width={150}
-                      height={150}
-                      className="object-cover rounded-full"
-                      onLoad={() => {
-                        setProfileImageShowImageFromUrlLoading(false);
-                      }}
-                      onLoadStart={() => {
-                        setProfileImageShowImageFromUrlLoading(false);
-                      }}
-                      onError={() => {
-                        setProfileImageShowImageFromUrlLoading(true);
-                      }}
-                    />
-                  </>
-                ) : (
-                  <span className="text-muted-foreground text-xs">
-                    {t("noImage")}
-                  </span>
-                )}
-              </div>
+              {profile?.avatarUrl ? (
+                <div className="border-2 dark:border-white border-black rounded-full">
+                  {profileImageShowImageFromUrlLoading ||
+                    (uploadAvatar.isPending && (
+                      <Loading
+                        className="absolute inset-0 flex items-center justify-center bg-background/75"
+                        size="sm"
+                      />
+                    ))}
+                  <Image
+                    src={profile?.avatarUrl}
+                    alt={profile?.fullName}
+                    width={150}
+                    height={150}
+                    className="object-cover rounded-full"
+                    onLoad={() => {
+                      setProfileImageShowImageFromUrlLoading(false);
+                    }}
+                    onLoadStart={() => {
+                      setProfileImageShowImageFromUrlLoading(false);
+                    }}
+                    onError={() => {
+                      setProfileImageShowImageFromUrlLoading(true);
+                    }}
+                  />
+                </div>
+              ) : (
+                <span className="text-muted-foreground text-xs border-2 w-28 h-28 text-center items-center justify-center flex rounded-full">
+                  {t("noImage")}
+                </span>
+              )}
               <div className="flex gap-2 flex-col">
                 <label className="text-sm font-medium text-muted-foreground">
                   {t("profileImage")}
@@ -124,6 +122,7 @@ const Profile = () => {
               </div>
             </div>
           </div>
+
           {/* Cropper Dialog */}
           <ImageCropperDialog
             open={cropOpen}

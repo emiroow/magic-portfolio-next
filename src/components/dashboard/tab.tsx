@@ -7,6 +7,7 @@ import EducationExperience from "./Education";
 import Profile from "./Profile";
 import Projects from "./Projects";
 import Skills from "./Skills";
+import Socials from "./Socials";
 import WorkExperience from "./WorkExperience";
 
 const Tab = () => {
@@ -20,6 +21,7 @@ const Tab = () => {
     { trans: "Education" },
     { trans: "Skills" },
     { trans: "Projects" },
+    { trans: "Socials" },
   ];
 
   const content = [
@@ -28,6 +30,7 @@ const Tab = () => {
     { component: <EducationExperience />, trans: "Education" },
     { component: <Skills />, trans: "Skills" },
     { component: <Projects />, trans: "Projects" },
+    { component: <Socials />, trans: "Socials" },
   ];
 
   // ✅ Load saved tab on mount

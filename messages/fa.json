@@ -86,7 +86,21 @@
       "Work": "سابقه کار",
       "Education": "تصحیلات",
       "Skills": "مهارت",
-      "Projects": "پروژه"
+      "Projects": "پروژه",
+      "Socials": "شبکه‌های اجتماعی"
+    },
+    "social": {
+      "title": "لینک‌های شبکه‌های اجتماعی",
+      "name": "نام",
+      "url": "آدرس",
+      "icon": "آیکون",
+      "selectIcon": "انتخاب آیکون",
+      "save": "ذخیره",
+      "namePlaceholder": "نام نمایشی (مثلاً GitHub)",
+      "urlPlaceholder": "آدرس پروفایل (https://...)",
+      "noSocials": "هنوز لینکی اضافه نشده است.",
+      "addFirstSocial": "اولین لینک را اضافه کنید",
+      "maxReached": "حداکثر ۴ لینک می‌توانید اضافه کنید."
     },
     "workExperience": {
       "experience": "تجربه کاری",

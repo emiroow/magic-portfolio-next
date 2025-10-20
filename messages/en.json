@@ -117,7 +117,21 @@
       "Work": "Work Experience",
       "Education": "Education Experience",
       "Skills": "Skills",
-      "Projects": "Projects"
+      "Projects": "Projects",
+      "Socials": "Socials"
+    },
+    "social": {
+      "title": "Social Links",
+      "name": "Name",
+      "url": "URL",
+      "icon": "Icon",
+      "selectIcon": "Select an icon",
+      "save": "Save",
+      "namePlaceholder": "Display name (e.g., GitHub)",
+      "urlPlaceholder": "Profile URL (https://...)",
+      "noSocials": "No social links added yet.",
+      "addFirstSocial": "Add your first social",
+      "maxReached": "You can only add up to 4 social links."
     },
     "skill": {
       "title": "Skills",

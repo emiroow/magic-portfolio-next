@@ -19,6 +19,36 @@ export async function GET(
   }
 }
 
+// POST: Create a new social for a language
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { lang: string } }
+) {
+  await connectDB();
+  try {
+    const body = await request.json();
+    const { name, url, icon } = body || {};
+    if (!name || !url || !icon) {
+      return NextResponse.json(
+        { error: "name, url and icon are required" },
+        { status: 400 }
+      );
+    }
+    const created = await socialModel.create({
+      name,
+      url,
+      icon,
+      lang: params.lang,
+    });
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 // PUT: Update a social by _id
 export async function PUT(
   request: NextRequest,

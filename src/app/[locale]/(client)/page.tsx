@@ -144,26 +144,32 @@ export default async function Page({ params: { locale } }: Props) {
         <div className="mx-auto w-full max-w-2xl space-y-8">
           <div className="gap-2 flex justify-between max-md:items-center">
             <div className="flex-col flex flex-1 space-y-1.5">
-              <BlurFadeText
-                delay={BLUR_FADE_DELAY}
-                className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
-                yOffset={20}
-                text={`${tHero("hi")} ${data.profile?.name} 👋`}
-              />
-              <BlurFadeText
-                className="max-w-[600px] md:text-xl"
-                delay={BLUR_FADE_DELAY}
-                text={data.profile?.summary}
-              />
-            </div>
-            <BlurFade delay={BLUR_FADE_DELAY}>
-              <Avatar className="size-32 border">
-                <AvatarImage
-                  alt={data.profile?.name}
-                  src={data.profile?.avatarUrl}
+              {!!data.profile?.name && (
+                <BlurFadeText
+                  delay={BLUR_FADE_DELAY}
+                  className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
+                  yOffset={20}
+                  text={`${tHero("hi")} ${data.profile?.name} 👋`}
                 />
-              </Avatar>
-            </BlurFade>
+              )}
+              {!!data.profile?.summary && (
+                <BlurFadeText
+                  className="max-w-[600px] md:text-xl"
+                  delay={BLUR_FADE_DELAY}
+                  text={data.profile?.summary}
+                />
+              )}
+            </div>
+            {!!data.profile?.avatarUrl && (
+              <BlurFade delay={BLUR_FADE_DELAY}>
+                <Avatar className="size-32 border">
+                  <AvatarImage
+                    alt={data.profile?.name}
+                    src={data.profile?.avatarUrl}
+                  />
+                </Avatar>
+              </BlurFade>
+            )}
           </div>
         </div>
       </section>
