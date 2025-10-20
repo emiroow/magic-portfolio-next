@@ -142,19 +142,19 @@ export default async function Page({ params: { locale } }: Props) {
 
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
-          <div className="gap-2 flex justify-between max-md:items-center">
+          <div className="gap-3 flex justify-between max-md:items-center">
             <div className="flex-col flex flex-1 space-y-1.5">
               {!!data.profile?.name && (
                 <BlurFadeText
                   delay={BLUR_FADE_DELAY}
-                  className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
+                  className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none"
                   yOffset={20}
                   text={`${tHero("hi")} ${data.profile?.name} 👋`}
                 />
               )}
               {!!data.profile?.summary && (
                 <BlurFadeText
-                  className="max-w-[600px] md:text-xl"
+                  className="max-w-[600px] text-sm md:text-lg"
                   delay={BLUR_FADE_DELAY}
                   text={data.profile?.summary}
                 />
@@ -178,7 +178,10 @@ export default async function Page({ params: { locale } }: Props) {
           <h2 className="text-xl font-bold">{t("about")}</h2>
         </BlurFade>
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
+          <Markdown
+            className="prose max-w-full text-pretty
+           font-sans text-sm text-muted-foreground dark:prose-invert"
+          >
             {data.profile?.description}
           </Markdown>
         </BlurFade>
@@ -209,8 +212,9 @@ export default async function Page({ params: { locale } }: Props) {
           </div>
         ) : null}
       </section>
-      <section id="education">
-        {data.educations?.length ? (
+      {/* educations */}
+      {data.educations?.length ? (
+        <section id="education">
           <div className="flex min-h-0 flex-col gap-y-3">
             <BlurFade delay={BLUR_FADE_DELAY * 7}>
               <h2 className="text-xl font-bold">{t("education")}</h2>
@@ -232,8 +236,9 @@ export default async function Page({ params: { locale } }: Props) {
               </BlurFade>
             ))}
           </div>
-        ) : null}
-      </section>
+          )
+        </section>
+      ) : null}
       <section id="skills">
         {data.skills?.length ? (
           <div className="flex min-h-0 flex-col gap-y-3">
@@ -294,7 +299,7 @@ export default async function Page({ params: { locale } }: Props) {
         ) : null}
       </section>
       <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pb-12">
+        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pb-16">
           <BlurFade delay={BLUR_FADE_DELAY * 16}>
             <div className="space-y-6">
               <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">

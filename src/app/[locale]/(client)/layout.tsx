@@ -22,7 +22,7 @@ export default async function ClientLayout({
     <div
       dir={direction}
       className={cn(
-        `min-h-screen bg-background antialiased max-w-2xl mx-auto py-12 sm:py-12 px-6 ${
+        `min-h-screen bg-background antialiased max-w-2xl mx-auto py-5 sm:py-12 px-6 ${
           locale === "en" ? "font-robotRegular" : "font-estedadRegular"
         } `
       )}

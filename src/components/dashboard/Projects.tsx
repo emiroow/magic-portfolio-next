@@ -503,7 +503,7 @@ const Projects = () => {
                     size={"icon"}
                     className="size-8"
                   >
-                    <GoPlus className="text-lg" />
+                    <GoPlus className="text-lg text-green-600" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
