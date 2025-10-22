@@ -26,7 +26,7 @@ export default async function LocaleLayout({
     <div
       dir={direction}
       className={cn(
-        `min-h-screen bg-background antialiased max-w-2xl mx-auto ${
+        `bg-background antialiased ${
           locale === "en" ? "font-robotRegular" : "font-estedadRegular"
         } `
       )}

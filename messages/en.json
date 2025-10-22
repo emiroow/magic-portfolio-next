@@ -33,6 +33,29 @@
   "NotFoundPage": {
     "title": "Not Found Page !"
   },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Please sign in to continue",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Sign in",
+      "loggingIn": "Signing in...",
+      "show": "Show",
+      "hide": "Hide",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with",
+      "github": "GitHub",
+      "google": "Google"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "confirmTitle": "Are you sure?",

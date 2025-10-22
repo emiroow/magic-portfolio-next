@@ -31,6 +31,29 @@
   "NotFoundPage": {
     "title": "پیج مورد نظر یافت نشد !"
   },
+  "auth": {
+    "login": {
+      "title": "ورود به حساب کاربری",
+      "subtitle": "برای ادامه، لطفاً وارد حساب خود شوید",
+      "email": "ایمیل",
+      "emailPlaceholder": "name@example.com",
+      "password": "رمز عبور",
+      "passwordPlaceholder": "رمز عبور خود را وارد کنید",
+      "rememberMe": "مرا به خاطر بسپار",
+      "forgotPassword": "فراموشی رمز عبور",
+      "loginButton": "ورود",
+      "loggingIn": "در حال ورود...",
+      "show": "نمایش",
+      "hide": "مخفی",
+      "showPassword": "نمایش رمز عبور",
+      "hidePassword": "مخفی کردن رمز عبور",
+      "noAccount": "حساب کاربری ندارید؟",
+      "signUp": "ثبت نام",
+      "orContinueWith": "یا ادامه دهید با",
+      "github": "گیت‌هاب",
+      "google": "گوگل"
+    }
+  },
   "dashboard": {
     "title": "داشبورد",
     "confirmTitle": "آیا از حذف مطمئن هستید؟",

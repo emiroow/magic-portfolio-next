@@ -4,18 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Fragment, useState } from "react";
-import gregorian from "react-date-object/calendars/gregorian";
-import persian from "react-date-object/calendars/persian";
-import gregorian_en from "react-date-object/locales/gregorian_en";
-import persian_fa from "react-date-object/locales/persian_fa";
 import { Controller } from "react-hook-form";
 import { GoPlus } from "react-icons/go";
 import { IoMdClose } from "react-icons/io";
-import DatePicker, { DateObject } from "react-multi-date-picker";
 import BlurFade from "../magicui/blur-fade";
 import { ResumeCard } from "../resume-card";
 import { Button } from "../ui/button";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+import { DateRangePicker } from "../ui/date-range-picker";
 import ImageCropperDialog from "../ui/image-cropper";
 import { Input } from "../ui/input";
 import Loading from "../ui/loading";
@@ -292,116 +288,37 @@ const EducationExperience = () => {
               />
               <p className="text-red-600 text-xs">{errors.degree?.message}</p>
 
-              {/* year Picker */}
-              <div className="w-full flex flex-row gap-2">
-                <div className="flex-1">
-                  <label
-                    htmlFor="education-start"
-                    className="text-sm font-medium text-muted-foreground"
-                  >
-                    {t("start")}
-                  </label>
-                  <Controller
-                    control={control}
-                    name="start"
-                    render={({ field: { ref, value, onChange, ...field } }) => (
-                      <DatePicker
-                        id="education-start"
-                        {...field}
-                        value={
-                          value
-                            ? new DateObject({
-                                date: `${value}/01/01`,
-                                calendar: locale === "fa" ? persian : gregorian,
-                                locale:
-                                  locale === "fa" ? persian_fa : gregorian_en,
-                                format: "YYYY/MM/DD",
-                              })
-                            : ""
-                        }
-                        onChange={(dateObj) => {
-                          onChange(dateObj ? String(dateObj.year) : "");
-                        }}
-                        onlyYearPicker
-                        format="YYYY"
-                        calendar={locale === "fa" ? persian : gregorian}
-                        locale={locale === "fa" ? persian_fa : gregorian_en}
-                        className={
-                          theme === "dark"
-                            ? "bg-dark text-white black"
-                            : "bg-white"
-                        }
-                        render={(value, openCalendar) => (
-                          <Input
-                            type="text"
-                            readOnly
-                            value={value}
-                            onClick={openCalendar}
-                            className="w-full text-sm text-center"
-                            placeholder={t("start")}
-                          />
-                        )}
-                      />
-                    )}
-                  />
-                  <p className="text-red-600 text-xs">
-                    {errors.start?.message}
-                  </p>
-                </div>
-
-                <div className="flex-1">
-                  <label
-                    htmlFor="education-end"
-                    className="text-sm font-medium text-muted-foreground"
-                  >
-                    {t("end")}
-                  </label>
+              {/* Date Range Picker */}
+              <Controller
+                control={control}
+                name="start"
+                render={({
+                  field: { value: startValue, onChange: onStartChange },
+                }) => (
                   <Controller
                     control={control}
                     name="end"
-                    render={({ field: { ref, value, onChange, ...field } }) => (
-                      <DatePicker
-                        id="education-end"
-                        {...field}
-                        value={
-                          value
-                            ? new DateObject({
-                                date: `${value}/01/01`,
-                                calendar: locale === "fa" ? persian : gregorian,
-                                locale:
-                                  locale === "fa" ? persian_fa : gregorian_en,
-                                format: "YYYY/MM/DD",
-                              })
-                            : ""
-                        }
-                        onChange={(dateObj) => {
-                          onChange(dateObj ? String(dateObj.year) : "");
+                    render={({
+                      field: { value: endValue, onChange: onEndChange },
+                    }) => (
+                      <DateRangePicker
+                        startValue={startValue}
+                        endValue={endValue}
+                        onStartChange={onStartChange}
+                        onEndChange={onEndChange}
+                        locale={locale as "fa" | "en"}
+                        theme={theme as "dark" | "light"}
+                        startLabel={t("start")}
+                        endLabel={t("end")}
+                        error={{
+                          start: errors.start?.message,
+                          end: errors.end?.message,
                         }}
-                        onlyYearPicker
-                        format="YYYY"
-                        calendar={locale === "fa" ? persian : gregorian}
-                        locale={locale === "fa" ? persian_fa : gregorian_en}
-                        className={
-                          theme === "dark"
-                            ? "bg-dark text-white black"
-                            : "bg-white"
-                        }
-                        render={(value, openCalendar) => (
-                          <Input
-                            type="text"
-                            readOnly
-                            value={value}
-                            onClick={openCalendar}
-                            className="w-full text-sm text-center"
-                            placeholder={t("end")}
-                          />
-                        )}
                       />
                     )}
                   />
-                  <p className="text-red-600 text-xs">{errors.end?.message}</p>
-                </div>
-              </div>
+                )}
+              />
 
               <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
                 <Button
