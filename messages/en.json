@@ -31,7 +31,10 @@
     "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
   },
   "NotFoundPage": {
-    "title": "Not Found Page !"
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or has been moved.",
+    "goHome": "Go to homepage",
+    "browse": "Browse blog"
   },
   "auth": {
     "login": {
@@ -54,6 +57,18 @@
       "orContinueWith": "Or continue with",
       "github": "GitHub",
       "google": "Google"
+    },
+    "reset": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "sendLink": "Send reset link",
+      "sending": "Sending...",
+      "emailSent": "If this email exists, we sent you a reset link.",
+      "backToLogin": "Back to sign in",
+      "demoNote": "Demo: Default credentials are admin@example.com / admin1234",
+      "successTitle": "Check your inbox",
+      "successDesc": "We've sent a link to reset your password."
     }
   },
   "dashboard": {

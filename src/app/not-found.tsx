@@ -1,13 +1,10 @@
-"use client";
+import NotFoundPage from "./[locale]/not-found";
 
-import Error from "next/error";
-
-export default function NotFound() {
-  return (
-    <html lang="en">
-      <body>
-        <Error statusCode={404} />
-      </body>
-    </html>
-  );
+export default function RootNotFound({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  // provide a default locale so NotFoundPage receives the expected params
+  return <NotFoundPage params={{ locale: params.locale }} />;
 }
