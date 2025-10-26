@@ -1,8 +1,9 @@
+import { getServerAuthSession } from "@/auth";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import DashboardProvider from "@/providers/dashboardProvider";
 import { getMessages, getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -23,6 +24,13 @@ export default async function DashboardLayout({
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
+  }
+
+  // Require authentication
+  const session = await getServerAuthSession();
+  if (!session) {
+    const callback = encodeURIComponent(`/${locale}/dashboard`);
+    redirect(`/${locale}/auth?callbackUrl=${callback}`);
   }
 
   return (
