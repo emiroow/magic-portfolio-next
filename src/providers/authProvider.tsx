@@ -2,6 +2,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { SessionProvider } from "next-auth/react";
 import { NextIntlClientProvider } from "next-intl";
 import { ThemeProvider, useTheme } from "next-themes"; // Add this import if you use next-themes
 import React from "react";
@@ -17,14 +18,16 @@ const AuthProvider = ({ children, locale, messages }: Props) => {
   const queryClient = new QueryClient();
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <ThemedContent locale={locale}>{children}</ThemedContent>
-          </TooltipProvider>
-          <ReactQueryDevtools />
-        </QueryClientProvider>
-      </ThemeProvider>
+      <SessionProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <ThemedContent locale={locale}>{children}</ThemedContent>
+            </TooltipProvider>
+            <ReactQueryDevtools />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </SessionProvider>
     </NextIntlClientProvider>
   );
 };
