@@ -7,6 +7,7 @@ import { useMemo } from "react";
 interface BlurFadeTextProps {
   text?: string;
   className?: string;
+  containerClassName?: string;
   variant?: {
     hidden: { y: number };
     visible: { y: number };
@@ -20,6 +21,7 @@ interface BlurFadeTextProps {
 const BlurFadeText = ({
   text,
   className,
+  containerClassName,
   variant,
   characterDelay = 0.03,
   delay = 0,
@@ -35,7 +37,7 @@ const BlurFadeText = ({
 
   if (animateByCharacter) {
     return (
-      <div className="flex">
+      <div className={cn("flex", containerClassName)}>
         <AnimatePresence>
           {characters.map((char, i) => (
             <motion.span
@@ -61,7 +63,7 @@ const BlurFadeText = ({
   }
 
   return (
-    <div className="flex">
+    <div className={cn("flex", containerClassName)}>
       <AnimatePresence>
         <motion.span
           initial="hidden"

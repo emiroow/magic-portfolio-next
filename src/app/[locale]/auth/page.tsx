@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,6 +18,7 @@ const BLUR_FADE_DELAY = 0.04;
 const AuthPage = () => {
   const t = useTranslations("auth.login");
   const locale = useLocale();
+  const { status } = useSession();
 
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -24,9 +26,22 @@ const AuthPage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "").trim();
+    if (!email || !password) return;
     setIsLoading(true);
-    // TODO: Implement authentication logic
-    setTimeout(() => setIsLoading(false), 1500);
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: true,
+        callbackUrl: `/${locale}/dashboard`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -163,6 +178,18 @@ const AuthPage = () => {
                     )}
                   </Button>
                 </form>
+                {status === "authenticated" && (
+                  <div className="pt-3 text-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => signOut({ callbackUrl: `/${locale}` })}
+                    >
+                      {t("logout", { default: "Logout" })}
+                    </Button>
+                  </div>
+                )}
               </BlurFade>
             </div>
           </div>
