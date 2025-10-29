@@ -1,8 +1,9 @@
+import { getServerAuthSession } from "@/config/auth";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import AuthProvider from "@/providers/authProvider";
 import { getMessages, getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function generateMetadata() {
   const t = await getTranslations();
@@ -23,6 +24,12 @@ export default async function AuthLayout({
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
+  }
+
+  // Require authentication
+  const session = await getServerAuthSession();
+  if (session) {
+    redirect(`/${locale}/dashboard`);
   }
 
   return (

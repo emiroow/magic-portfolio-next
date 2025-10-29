@@ -1,5 +1,4 @@
 "use client";
-
 import { Icons } from "@/components/icons";
 import BlurFade from "@/components/magicui/blur-fade";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -8,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn, signOut, useSession } from "next-auth/react";
+import useAuth from "@/hooks/useAuth";
+import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
 import { useState } from "react";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -19,30 +18,9 @@ const AuthPage = () => {
   const t = useTranslations("auth.login");
   const locale = useLocale();
   const { status } = useSession();
-
-  const [isLoading, setIsLoading] = useState(false);
+  const { handleSubmit, register, onSubmit, errors, isPending } = useAuth();
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "").trim();
-    if (!email || !password) return;
-    setIsLoading(true);
-    try {
-      await signIn("credentials", {
-        email,
-        password,
-        redirect: true,
-        callbackUrl: `/${locale}/dashboard`,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="w-full relative flex min-h-screen items-center justify-center">
@@ -82,22 +60,31 @@ const AuthPage = () => {
               </div>
 
               <BlurFade delay={BLUR_FADE_DELAY * 4}>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  {errors?.root?.message && (
+                    <div className="rounded-md border px-3 py-2 text-sm text-destructive">
+                      {errors.root.message as any}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm">
                       {t("email")}
                     </Label>
                     <Input
                       id="email"
-                      name="email"
+                      {...register("email")}
                       type="email"
                       placeholder={t("emailPlaceholder")}
                       autoComplete="email"
-                      required
-                      disabled={isLoading}
+                      disabled={isPending}
                       className="h-11 rounded-lg"
                       aria-label={t("email")}
                     />
+                    {errors?.email && (
+                      <p className="text-xs text-destructive">
+                        {String(errors.email.message)}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -105,40 +92,40 @@ const AuthPage = () => {
                       <Label htmlFor="password" className="text-sm">
                         {t("password")}
                       </Label>
-                      <Link
-                        href={`/${locale}/reset-password`}
-                        className="text-xs text-primary underline-offset-4 hover:underline"
-                      >
-                        {t("forgotPassword")}
-                      </Link>
                     </div>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder={t("passwordPlaceholder")}
-                        autoComplete="current-password"
-                        required
-                        disabled={isLoading}
-                        className={`h-11 rounded-lg ${
-                          locale === "fa" ? "pl-12" : "pr-12"
-                        }`}
-                        aria-label={t("password")}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((v) => !v)}
-                        className={`absolute inset-y-0 ${
-                          locale === "fa" ? "left-2" : "right-2"
-                        } my-auto inline-flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground hover:text-foreground`}
-                        aria-label={
-                          showPassword ? t("hidePassword") : t("showPassword")
-                        }
-                        tabIndex={-1}
-                      >
-                        {showPassword ? t("hide") : t("show")}
-                      </button>
+                    <div>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          {...register("password")}
+                          type={showPassword ? "text" : "password"}
+                          placeholder={t("passwordPlaceholder")}
+                          autoComplete="current-password"
+                          disabled={isPending}
+                          className={`h-11 rounded-lg ${
+                            locale === "fa" ? "pl-12" : "pr-12"
+                          }`}
+                          aria-label={t("password")}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className={`absolute inset-y-0 ${
+                            locale === "fa" ? "left-2" : "right-2"
+                          } my-auto inline-flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground hover:text-foreground`}
+                          aria-label={
+                            showPassword ? t("hidePassword") : t("showPassword")
+                          }
+                          tabIndex={-1}
+                        >
+                          {showPassword ? t("hide") : t("show")}
+                        </button>
+                      </div>
+                      {errors?.password && (
+                        <p className="text-xs text-destructive mt-1">
+                          {String(errors.password.message)}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -153,7 +140,7 @@ const AuthPage = () => {
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="h-4 w-4 rounded border-input bg-background text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        disabled={isLoading}
+                        disabled={isPending}
                       />
                       <span className="font-normal">{t("rememberMe")}</span>
                     </label>
@@ -165,10 +152,10 @@ const AuthPage = () => {
                   <Button
                     type="submit"
                     className="w-full rounded-lg py-3"
-                    disabled={isLoading}
+                    disabled={isPending}
                     size="lg"
                   >
-                    {isLoading ? (
+                    {isPending ? (
                       <span className="inline-flex items-center gap-2">
                         <Icons.spinner className="h-4 w-4 animate-spin" />
                         <span>{t("loggingIn")}</span>
@@ -178,18 +165,6 @@ const AuthPage = () => {
                     )}
                   </Button>
                 </form>
-                {status === "authenticated" && (
-                  <div className="pt-3 text-center">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => signOut({ callbackUrl: `/${locale}` })}
-                    >
-                      {t("logout", { default: "Logout" })}
-                    </Button>
-                  </div>
-                )}
               </BlurFade>
             </div>
           </div>

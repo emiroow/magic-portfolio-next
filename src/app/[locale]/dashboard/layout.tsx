@@ -1,4 +1,4 @@
-import { getServerAuthSession } from "@/auth";
+import { getServerAuthSession } from "@/config/auth";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import DashboardProvider from "@/providers/dashboardProvider";
@@ -22,15 +22,15 @@ export default async function DashboardLayout({
   const direction = locale === "fa" ? "rtl" : "ltr";
   const messages: any = await getMessages();
 
-  if (!routing.locales.includes(locale as any)) {
-    notFound();
-  }
-
   // Require authentication
   const session = await getServerAuthSession();
   if (!session) {
     const callback = encodeURIComponent(`/${locale}/dashboard`);
     redirect(`/${locale}/auth?callbackUrl=${callback}`);
+  }
+
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
   }
 
   return (

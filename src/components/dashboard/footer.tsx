@@ -8,7 +8,9 @@ import {
 } from "@/components/ui/tooltip";
 import { NavbarRoutes } from "@/constants/global";
 import { cn } from "@/lib/utils";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { FaPowerOff } from "react-icons/fa";
 import { Dock } from "../magicui/dock";
 import { ModeToggle } from "../mode-toggle";
 import ThemeToggle from "../theme-toggle";
@@ -42,6 +44,19 @@ const Footer = () => {
             </Tooltip>
           </DockIcon>
         ))}
+        <Separator orientation="vertical" className="h-full py-2" />
+        <DockIcon>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <FaPowerOff
+                onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Logout</p>
+            </TooltipContent>
+          </Tooltip>
+        </DockIcon>
         <Separator orientation="vertical" className="h-full py-2" />
         <DockIcon>
           <Tooltip>

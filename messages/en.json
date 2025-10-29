@@ -38,7 +38,7 @@
   },
   "auth": {
     "login": {
-      "title": "Sign in to your account",
+      "title": "Sign in to dashboard",
       "subtitle": "Please sign in to continue",
       "email": "Email",
       "emailPlaceholder": "name@example.com",
@@ -56,7 +56,10 @@
       "signUp": "Sign up",
       "orContinueWith": "Or continue with",
       "github": "GitHub",
-      "google": "Google"
+      "google": "Google",
+      "requiredField": "This field is required",
+      "invalidEmail": "Invalid email",
+      "invalidCredentials": "Invalid email or password"
     },
     "reset": {
       "title": "Reset your password",

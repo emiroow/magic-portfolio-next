@@ -3,7 +3,7 @@ import BlurFadeText from "@/components/magicui/blur-fade-text";
 import { Button } from "@/components/ui/button";
 import { getPathname } from "@/i18n/routing";
 import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 export async function generateMetadata({
@@ -33,12 +33,9 @@ export async function generateMetadata({
   } as Metadata;
 }
 
-export default async function NotFoundPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
+export default async function NotFoundPage() {
   const t = await getTranslations("NotFoundPage");
+  const locale = await getLocale();
   const BLUR_FADE_DELAY = 0.04;
 
   return (

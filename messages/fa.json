@@ -36,8 +36,8 @@
   },
   "auth": {
     "login": {
-      "title": "ورود به حساب کاربری",
-      "subtitle": "برای ادامه، لطفاً وارد حساب خود شوید",
+      "title": "ورود به داشبورد ",
+      "subtitle": "برای ادامه، لطفاً نام کاربری و رمز عبور را وارد کنید",
       "email": "ایمیل",
       "emailPlaceholder": "name@example.com",
       "password": "رمز عبور",
@@ -54,7 +54,10 @@
       "signUp": "ثبت نام",
       "orContinueWith": "یا ادامه دهید با",
       "github": "گیت‌هاب",
-      "google": "گوگل"
+      "google": "گوگل",
+      "requiredField": "این فیلد الزامی است",
+      "invalidEmail": "ایمیل نامعتبر است",
+      "invalidCredentials": "ایمیل یا رمز عبور نادرست است"
     },
     "reset": {
       "title": "بازنشانی رمز عبور",
