@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { ThemeProvider } from "next-themes";
 
 interface Props {
   children: React.ReactNode;
@@ -11,7 +12,9 @@ const MainProvider = async ({ children }: Props) => {
 
   return (
     <NextIntlClientProvider messages={messages}>
-      {children}
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        {children}
+      </ThemeProvider>
     </NextIntlClientProvider>
   );
 };
