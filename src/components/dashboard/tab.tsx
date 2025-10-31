@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import BlurFade from "../magicui/blur-fade";
+import Blog from "./Blog";
 import EducationExperience from "./Education";
 import Profile from "./Profile";
 import Projects from "./Projects";
@@ -22,6 +23,7 @@ const Tab = () => {
     { trans: "Skills" },
     { trans: "Projects" },
     { trans: "Socials" },
+    { trans: "Blog" },
   ];
 
   const content = [
@@ -31,6 +33,7 @@ const Tab = () => {
     { component: <Skills />, trans: "Skills" },
     { component: <Projects />, trans: "Projects" },
     { component: <Socials />, trans: "Socials" },
+    { component: <Blog />, trans: "Blog" },
   ];
 
   // ✅ Load saved tab on mount

@@ -1,5 +1,6 @@
-import { getBlogPosts } from "@/data/blog";
+import { connectDB } from "@/config/dbConnection";
 import { routing } from "@/i18n/routing";
+import { blogModel } from "@/models/blog";
 import type { MetadataRoute } from "next";
 
 /**
@@ -36,12 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  // Include blog posts for each locale
+  // Include blog posts for each locale from DB
   try {
-    const posts = await getBlogPosts();
-    for (const post of posts) {
+    await connectDB();
+    const slugs = await blogModel.find().select("slug").lean();
+    const uniqueSlugs = Array.from(new Set(slugs.map((s: any) => s.slug)));
+    for (const slug of uniqueSlugs) {
       for (const locale of routing.locales) {
-        const path = `/blog/${post.slug}`;
+        const path = `/blog/${slug}`;
         entries.push({
           url: `${base}/${locale}${path}`,
           lastModified: now,
@@ -57,8 +60,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
       }
     }
-  } catch (e) {
-    // no-op if content folder is missing in some environments
-  }
+  } catch {}
   return entries;
 }

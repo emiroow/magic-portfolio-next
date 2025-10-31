@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
       case "experience":
         folder = "experience";
         break;
+      case "blog":
+        folder = "blog";
+        break;
     }
 
     // Convert file to Buffer
@@ -124,6 +127,9 @@ export async function DELETE(req: NextRequest) {
         break;
       case "experience":
         folder = "experience";
+        break;
+      case "blog":
+        folder = "blog";
         break;
     }
 
