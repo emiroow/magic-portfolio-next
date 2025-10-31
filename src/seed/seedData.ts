@@ -1,4 +1,5 @@
 import { connectDB } from "@/config/dbConnection";
+import { blogModel } from "@/models/blog";
 import { educationModel } from "@/models/education";
 import { profileModel } from "@/models/profile";
 import { projectModel } from "@/models/project";
@@ -6,6 +7,7 @@ import { skillModel } from "@/models/skill";
 import { socialModel } from "@/models/social";
 import { workModel } from "@/models/work";
 import mongoose from "mongoose";
+import { seedBlogData } from "./blog.seed";
 import { seedEducationData } from "./education.seed";
 import { seedUserData } from "./profile.seed";
 import { seedProductData } from "./project.seed";
@@ -27,6 +29,7 @@ const seedData = async () => {
       profileModel.countDocuments(),
       workModel.countDocuments(),
       skillModel.countDocuments(),
+      blogModel.countDocuments(),
     ]);
 
     if (counts.some((count) => count > 0)) {
@@ -41,6 +44,7 @@ const seedData = async () => {
       seedWorkData(),
       seedUserData(),
       seedSkillsData(),
+      seedBlogData(),
     ]);
 
     console.log("Seed data inserted successfully");
