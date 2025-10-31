@@ -30,6 +30,11 @@
     "title": "Get in Touch",
     "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
   },
+  "blogPage": {
+    "title": "Blog",
+    "description": "My thoughts on software development, life, and more.",
+    "empty": "No posts yet."
+  },
   "NotFoundPage": {
     "title": "Page not found",
     "description": "The page you’re looking for doesn’t exist or has been moved.",
@@ -159,7 +164,21 @@
       "Education": "Education Experience",
       "Skills": "Skills",
       "Projects": "Projects",
-      "Socials": "Socials"
+      "Socials": "Socials",
+      "Blog": "Blog"
+    },
+    "blog": {
+      "title": "Blog Posts",
+      "listTitle": "All posts",
+      "loading": "Loading...",
+      "save": "Save",
+      "edit": "Edit",
+      "createBlog": "Create blog post",
+      "noBlogs": "No blog posts yet.",
+      "titlePlaceholder": "Post title",
+      "slugPlaceholder": "Slug (example-post)",
+      "summaryPlaceholder": "Short summary",
+      "contentPlaceholder": "Content (HTML or Markdown)"
     },
     "social": {
       "title": "Social Links",
