@@ -8,6 +8,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { apiEndPoint } from "@/constants/global";
 import { IClientResponse } from "@/interface/IGlobal";
+import { formatYearMonthLocal } from "@/lib/utils";
 import axios from "axios";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -108,6 +109,7 @@ export default async function Page({ params: { locale } }: Props) {
   const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
+  const presentLabel = locale === "fa" ? "تا کنون" : "Present";
 
   return (
     <main className="flex flex-col min-h-[100dvh] space-y-10">
@@ -204,7 +206,17 @@ export default async function Page({ params: { locale } }: Props) {
                   title={work.company}
                   subtitle={work.title}
                   href={work.href}
-                  period={`${work.start} - ${work.end ?? "Present"}`}
+                  period={`${formatYearMonthLocal(
+                    work.start || "",
+                    locale as unknown as "fa" | "en"
+                  )} - ${
+                    work.end
+                      ? formatYearMonthLocal(
+                          work.end,
+                          locale as unknown as "fa" | "en"
+                        )
+                      : presentLabel
+                  }`}
                   description={work.description}
                 />
               </BlurFade>
@@ -231,7 +243,13 @@ export default async function Page({ params: { locale } }: Props) {
                   altText={education.school}
                   title={education.school}
                   subtitle={education.degree}
-                  period={`${education.start} - ${education.end}`}
+                  period={`${formatYearMonthLocal(
+                    education.start || "",
+                    locale as unknown as "fa" | "en"
+                  )} - ${formatYearMonthLocal(
+                    education.end || "",
+                    locale as unknown as "fa" | "en"
+                  )}`}
                 />
               </BlurFade>
             ))}

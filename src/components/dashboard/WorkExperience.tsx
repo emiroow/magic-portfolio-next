@@ -1,5 +1,6 @@
 "use client";
 import useWorkExperience from "@/hooks/dashboard/useWorkExperience";
+import { formatYearMonthLocal } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
@@ -411,7 +412,13 @@ const WorkExperience = () => {
                       title={item.company}
                       subtitle={item.title}
                       href={item.href}
-                      period={`${item.start} - ${item.end}`}
+                      period={`${formatYearMonthLocal(
+                        item.start || "",
+                        locale as "fa" | "en"
+                      )} - ${formatYearMonthLocal(
+                        item.end || "",
+                        locale as "fa" | "en"
+                      )}`}
                       description={item.description}
                       isExpanded={expandedIndex === index}
                       onToggle={() => {

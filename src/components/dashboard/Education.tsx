@@ -1,5 +1,6 @@
 "use client";
 import useEducation from "@/hooks/dashboard/useEducation";
+import { formatYearMonthLocal } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -382,7 +383,13 @@ const EducationExperience = () => {
                       altText={item.school}
                       title={item.school}
                       subtitle={item.degree}
-                      period={`${item.start} - ${item.end}`}
+                      period={`${formatYearMonthLocal(
+                        item.start || "",
+                        locale as "fa" | "en"
+                      )} - ${formatYearMonthLocal(
+                        item.end || "",
+                        locale as "fa" | "en"
+                      )}`}
                       onEdit={() => {
                         setValue("id", item._id || "");
                         setValue("degree", item.degree || "");
