@@ -39,21 +39,31 @@ export default function BlogListClient({
     );
   }, [posts, q]);
 
+  // simple reading time estimation (~200 wpm)
+  const readingTime = (text: string | undefined) => {
+    if (!text) return "";
+    const words = text.trim().split(/\s+/).length;
+    const minutes = Math.max(1, Math.ceil(words / 200));
+    return `${minutes} min`;
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-sm text-muted-foreground">
-          {locale === "fa" ? "تعداد" : "Total"}: {posts?.length || 0}
+      <BlurFade delay={BLUR_FADE_DELAY * 2} key="search-input">
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-sm text-muted-foreground">
+            {locale === "fa" ? "تعداد" : "Total"}: {posts?.length || 0}
+          </div>
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={
+              locale === "fa" ? "جستجو عنوان یا اسلاگ" : "Search title or slug"
+            }
+            className="h-9 w-48 sm:w-64"
+          />
         </div>
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={
-            locale === "fa" ? "جستجو عنوان یا اسلاگ" : "Search title or slug"
-          }
-          className="h-9 w-48 sm:w-64"
-        />
-      </div>
+      </BlurFade>
 
       {list.map((post, id) => (
         <BlurFade delay={BLUR_FADE_DELAY * 2 + id * 0.05} key={post.slug}>
@@ -63,12 +73,13 @@ export default function BlogListClient({
           >
             <div className="w-full flex flex-col gap-1">
               <div className="flex items-start justify-between gap-3">
-                <p className="tracking-tight font-medium line-clamp-2">
+                <p className="tracking-tight font-bold line-clamp-2">
                   {post.title}
                 </p>
+
                 {post.content && (
                   <span className="text-[11px] text-muted-foreground bg-muted/40 rounded px-1 py-0.5">
-                    {locale === "fa" ? "زمان مطالعه:" : "Read:"}{" "}
+                    {locale === "fa" ? "زمان مطالعه:" : "Read:"}
                     {readingTime(post.content)}
                   </span>
                 )}

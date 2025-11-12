@@ -1,8 +1,8 @@
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Fragment } from "react";
 
 export default async function BlogLayout({
   children,
@@ -27,7 +27,7 @@ export default async function BlogLayout({
         } `
       )}
     >
-      <Fragment>{children}</Fragment>
+      <TooltipProvider>{children}</TooltipProvider>
     </div>
   );
 }

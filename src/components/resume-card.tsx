@@ -74,7 +74,7 @@ export const ResumeCard = ({
               </Avatar>
             </div>
           )}
-          <div className="flex-grow mx-4 items-center flex-col group">
+          <div className="flex-grow ms-4 items-center flex-col group">
             <CardHeader>
               <div className="flex items-center justify-between gap-x-2 text-base">
                 <h3
@@ -111,7 +111,7 @@ export const ResumeCard = ({
                     />
                   )}
                 </h3>
-                <div className="text-xs sm:text-sm tabular-nums text-muted-foreground text-right">
+                <div className="text-[11px] sm:text-xs font-normal text-muted-foreground text-left">
                   {period}
                 </div>
               </div>

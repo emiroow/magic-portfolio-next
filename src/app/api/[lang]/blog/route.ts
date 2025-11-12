@@ -10,11 +10,7 @@ export async function GET(
   const { lang } = params;
   try {
     await connectDB();
-    const docs = await blogModel
-      .find({ lang })
-      .select("title summary slug lang createdAt updatedAt")
-      .sort({ createdAt: -1 })
-      .lean();
+    const docs = await blogModel.find({ lang }).sort({ createdAt: -1 }).lean();
 
     return NextResponse.json(docs, { status: 200 });
   } catch (error) {

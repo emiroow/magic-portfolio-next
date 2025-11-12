@@ -1,5 +1,6 @@
 import BlogListClient from "@/components/blog/BlogListClient";
 import BlurFade from "@/components/magicui/blur-fade";
+import Navbar from "@/components/navbar";
 import { routing } from "@/i18n/routing";
 import type { IBlog } from "@/interface/IBlog";
 import type { Metadata } from "next";
@@ -60,6 +61,7 @@ export default async function BlogPage({
   const posts = (await res.json()) as IBlog[];
 
   const t = await getTranslations({ locale, namespace: "blogPage" });
+
   return (
     <section>
       <BlurFade delay={BLUR_FADE_DELAY}>
@@ -77,6 +79,7 @@ export default async function BlogPage({
         </div>
       </BlurFade>
       <BlogListClient posts={posts} locale={locale} />
+      <Navbar socials={[]} />
     </section>
   );
 }

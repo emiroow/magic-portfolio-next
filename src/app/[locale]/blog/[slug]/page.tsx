@@ -84,16 +84,17 @@ export default async function Blog({
   const allRes = await fetch(`${base}/api/${params.locale}/blog`, {
     cache: "no-store",
   });
+
   const all = (allRes.ok ? ((await allRes.json()) as IBlog[]) : []).sort(
     (a, b) =>
       new Date(b.createdAt || 0).getTime() -
       new Date(a.createdAt || 0).getTime()
   );
+
   const index = all.findIndex((p) => p.slug === post.slug);
   const prev = index > 0 ? all[index - 1] : undefined;
   const next =
     index >= 0 && index < all.length - 1 ? all[index + 1] : undefined;
-  const related = all.filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
     <section id="blog">
@@ -136,16 +137,18 @@ export default async function Blog({
           ],
         }}
       />
-      <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
+      <h1 className="title font-semibold text-2xl tracking-tighter max-w-[650px]">
         {post.title}
       </h1>
-      <div className="flex flex-col gap-1 mt-2 mb-8 text-sm max-w-[650px]">
+      <div className="flex flex-col gap-1 mt-2 mb-4 text-sm max-w-[650px]">
         <Suspense fallback={<p className="h-5" />}>
           <p className="text-neutral-600 dark:text-neutral-400">
             {formatYearMonthLocal(post.createdAt || "", params.locale as any)}
           </p>
         </Suspense>
       </div>
+
+      <h2>{post.summary}</h2>
       <article className="prose dark:prose-invert">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -157,57 +160,30 @@ export default async function Blog({
           {post.content || ""}
         </ReactMarkdown>
       </article>
+
       {(prev || next) && (
         <nav className="mt-10 flex items-center justify-between text-sm">
-          {prev ? (
-            <Link
-              href={`/${params.locale}/blog/${prev.slug}`}
-              className="hover:underline"
-            >
-              ← {prev.title}
-            </Link>
-          ) : (
-            <span />
-          )}
           {next ? (
             <Link
               href={`/${params.locale}/blog/${next.slug}`}
               className="hover:underline"
             >
-              {next.title} →
+              → {next.title}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {prev ? (
+            <Link
+              href={`/${params.locale}/blog/${prev.slug}`}
+              className="hover:underline"
+            >
+              {prev.title} ←
             </Link>
           ) : (
             <span />
           )}
         </nav>
-      )}
-      {related && related.length > 0 && (
-        <div className="mt-10">
-          <h3 className="text-base font-semibold mb-3">
-            {params.locale === "fa" ? "مطالب مرتبط" : "Related posts"}
-          </h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-            {related.map((r) => (
-              <li
-                key={r.slug}
-                className="border rounded p-3 hover:bg-muted/30 transition-colors"
-              >
-                <Link
-                  href={`/${params.locale}/blog/${r.slug}`}
-                  className="hover:underline line-clamp-2"
-                >
-                  {r.title}
-                </Link>
-                <div className="text-[11px] text-muted-foreground mt-1">
-                  {formatYearMonthLocal(
-                    r.createdAt || "",
-                    params.locale as any
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
       )}
     </section>
   );

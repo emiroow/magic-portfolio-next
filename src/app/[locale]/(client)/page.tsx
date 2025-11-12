@@ -209,7 +209,7 @@ export default async function Page({ params: { locale } }: Props) {
                   period={`${formatYearMonthLocal(
                     work.start || "",
                     locale as unknown as "fa" | "en"
-                  )} - ${
+                  )} / ${
                     work.end
                       ? formatYearMonthLocal(
                           work.end,

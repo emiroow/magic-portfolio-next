@@ -225,7 +225,7 @@ const Blog = () => {
                   placeholder={
                     locale === "fa" ? "جستجو عنوان/اسلاگ" : "Search title/slug"
                   }
-                  className="h-9 w-48 sm:w-64"
+                  className="w-full text-sm text-center sm:w-64"
                 />
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -253,7 +253,7 @@ const Blog = () => {
                   <div className="w-full border rounded p-4 flex flex-col gap-3 hover:bg-muted/30 transition-colors">
                     <div className="min-w-0">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="font-medium text-base line-clamp-2 sm:line-clamp-1">
+                        <div className="font-bold text-base line-clamp-2 sm:line-clamp-1">
                           {b.title}
                         </div>
                         <div className="hidden sm:flex gap-2">
