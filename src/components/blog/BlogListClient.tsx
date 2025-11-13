@@ -8,13 +8,6 @@ import { useMemo, useState } from "react";
 
 const BLUR_FADE_DELAY = 0.04;
 
-function readingTime(text: string | undefined) {
-  if (!text) return "";
-  const words = text.trim().split(/\s+/).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return `${minutes} min`;
-}
-
 export default function BlogListClient({
   posts,
   locale,
