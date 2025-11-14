@@ -112,8 +112,8 @@ export const ResumeCard = ({
                   )}
                 </h3>
                 <div
-                  className={`text-[11px] sm:text-xs font-normal text-muted-foreground ${
-                    !!onEdit ? "ml-3 mt-4" : "text-left"
+                  className={`text-[11px] sm:text-xs font-normal text-muted-foreground mt-5 ${
+                    locale === "en" ? "mr-3" : "ml-3"
                   } `}
                 >
                   {period}
@@ -126,7 +126,6 @@ export const ResumeCard = ({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{
                   opacity: isExpanded ? 1 : 0,
-
                   height: isExpanded ? "auto" : 0,
                 }}
                 transition={{
