@@ -50,9 +50,15 @@ const Footer = () => {
         <DockIcon>
           <Tooltip>
             <TooltipTrigger asChild>
-              <FaPowerOff
+              <button
+                type="button"
                 onClick={() => signOut({ redirect: true, callbackUrl: "/" })}
-              />
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" })
+                )}
+              >
+                <FaPowerOff />
+              </button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Logout</p>

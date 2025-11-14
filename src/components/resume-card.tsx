@@ -111,7 +111,11 @@ export const ResumeCard = ({
                     />
                   )}
                 </h3>
-                <div className="text-[11px] sm:text-xs font-normal text-muted-foreground text-left">
+                <div
+                  className={`text-[11px] sm:text-xs font-normal text-muted-foreground ${
+                    !!onEdit ? "ml-3 mt-4" : "text-left"
+                  } `}
+                >
                   {period}
                 </div>
               </div>
@@ -138,7 +142,7 @@ export const ResumeCard = ({
         </Link>
         <div
           className={`flex flex-col ${
-            isExpanded ? "gap-4" : "gap-2"
+            isExpanded ? "gap-4" : "gap-3"
           } z-50 transition-discrete transition-all delay-150 duration-300`}
         >
           {!!onEdit && (
