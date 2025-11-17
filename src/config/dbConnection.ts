@@ -12,6 +12,9 @@ export const connectDB = async (): Promise<void> => {
     } else {
       console.error("An unknown error occurred");
     }
-    process.exit(1);
+    // In serverless / production environments exiting the process
+    // can crash the runtime and obscure the original error digest.
+    // Throw the error so Next/Vercel logging surfaces the stack and digest.
+    throw error;
   }
 };
