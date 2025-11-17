@@ -18,7 +18,7 @@ export function formatDate(date: string, locale: "fa" | "en" = "en") {
     // Use Persian (Jalaali) calendar formatting if available
     try {
       // Lazy require to avoid SSR bundling issues if not used
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // dynamic require to optionally load moment-jalaali at runtime
       const moment = require("moment-jalaali");
       moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
       const m = moment(date);
@@ -86,7 +86,7 @@ export function formatYearMonthDual(date: string, locale: "fa" | "en" = "en") {
         const day = ym[3] ? parseInt(ym[3], 10) : 1;
         if (inputLocale === "fa") {
           // Interpret as Jalali and convert to Gregorian Date
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // dynamic require to optionally load moment-jalaali at runtime
           const moment = require("moment-jalaali");
           moment.loadPersian({
             dialect: "persian-modern",
@@ -127,7 +127,7 @@ export function formatYearMonthDual(date: string, locale: "fa" | "en" = "en") {
   // Jalaali part
   let jalaali = "";
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // dynamic require to optionally load moment-jalaali at runtime
     const moment = require("moment-jalaali");
     moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
     // Month then Year to match "مهر ۱۴۰۴"
@@ -154,7 +154,7 @@ export function formatYearMonthLocal(date: string, locale: "fa" | "en" = "en") {
         const month = parseInt(ym[2], 10);
         const day = ym[3] ? parseInt(ym[3], 10) : 1;
         if (inputLocale === "fa") {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // dynamic require to optionally load moment-jalaali at runtime
           const moment = require("moment-jalaali");
           moment.loadPersian({
             dialect: "persian-modern",
@@ -186,7 +186,7 @@ export function formatYearMonthLocal(date: string, locale: "fa" | "en" = "en") {
 
   if (locale === "fa") {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // dynamic require to optionally load moment-jalaali at runtime
       const moment = require("moment-jalaali");
       moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
       // Month then Year

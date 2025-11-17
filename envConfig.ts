@@ -1,4 +1,4 @@
-import { loadEnvConfig } from "@next/env";
+import * as dotenv from "dotenv";
 
 const projectDir = process.cwd();
-loadEnvConfig(projectDir);
+dotenv.config({ path: `${projectDir}/.env` });
