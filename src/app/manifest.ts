@@ -1,10 +1,13 @@
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const NAME = process.env.NEXT_PUBLIC_SITE_TITLE || "Portfolio";
+  const DESCRIPTION =
+    process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "Personal portfolio website";
   return {
-    name: "Portfolio",
-    short_name: "Portfolio",
-    description: "Personal portfolio website",
+    name: NAME,
+    short_name: NAME,
+    description: DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

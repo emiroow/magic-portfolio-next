@@ -147,12 +147,14 @@ export default async function Page({ params: { locale } }: Props) {
           <div className="gap-3 flex justify-between max-md:items-center">
             <div className="flex-col flex flex-1 space-y-1.5">
               {!!data.profile?.name && (
-                <BlurFadeText
-                  delay={BLUR_FADE_DELAY}
-                  className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none"
-                  yOffset={20}
-                  text={`${tHero("hi")} ${data.profile?.name} 👋`}
-                />
+                <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none">
+                  <BlurFadeText
+                    delay={BLUR_FADE_DELAY}
+                    className="inline"
+                    yOffset={20}
+                    text={`${tHero("hi")} ${data.profile?.name} 👋`}
+                  />
+                </h1>
               )}
               {!!data.profile?.summary && (
                 <BlurFadeText
@@ -175,9 +177,11 @@ export default async function Page({ params: { locale } }: Props) {
           </div>
         </div>
       </section>
-      <section id="about">
+      <section id="about" aria-labelledby="about-heading">
         <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold">{t("about")}</h2>
+          <h2 id="about-heading" className="text-xl font-bold">
+            {t("about")}
+          </h2>
         </BlurFade>
         <BlurFade delay={BLUR_FADE_DELAY * 4}>
           <Markdown

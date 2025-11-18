@@ -24,10 +24,16 @@ export async function generateMetadata({
       type: "website",
       url: getPathname({ href: "/404", locale }),
     },
+    robots: {
+      index: false,
+      follow: false,
+    },
     alternates: {
       canonical: getPathname({ href: "/404", locale }),
       languages: {
-        [locale]: getPathname({ href: "/404", locale }),
+        fa: getPathname({ href: "/404", locale: "fa" }),
+        en: getPathname({ href: "/404", locale: "en" }),
+        "x-default": getPathname({ href: "/404", locale }),
       },
     },
   } as Metadata;

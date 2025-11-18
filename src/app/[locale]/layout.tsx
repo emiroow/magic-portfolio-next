@@ -44,11 +44,23 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+  const SITE_TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "Portfolio";
+  const SITE_DESCRIPTION =
+    process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "Personal portfolio website";
+  const TWITTER = process.env.NEXT_PUBLIC_TWITTER_HANDLE || "";
+  const OG_IMAGE =
+    process.env.NEXT_PUBLIC_OG_IMAGE ||
+    (site ? `${site}/favicon.ico` : "/favicon.ico");
   const currentFa = getPathname({ href: "/", locale: "fa" });
   const currentEn = getPathname({ href: "/", locale: "en" });
 
   return {
     metadataBase: site ? new URL(site) : undefined,
+    title: {
+      default: SITE_TITLE,
+      template: `%s | ${SITE_TITLE}`,
+    },
+    description: SITE_DESCRIPTION,
     alternates: {
       canonical: getPathname({ href: "/", locale }),
       languages: {
@@ -59,6 +71,15 @@ export async function generateMetadata({
     },
     openGraph: {
       locale: locale === "fa" ? "fa_IR" : "en_US",
+      title: SITE_TITLE,
+      description: SITE_DESCRIPTION,
+      url: site ? `${site}/${locale}` : undefined,
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: TWITTER || undefined,
+      creator: TWITTER || undefined,
     },
   } satisfies Metadata;
 }

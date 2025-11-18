@@ -4,21 +4,29 @@ import { getLocale } from "next-intl/server";
 
 // Base SEO metadata applied across the app
 const site = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+const SITE_TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || "Portfolio";
+const SITE_DESCRIPTION =
+  process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "Personal portfolio website";
+const AUTHOR = process.env.NEXT_PUBLIC_AUTHOR_NAME || "Amir";
+const TWITTER = process.env.NEXT_PUBLIC_TWITTER_HANDLE || ""; // include @ if desired
+const OG_IMAGE =
+  process.env.NEXT_PUBLIC_OG_IMAGE ||
+  (site ? `${site}/favicon.ico` : "/favicon.ico");
 
 export const metadata: Metadata = {
   // Setting a metadataBase ensures canonical/alternate links are absolute
   metadataBase: site ? new URL(site) : undefined,
   title: {
-    default: "Portfolio",
-    template: "%s | Portfolio",
+    default: SITE_TITLE,
+    template: `%s | ${SITE_TITLE}`,
   },
-  description: "Personal portfolio website",
-  applicationName: "Portfolio",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_TITLE,
   referrer: "origin-when-cross-origin",
   keywords: ["portfolio", "developer", "projects", "resume"],
-  authors: [{ name: "Owner" }],
-  creator: "Owner",
-  publisher: "Owner",
+  authors: [{ name: AUTHOR }],
+  creator: AUTHOR,
+  publisher: AUTHOR,
   formatDetection: {
     email: false,
     address: false,
@@ -26,10 +34,23 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Portfolio",
+    siteName: SITE_TITLE,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: site || undefined,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
+    site: TWITTER || undefined,
+    creator: TWITTER || undefined,
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-dark.png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
   robots: {
     index: true,
