@@ -1,5 +1,6 @@
 import { profileModel } from "@/models/profile";
-import { access, constants, mkdir, unlink, writeFile } from "fs/promises";
+import { constants } from "fs";
+import { access, mkdir, unlink, writeFile } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
