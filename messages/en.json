@@ -1,6 +1,7 @@
 {
   "hero": {
-    "hi": "Hi, I'm"
+    "hi": "Hi, I'm",
+    "iam" : ""
   },
   "experience": "Work Experience",
   "about": "About",

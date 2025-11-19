@@ -26,6 +26,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
   const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 
   const ogImage = data.profile?.avatarUrl || (site ? `${site}/og-image.png` : '/og-image.png');
+
   const keywords = [
     ...(data.skills?.map(s => s.name) || []),
     ...(data.projects?.flatMap(p => p.technologies || []) || []),
@@ -35,11 +36,44 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
 
   return {
     metadataBase: site ? new URL(site) : undefined,
+    abstract: data.profile?.description,
+    archives: site ? [site] : undefined,
+    assets: site ? [new URL('/favicon.ico', site)] : undefined,
+    authors: data.profile?.fullName ? [{ name: data.profile?.fullName }] : undefined,
+    creator: data.profile?.fullName || undefined,
+    publisher: data.profile?.fullName || undefined,
+    manifest: site ? `${site}/site.webmanifest` : undefined,
+    referrer: 'no-referrer-when-downgrade',
+    bookmarks: site ? [site] : undefined,
+    icons: site ? { icon: `${site}/favicon.ico` } : undefined,
+    category: 'Personal Website',
+    colorScheme: 'light dark',
+    formatDetection: {
+      telephone: true,
+      address: false,
+      date: false,
+      email: false,
+    },
+    appleWebApp: {
+      title: data.profile?.fullName,
+      statusBarStyle: 'default',
+      capable: true,
+      // startupImages: [
+      //   {
+      //     href: site ? `${site}/apple-splash-2048-2732.png` : '/apple-splash-2048-2732.png',
+      //     media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
+      //   },
+      // ],
+    },
     title: {
       default: `${data.profile?.fullName} | ${t('personalWebsite')}`,
       template: `%s | ${data.profile?.fullName} | ${t('personalWebsite')}`,
+      absolute: `${data.profile?.fullName} | ${t('personalWebsite')}`,
     },
     alternates: {
+      types: {
+        'application/rss+xml': site ? `${site}/rss.xml` : undefined,
+      },
       canonical: site ? `${site}/${locale}` : undefined,
       languages: {
         fa: site ? `${site}/fa` : undefined,
@@ -49,14 +83,19 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     },
     description: data.profile?.description,
     keywords,
-    authors: data.profile?.fullName ? [{ name: data.profile?.fullName }] : undefined,
     openGraph: {
-      title: `${data.profile?.name}`,
+      title: `${data.profile?.fullName}`,
+      determiner: 'auto',
+      alternateLocale: locale === 'fa' ? 'en_US' : 'fa_IR',
+      siteUrl: site ? `${site}/${locale}` : undefined,
+      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
+      phoneNumbers: data.profile?.tel ? [data.profile?.tel] : undefined,
+      emails: data.profile?.email ? [data.profile?.email] : undefined,
+      countryName: 'Iran',
       description: data.profile?.description,
       url: site ? `${site}/${locale}` : undefined,
       images: [ogImage],
       siteName: `${data.profile?.fullName}`,
-      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
       type: 'website',
     },
     appLinks: {
@@ -76,30 +115,20 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
         'max-snippet': -1,
       },
     },
-    // icons: {
-    //   icon: [
-    //     { url: "/icon.png" },
-    //     new URL("/icon.png", "https://example.com"),
-    //     { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)" },
-    //   ],
-    //   shortcut: ["/shortcut-icon.png"],
-    //   apple: [
-    //     { url: "/apple-icon.png" },
-    //     { url: "/apple-icon-x3.png", sizes: "180x180", type: "image/png" },
-    //   ],
-    //   other: [
-    //     {
-    //       rel: "apple-touch-icon-precomposed",
-    //       url: "/apple-touch-icon-precomposed.png",
-    //     },
-    //   ],
-    // },
     twitter: {
-      title: `${data.profile?.name}`,
+      creator: data.socials?.find(s => s.name.toLowerCase() === 'twitter')?.name || '',
+      title: `${data.profile?.fullName}`,
       card: 'summary_large_image',
       images: [ogImage],
+      site: site ? `${site}/${locale}` : undefined,
+      description: data.profile?.description,
+      creatorId: data.socials?.find(s => s.name.toLowerCase() === 'twitter')?.url
+        ? data.socials.find(s => s.name.toLowerCase() === 'twitter')?.url?.split('https://twitter.com/')[1]
+        : undefined,
+      siteId: site ? site.split('https://twitter.com/')[1] : undefined,
     },
     verification: {
+      meta: data.profile?.email,
       google: 'google',
       yandex: 'yandex',
       yahoo: 'yahoo',
@@ -159,8 +188,13 @@ export default async function Page({ params: { locale } }: Props) {
           <div className="gap-3 flex justify-between max-md:items-center">
             <div className="flex-col flex flex-1 space-y-1.5">
               {!!data.profile?.name && (
-                <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none">
-                  <BlurFadeText delay={BLUR_FADE_DELAY} className="inline" yOffset={20} text={`${tHero('hi')} ${data.profile?.name} 👋`} />
+                <h1 className="text-lg font-bold tracking-tighter sm:text-2xl xl:text-3xl/none">
+                  <BlurFadeText
+                    delay={BLUR_FADE_DELAY}
+                    className="inline"
+                    yOffset={20}
+                    text={`${tHero('hi')} ${data.profile?.fullName} ${tHero('iam')}👋`}
+                  />
                 </h1>
               )}
               {!!data.profile?.summary && (
