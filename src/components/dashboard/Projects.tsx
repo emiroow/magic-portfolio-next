@@ -1,32 +1,32 @@
-"use client";
-import { Badge } from "@/components/ui/badge";
-import useProjects from "@/hooks/dashboard/useProjects";
-import { AnimatePresence, motion } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
-import Image from "next/image";
-import { useState } from "react";
-import gregorian from "react-date-object/calendars/gregorian";
-import persian from "react-date-object/calendars/persian";
-import gregorian_en from "react-date-object/locales/gregorian_en";
-import persian_fa from "react-date-object/locales/persian_fa";
-import { GoPlus } from "react-icons/go";
-import { IoMdClose } from "react-icons/io";
-import DatePicker from "react-multi-date-picker";
-import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
-import "react-multi-date-picker/styles/backgrounds/bg-gray.css";
-import BlurFade from "../magicui/blur-fade";
-import { Button } from "../ui/button";
-import ImageCropperDialog from "../ui/image-cropper";
-import { Input } from "../ui/input";
-import Loading from "../ui/loading";
-import { Textarea } from "../ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import ProjectCard from "./Project-card";
+'use client';
+import { Badge } from '@/components/ui/badge';
+import useProjects from '@/hooks/dashboard/useProjects';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
+import { useTheme } from 'next-themes';
+import Image from 'next/image';
+import { useState } from 'react';
+import gregorian from 'react-date-object/calendars/gregorian';
+import persian from 'react-date-object/calendars/persian';
+import gregorian_en from 'react-date-object/locales/gregorian_en';
+import persian_fa from 'react-date-object/locales/persian_fa';
+import { GoPlus } from 'react-icons/go';
+import { IoMdClose } from 'react-icons/io';
+import DatePicker from 'react-multi-date-picker';
+import 'react-multi-date-picker/styles/backgrounds/bg-dark.css';
+import 'react-multi-date-picker/styles/backgrounds/bg-gray.css';
+import BlurFade from '../magicui/blur-fade';
+import { Button } from '../ui/button';
+import ImageCropperDialog from '../ui/image-cropper';
+import { Input } from '../ui/input';
+import Loading from '../ui/loading';
+import { Textarea } from '../ui/textarea';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import ProjectCard from './Project-card';
 
 const Projects = () => {
-  const t = useTranslations("dashboard.projects");
-  const tcrop = useTranslations("dashboard.crop");
+  const t = useTranslations('dashboard.projects');
+  const tcrop = useTranslations('dashboard.crop');
   const locale = useLocale();
   const { theme } = useTheme();
   const BLUR_FADE_DELAY = 0.04;
@@ -34,14 +34,14 @@ const Projects = () => {
   const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   const availableIcons = [
-    { value: "github", label: "GitHub", emoji: "🔗" },
-    { value: "demo", label: "Demo", emoji: "🌐" },
-    { value: "figma", label: "Figma", emoji: "🎨" },
-    { value: "website", label: "Website", emoji: "🌍" },
-    { value: "api", label: "API", emoji: "⚡" },
-    { value: "docs", label: "Documentation", emoji: "📚" },
-    { value: "video", label: "Video", emoji: "🎥" },
-    { value: "download", label: "Download", emoji: "⬇️" },
+    { value: 'github', label: 'GitHub', emoji: '🔗' },
+    { value: 'demo', label: 'Demo', emoji: '🌐' },
+    { value: 'figma', label: 'Figma', emoji: '🎨' },
+    { value: 'website', label: 'Website', emoji: '🌍' },
+    { value: 'api', label: 'API', emoji: '⚡' },
+    { value: 'docs', label: 'Documentation', emoji: '📚' },
+    { value: 'video', label: 'Video', emoji: '🎥' },
+    { value: 'download', label: 'Download', emoji: '⬇️' },
   ];
 
   const {
@@ -85,20 +85,18 @@ const Projects = () => {
           // Edit & create form
           <motion.div
             key="edit-form"
-            initial={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
+            initial={{ opacity: 0, y: -15, scale: 0.97, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, scale: 0.97, filter: 'blur(6px)' }}
             transition={{
               duration: 0.1,
-              type: "spring",
+              type: 'spring',
               stiffness: 180,
               damping: 18,
             }}
           >
             <div className="flex flex-row justify-between items-center">
-              <h3 className="text-xl font-bold mt-3">
-                {getValues("_id") ? t("editProject") : t("createProject")}
-              </h3>
+              <h3 className="text-xl font-bold mt-3">{getValues('_id') ? t('editProject') : t('createProject')}</h3>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -107,35 +105,30 @@ const Projects = () => {
                       resetMutation();
                       setIsEdit(false);
                     }}
-                    variant={"secondary"}
-                    size={"icon"}
+                    variant={'secondary'}
+                    size={'icon'}
                     className="size-8"
                   >
                     <IoMdClose className="text-red-700 text-lg" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t("cancel")}</p>
+                  <p>{t('cancel')}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
 
             {/* Form */}
-            <form
-              onSubmit={handleSubmit(onsubmit)}
-              className="flex flex-col gap-4 mb-2 mt-5"
-            >
+            <form onSubmit={handleSubmit(onsubmit)} className="flex flex-col gap-4 mb-2 mt-5">
               {/* Image Upload Section */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("projectImage")}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">{t('projectImage')}</p>
                 <div className="flex flex-col sm:flex-row gap-4 items-start">
                   <div className="relative w-full sm:w-auto">
                     <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
-                      {getValues("image") ? (
+                      {getValues('image') ? (
                         <Image
-                          src={getValues("image")}
+                          src={getValues('image')}
                           alt="Project preview"
                           width={120}
                           height={120}
@@ -143,16 +136,12 @@ const Projects = () => {
                         />
                       ) : (
                         <div className="text-center p-2">
-                          <div className="text-muted-foreground text-2xl mb-1">
-                            📷
-                          </div>
-                          <span className="text-muted-foreground text-xs">
-                            {t("noImage")}
-                          </span>
+                          <div className="text-muted-foreground text-2xl mb-1">📷</div>
+                          <span className="text-muted-foreground text-xs">{t('noImage')}</span>
                         </div>
                       )}
                     </div>
-                    {getValues("image") && (
+                    {getValues('image') && (
                       <Button
                         type="button"
                         variant="destructive"
@@ -166,7 +155,7 @@ const Projects = () => {
                     )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    {!getValues("image") && (
+                    {!getValues('image') && (
                       <>
                         <Button
                           type="button"
@@ -179,10 +168,10 @@ const Projects = () => {
                           {uploadProjectImage.isPending ? (
                             <>
                               <Loading size="sm" className="mr-2" />
-                              {t("uploading")}
+                              {t('uploading')}
                             </>
                           ) : (
-                            <>📷 {t("uploadImage")}</>
+                            <>📷 {t('uploadImage')}</>
                           )}
                         </Button>
                         <input
@@ -190,7 +179,7 @@ const Projects = () => {
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={e => {
                             const file = e.target.files?.[0];
                             if (!file) return;
                             const url = URL.createObjectURL(file);
@@ -199,9 +188,7 @@ const Projects = () => {
                           }}
                           disabled={uploadProjectImage.isPending}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          {t("uploadImageHint")}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t('uploadImageHint')}</p>
                       </>
                     )}
                   </div>
@@ -211,7 +198,7 @@ const Projects = () => {
               {/* Cropper Dialog */}
               <ImageCropperDialog
                 open={cropOpen}
-                onOpenChange={(v) => {
+                onOpenChange={v => {
                   setCropOpen(v);
                   if (!v && cropSrc) {
                     URL.revokeObjectURL(cropSrc);
@@ -219,152 +206,107 @@ const Projects = () => {
                     if (fileInputRef.current) {
                       // reset input to allow picking the same file again
                       // @ts-ignore
-                      fileInputRef.current.value = "";
+                      fileInputRef.current.value = '';
                     }
                   }
                 }}
                 src={cropSrc}
                 aspect={1}
                 labels={{
-                  title: tcrop("title"),
-                  apply: tcrop("apply"),
-                  cancel: t("cancel"),
-                  zoom: tcrop("zoom"),
-                  move: tcrop("move"),
+                  title: tcrop('title'),
+                  apply: tcrop('apply'),
+                  cancel: t('cancel'),
+                  zoom: tcrop('zoom'),
+                  move: tcrop('move'),
                 }}
-                dir={locale === "fa" ? "rtl" : "ltr"}
-                isDark={theme === "dark"}
+                dir={locale === 'fa' ? 'rtl' : 'ltr'}
+                isDark={theme === 'dark'}
                 outputSize={512}
-                onCropped={(file) => {
+                onCropped={file => {
                   const formData = new FormData();
-                  formData.append("image", file);
+                  formData.append('image', file);
                   uploadProjectImage.mutate(formData);
                 }}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    {t("projectTitle")}
-                  </label>
-                  <Input
-                    {...register("title")}
-                    placeholder={t("projectTitlePlaceholder")}
-                    className={errors.title ? "border-red-500" : ""}
-                  />
-                  {errors.title && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.title.message}
-                    </p>
-                  )}
+                  <label className="text-sm font-medium text-muted-foreground">{t('projectTitle')}</label>
+                  <Input {...register('title')} placeholder={t('projectTitlePlaceholder')} className={errors.title ? 'border-red-500' : ''} />
+                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    {t("projectUrl")}
-                  </label>
-                  <Input
-                    {...register("href")}
-                    placeholder={t("projectUrlPlaceholder")}
-                    className={errors.href ? "border-red-500" : ""}
-                  />
-                  {errors.href && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.href.message}
-                    </p>
-                  )}
+                  <label className="text-sm font-medium text-muted-foreground">{t('projectUrl')}</label>
+                  <Input {...register('href')} placeholder={t('projectUrlPlaceholder')} className={errors.href ? 'border-red-500' : ''} />
+                  {errors.href && <p className="text-red-500 text-xs mt-1">{errors.href.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    {t("projectDates")}
-                  </label>
+                  <label className="text-sm font-medium text-muted-foreground">{t('projectDates')}</label>
                   <DatePicker
                     range
                     onlyMonthPicker
-                    className={`${theme === "dark" ? "bg-dark" : "bg-muted"}`}
+                    className={`${theme === 'dark' ? 'bg-dark' : 'bg-muted'}`}
                     onChange={(dates: any) => {
                       if (dates && dates.length === 2) {
                         const [start, end] = dates;
-                        const formattedRange = `${start.format(
-                          "MMMM YYYY"
-                        )} - ${end.format("MMMM YYYY")}`;
-                        setValue("dates", formattedRange);
+                        const formattedRange = `${start.format('MMMM YYYY')} - ${end.format('MMMM YYYY')}`;
+                        setValue('dates', formattedRange);
                       } else if (dates && dates.length === 1) {
-                        setValue("dates", dates[0].format("MMMM YYYY"));
+                        setValue('dates', dates[0].format('MMMM YYYY'));
                       } else {
-                        setValue("dates", "");
+                        setValue('dates', '');
                       }
                     }}
-                    calendar={locale === "fa" ? persian : gregorian}
-                    locale={locale === "fa" ? persian_fa : gregorian_en}
+                    calendar={locale === 'fa' ? persian : gregorian}
+                    locale={locale === 'fa' ? persian_fa : gregorian_en}
                     format="MMMM YYYY"
-                    placeholder={t("projectDatesPlaceholder")}
-                    containerStyle={{ width: "100%" }}
+                    placeholder={t('projectDatesPlaceholder')}
+                    containerStyle={{ width: '100%' }}
                     style={{
-                      width: "100%",
-                      fontSize: "10px",
-                      height: "36px",
-                      borderRadius: "6px",
-                      border: errors.dates
-                        ? "1px solid rgb(239 68 68)"
-                        : "1px solid hsl(var(--input))",
-                      padding: "0 12px",
-                      backgroundColor: "hsl(var(--background))",
-                      color: "hsl(var(--foreground))",
+                      width: '100%',
+                      fontSize: '10px',
+                      height: '36px',
+                      borderRadius: '6px',
+                      border: errors.dates ? '1px solid rgb(239 68 68)' : '1px solid hsl(var(--input))',
+                      padding: '0 12px',
+                      backgroundColor: 'hsl(var(--background))',
+                      color: 'hsl(var(--foreground))',
                     }}
-                    inputClass={errors.dates ? "border-red-500" : ""}
+                    inputClass={errors.dates ? 'border-red-500' : ''}
                   />
-                  {errors.dates && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.dates.message}
-                    </p>
-                  )}
+                  {errors.dates && <p className="text-red-500 text-xs mt-1">{errors.dates.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("projectDescription")}
-                </label>
+                <label className="text-sm font-medium text-muted-foreground">{t('projectDescription')}</label>
                 <Textarea
-                  {...register("description")}
-                  placeholder={t("projectDescriptionPlaceholder")}
-                  className={errors.description ? "border-red-500" : ""}
+                  {...register('description')}
+                  placeholder={t('projectDescriptionPlaceholder')}
+                  className={errors.description ? 'border-red-500' : ''}
                   rows={3}
                 />
-                {errors.description && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.description.message}
-                  </p>
-                )}
+                {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("technologies")}
-                </label>
+                <label className="text-sm font-medium text-muted-foreground">{t('technologies')}</label>
                 <div className="flex gap-2">
                   <Input
                     value={newTech}
-                    onChange={(e) => setNewTech(e.target.value)}
-                    placeholder={t("technologyPlaceholder")}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addTechnology())
-                    }
+                    onChange={e => setNewTech(e.target.value)}
+                    placeholder={t('technologyPlaceholder')}
+                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
                   />
-                  <Button
-                    type="button"
-                    onClick={addTechnology}
-                    size="sm"
-                    className="shrink-0"
-                  >
+                  <Button type="button" onClick={addTechnology} size="sm" className="shrink-0">
                     <GoPlus className="h-4 w-4 mr-1" />
-                    {t("add")}
+                    {t('add')}
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(getValues("technologies") || []).map((tech, index) => (
+                  {(getValues('technologies') || []).map((tech, index) => (
                     <Badge key={index} onDelete={() => removeTechnology(index)}>
                       {tech}
                     </Badge>
@@ -374,28 +316,24 @@ const Projects = () => {
 
               {/* Links Management */}
               <div className="space-y-3">
-                <label className="text-sm font-medium text-muted-foreground">
-                  {t("projectLinks")}
-                </label>
+                <label className="text-sm font-medium text-muted-foreground">{t('projectLinks')}</label>
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex-1 min-w-0">
                       <select
                         value={newLink.type}
-                        onChange={(e) => {
-                          const selectedIcon = availableIcons.find(
-                            (icon) => icon.value === e.target.value
-                          );
+                        onChange={e => {
+                          const selectedIcon = availableIcons.find(icon => icon.value === e.target.value);
                           setNewLink({
                             ...newLink,
                             type: e.target.value,
-                            icon: selectedIcon?.value || "",
+                            icon: selectedIcon?.value || '',
                           });
                         }}
                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="">{t("selectLinkType")}</option>
-                        {availableIcons.map((icon) => (
+                        <option value="">{t('selectLinkType')}</option>
+                        {availableIcons.map(icon => (
                           <option key={icon.value} value={icon.value}>
                             {icon.emoji} {icon.label}
                           </option>
@@ -405,36 +343,22 @@ const Projects = () => {
                     <div className="flex-1 min-w-0">
                       <Input
                         value={newLink.href}
-                        onChange={(e) =>
-                          setNewLink({ ...newLink, href: e.target.value })
-                        }
-                        placeholder={t("linkUrlPlaceholder")}
+                        onChange={e => setNewLink({ ...newLink, href: e.target.value })}
+                        placeholder={t('linkUrlPlaceholder')}
                         type="url"
                       />
                     </div>
-                    <Button
-                      type="button"
-                      onClick={addLink}
-                      size="sm"
-                      disabled={!newLink.type || !newLink.href}
-                      className="shrink-0 w-full sm:w-auto"
-                    >
+                    <Button type="button" onClick={addLink} size="sm" disabled={!newLink.type || !newLink.href} className="shrink-0 w-full sm:w-auto">
                       <GoPlus className="h-4 w-4 mr-1" />
-                      {t("add")}
+                      {t('add')}
                     </Button>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(getValues("links") || []).map((link, index) => {
-                    const iconInfo = availableIcons.find(
-                      (icon) => icon.value === link.icon
-                    );
+                  {(getValues('links') || []).map((link, index) => {
+                    const iconInfo = availableIcons.find(icon => icon.value === link.icon);
                     return (
-                      <Badge
-                        key={index}
-                        onDelete={() => removeLink(index)}
-                        className="flex items-center gap-1"
-                      >
+                      <Badge key={index} onDelete={() => removeLink(index)} className="flex items-center gap-1">
                         <span className="text-xs">{iconInfo?.emoji}</span>
                         {link.type}
                       </Badge>
@@ -444,25 +368,15 @@ const Projects = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <input type="checkbox" {...register("active")} id="active" />
+                <input type="checkbox" {...register('active')} id="active" />
                 <label htmlFor="active" className="text-sm font-medium">
-                  {t("active")}
+                  {t('active')}
                 </label>
               </div>
 
               <div className="flex gap-2 max-sm:flex-col mt-4">
-                <Button
-                  type="submit"
-                  disabled={btnLoading}
-                  className="w-full sm:w-auto"
-                >
-                  {btnLoading ? (
-                    <Loading size="sm" />
-                  ) : getValues("_id") ? (
-                    t("update")
-                  ) : (
-                    t("create")
-                  )}
+                <Button type="submit" disabled={btnLoading} className="w-full sm:w-auto">
+                  {btnLoading ? <Loading size="sm" /> : getValues('_id') ? t('update') : t('create')}
                 </Button>
                 <Button
                   type="button"
@@ -474,7 +388,7 @@ const Projects = () => {
                   }}
                   className="w-full sm:w-auto"
                 >
-                  {t("cancel")}
+                  {t('cancel')}
                 </Button>
               </div>
             </form>
@@ -483,60 +397,43 @@ const Projects = () => {
           // Projects list
           <motion.div
             key="projects-list"
-            initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
+            initial={{ opacity: 0, y: 15, scale: 0.97, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 15, scale: 0.97, filter: 'blur(6px)' }}
             transition={{
               duration: 0.1,
-              type: "spring",
+              type: 'spring',
               stiffness: 180,
               damping: 18,
             }}
           >
             <div className="flex flex-row justify-between items-center">
-              <h3 className="text-xl font-bold mt-3">{t("title")}</h3>
+              <h3 className="text-xl font-bold mt-3">{t('title')}</h3>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsEdit(true)}
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="size-8"
-                  >
+                  <Button onClick={() => setIsEdit(true)} variant={'secondary'} size={'icon'} className="size-8">
                     <GoPlus className="text-lg text-green-600" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{t("addProject")}</p>
+                  <p>{t('addProject')}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
 
             <div className="space-y-4 mt-5">
               {projects?.map((project: any, index: number) => (
-                <BlurFade
-                  key={project._id}
-                  delay={BLUR_FADE_DELAY * 2 + index * 0.05}
-                >
-                  <ProjectCard
-                    project={project}
-                    onEdit={editProject}
-                    onDelete={deleteProject}
-                    isDeleting={isDeletingProject}
-                  />
+                <BlurFade key={project._id} delay={BLUR_FADE_DELAY * 2 + index * 0.05}>
+                  <ProjectCard project={project} onEdit={editProject} onDelete={deleteProject} isDeleting={isDeletingProject} />
                 </BlurFade>
               ))}
             </div>
 
             {(!projects || projects.length === 0) && (
               <div className="text-center py-8 mt-24">
-                <p className="text-muted-foreground">{t("noProjects")}</p>
-                <Button
-                  onClick={() => setIsEdit(true)}
-                  variant="outline"
-                  className="mt-2"
-                >
-                  {t("createFirstProject")}
+                <p className="text-muted-foreground">{t('noProjects')}</p>
+                <Button onClick={() => setIsEdit(true)} variant="outline" className="mt-2">
+                  {t('createFirstProject')}
                 </Button>
               </div>
             )}
