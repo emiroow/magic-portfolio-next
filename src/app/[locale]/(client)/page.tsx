@@ -193,7 +193,7 @@ export default async function Page({ params: { locale } }: Props) {
                     delay={BLUR_FADE_DELAY}
                     className="inline"
                     yOffset={20}
-                    text={`${tHero('hi')} ${data.profile?.fullName} ${tHero('iam')}👋`}
+                    text={`${tHero('hi')} ${data.profile?.name} ${tHero('iam')}👋`}
                   />
                 </h1>
               )}
