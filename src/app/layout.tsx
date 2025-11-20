@@ -1,5 +1,6 @@
 import '@/app/globals.css';
 import { AUTHOR, OG_IMAGE, SITE_DESCRIPTION, SITE_TITLE, TWITTER, getCanonical, metadataBase, site } from '@/lib/seo';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 
@@ -65,7 +66,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const dir = locale === 'fa' ? 'rtl' : 'ltr';
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

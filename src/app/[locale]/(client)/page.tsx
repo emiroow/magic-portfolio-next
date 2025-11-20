@@ -23,8 +23,8 @@ type Props = {
 export const generateMetadata = async ({ params: { locale } }: Props) => {
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
   const t = await getTranslations();
+  const tHero = await getTranslations('hero');
   const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-
   const ogImage = data.profile?.avatarUrl || (site ? `${site}/og-image.png` : '/og-image.png');
 
   const keywords = [
@@ -84,7 +84,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     description: data.profile?.description,
     keywords,
     openGraph: {
-      title: `${data.profile?.fullName}`,
+      title: `${tHero('hi')} ${data.profile?.fullName} ${tHero('iam')}👋`,
       determiner: 'auto',
       alternateLocale: locale === 'fa' ? 'en_US' : 'fa_IR',
       siteUrl: site ? `${site}/${locale}` : undefined,
