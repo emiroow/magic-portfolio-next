@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-const uri = process.env.DB_CONNECTION || "mongodb://localhost:27017/Magic";
+import mongoose from 'mongoose';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/Magic';
 
 export const connectDB = async (): Promise<void> => {
   try {
@@ -10,7 +10,7 @@ export const connectDB = async (): Promise<void> => {
     if (error instanceof Error) {
       console.error(`Error: ${error.message}`);
     } else {
-      console.error("An unknown error occurred");
+      console.error('An unknown error occurred');
     }
     // In serverless / production environments exiting the process
     // can crash the runtime and obscure the original error digest.
