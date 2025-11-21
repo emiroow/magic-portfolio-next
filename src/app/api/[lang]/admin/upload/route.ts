@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 
 const isDev = process.env.NODE_ENV === 'development';
-
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 export async function POST(req: NextRequest) {
   const lang = req.nextUrl.searchParams.get('lang');
   const type = req.nextUrl.searchParams.get('type');
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       const filePath = path.join(uploadDir, fileName);
       await writeFile(filePath, buffer);
 
-      const fileUrl = `/${folder}/${fileName}`;
+      const fileUrl = `${siteUrl}/${folder}/${fileName}`;
 
       if (type === 'avatar') {
         await profileModel.findOneAndUpdate({ lang }, { avatarUrl: fileUrl });
