@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/Magic';
+const uri = process.env.DB_CONNECTION || 'mongodb://localhost:27017/Magic';
 
 export const connectDB = async (): Promise<void> => {
   try {
