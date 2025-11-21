@@ -2,13 +2,19 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // experimental: { serverComponentsHmrCache: false, turbo: { caches: false } },
   images: {
-    domains: ["api.emiroow.ir"],
+    domains: ["api.emiroow.ir", "localhost", "127.0.0.1", "your-vercel-blob-domain", siteUrl],
   },
-  reactStrictMode: true,
+  remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "**.blob.vercel-storage.com",
+    },
+  ],
 };
 
 export default withNextIntl(nextConfig);

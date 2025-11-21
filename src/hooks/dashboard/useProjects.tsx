@@ -140,6 +140,7 @@ const useProjects = () => {
     },
     onSuccess: data => {
       const imageUrl = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : '';
+      console.log(imageUrl);
       setValue('image', imageUrl);
     },
     onError: () => {
