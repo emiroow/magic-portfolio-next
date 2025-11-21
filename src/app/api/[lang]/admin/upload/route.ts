@@ -44,7 +44,6 @@ export async function POST(req: NextRequest) {
     }
 
     const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
-
     const fileName = type === 'avatar' ? `avatarImage.${ext}` : `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
     // ---------------------------------------
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest) {
       message: 'Upload successful',
     });
   } catch (err) {
-    console.error('Upload error:', err);
+    console.error('AVATAR UPLOAD ERROR →', err);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 }
