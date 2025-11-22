@@ -8,8 +8,8 @@ let cached = (global as any).mongoose || { conn: null, promise: null };
 export async function connectDB() {
   if (cached.conn) return cached.conn;
 
-  const uri = process.env.DB_CONNECTION;
-  if (!uri) throw new Error('❌ DB_CONNECTION is missing!');
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error('❌ MONGODB_URI is missing!');
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(uri).then(mongoose => mongoose);
