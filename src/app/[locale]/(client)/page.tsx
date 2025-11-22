@@ -38,7 +38,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     metadataBase: site ? new URL(site) : undefined,
     abstract: data.profile?.description,
     archives: site ? [site] : undefined,
-    assets: site ? [new URL('/favicon.ico', site)] : undefined,
+    assets: site ? [`${site}/favicon.ico`] : undefined,
     authors: data.profile?.fullName ? [{ name: data.profile?.fullName }] : undefined,
     creator: data.profile?.fullName || undefined,
     publisher: data.profile?.fullName || undefined,
@@ -47,7 +47,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     bookmarks: site ? [site] : undefined,
     icons: site ? { icon: `${site}/favicon.ico` } : undefined,
     category: 'Personal Website',
-    colorScheme: 'light dark',
+    // colorScheme moved to viewport export below to satisfy Next.js metadata rules
     formatDetection: {
       telephone: true,
       address: false,
@@ -138,6 +138,13 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
     },
   } as Metadata;
 };
+
+// Export viewport metadata (must be plain object) — includes color scheme settings
+export function generateViewport() {
+  return {
+    colorScheme: 'light dark',
+  } as const;
+}
 
 // Avoid build-time data fetching for this route
 export const dynamic = 'force-dynamic';

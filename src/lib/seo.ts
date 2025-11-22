@@ -62,7 +62,7 @@ export function absoluteImage(url?: string) {
   }
 }
 
-export default {
+const seo = {
   site,
   SITE_TITLE,
   SITE_DESCRIPTION,
@@ -76,3 +76,5 @@ export default {
   metadataBase,
   absoluteUrl,
 };
+
+export default seo;

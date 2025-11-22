@@ -15,7 +15,7 @@ import { seedSkillsData } from './skill.seed';
 import { seedSocialData } from './social.seed';
 import { seedWorkData } from './work.seed';
 
-const seedData = async () => {
+export const seedData = async () => {
   try {
     await connectDB();
 
@@ -49,4 +49,6 @@ const seedData = async () => {
 };
 
 // Run the script only when executed directly
-seedData().then(() => process.exit());
+// If you need to run this file as a standalone script, import and call `seedData()`
+// from a dedicated script (avoid running on module import to prevent circular
+// dependency issues when other modules import this file).
