@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
     // ---------------------------------------
     const { url } = await put(`${folder}/${fileName}`, file, {
       access: 'public',
+      allowOverwrite: true,
     });
 
     if (type === 'avatar') {
