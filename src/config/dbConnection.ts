@@ -1,38 +1,33 @@
 import { SeedStatusModel } from '@/models/seedData';
 import { seedData } from '@/seed/seedData';
 import mongoose from 'mongoose';
-const uri = process.env.DB_CONNECTION || 'mongodb://localhost:27017/Magic';
 
-export let isConnected = false;
+let cached = (global as any).mongoose || { conn: null, promise: null };
+(global as any).mongoose = cached;
 
-export const connectDB = async (): Promise<void> => {
-  try {
-    const conn = await mongoose.connect(uri);
-    if (conn.connection.readyState === 1) {
-      isConnected = true;
-      console.log(`MongoDB Connected: ${conn.connection.host}`);
+export async function connectDB() {
+  if (cached.conn) return cached.conn;
 
-      // ---- AUTO SEED ----
-      const seedFlag = await SeedStatusModel.findOne();
+  const uri = process.env.DB_CONNECTION;
+  if (!uri) throw new Error('❌ DB_CONNECTION is missing!');
 
-      if (!seedFlag) {
-        console.log('⏳ Seeding database for the first time...');
-
-        await seedData();
-
-        await SeedStatusModel.create({ seededStatus: true });
-
-        console.log('🎉 Database has been seeded automatically.');
-      } else {
-        console.log('✔ Seed already completed, skipping.');
-      }
-    }
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error(`Error: ${error.message}`);
-    } else {
-      console.error('An unknown error occurred');
-    }
-    throw error;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri).then(mongoose => mongoose);
   }
-};
+
+  cached.conn = await cached.promise;
+
+  // --- AUTO SEED ONE TIME ---
+  const seedFlag = await SeedStatusModel.findOne();
+
+  if (!seedFlag) {
+    console.log('⏳ Seeding database first time...');
+    await seedData();
+    await SeedStatusModel.create({ seededStatus: true });
+    console.log('🎉 Seeding completed.');
+  } else {
+    console.log('✅ Database already have seed data.');
+  }
+
+  return cached.conn;
+}
