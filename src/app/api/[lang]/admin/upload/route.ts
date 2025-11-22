@@ -78,7 +78,9 @@ export async function POST(req: NextRequest) {
       const fileUrl = `${siteUrl}/${folder}/${fileName}`;
 
       if (type === 'avatar') {
-        await profileModel.findOneAndUpdate({ lang }, { avatarUrl: fileUrl });
+        const filter = lang ? { lang } : {};
+        console.log('AVATAR UPLOAD (DEV) →', { lang, fileUrl });
+        await profileModel.findOneAndUpdate(filter, { avatarUrl: fileUrl });
       }
 
       return NextResponse.json({
@@ -96,7 +98,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (type === 'avatar') {
-      await profileModel.findOneAndUpdate({ lang }, { avatarUrl: url });
+      const filter = lang ? { lang } : {};
+      console.log('AVATAR UPLOAD →', { lang, url });
+      await profileModel.findOneAndUpdate(filter, { avatarUrl: url });
     }
 
     return NextResponse.json({
