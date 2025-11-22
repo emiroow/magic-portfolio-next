@@ -14,7 +14,7 @@ export const connectDB = async (): Promise<void> => {
 
       // ---- AUTO SEED ----
       const seedFlag = await SeedStatusModel.find();
-      console.warn(seedFlag);
+
       if (!seedFlag) {
         console.log('⏳ Seeding database for the first time...');
 
