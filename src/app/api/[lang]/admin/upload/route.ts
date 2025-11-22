@@ -8,8 +8,11 @@ import path from 'path';
 const isDev = process.env.NODE_ENV === 'development';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 export async function POST(req: NextRequest) {
-  const lang = req.nextUrl.searchParams.get('lang');
-  console.log({ lang });
+  // Prefer explicit `lang` query param, fall back to the dynamic route segment.
+  const langQuery = req.nextUrl.searchParams.get('lang');
+  const langFromPath = req.nextUrl.pathname.split('/')[2];
+  const lang = langQuery ?? langFromPath ?? null;
+  console.log('upload route lang values →', { langQuery, langFromPath, lang });
   const type = req.nextUrl.searchParams.get('type');
 
   try {
