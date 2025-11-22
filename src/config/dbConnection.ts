@@ -13,7 +13,7 @@ export const connectDB = async (): Promise<void> => {
       console.log(`MongoDB Connected: ${conn.connection.host}`);
 
       // ---- AUTO SEED ----
-      const seedFlag = await SeedStatusModel.find();
+      const seedFlag = await SeedStatusModel.findOne();
 
       if (!seedFlag) {
         console.log('⏳ Seeding database for the first time...');
