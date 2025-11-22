@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const langQuery = req.nextUrl.searchParams.get('lang');
   const langFromPath = req.nextUrl.pathname.split('/')[2];
   const lang = langQuery ?? langFromPath ?? null;
-  console.log('upload route lang values →', { langQuery, langFromPath, lang });
+
   const type = req.nextUrl.searchParams.get('type');
 
   try {
@@ -82,9 +82,7 @@ export async function POST(req: NextRequest) {
       const fileUrl = `${siteUrl}/${folder}/${fileName}`;
 
       if (type === 'avatar') {
-        const filter = lang ? { lang } : {};
-        console.log('AVATAR UPLOAD (DEV) →', { lang, fileUrl });
-        await profileModel.findOneAndUpdate(filter, { avatarUrl: fileUrl });
+        await profileModel.findOneAndUpdate({ lang }, { avatarUrl: fileUrl });
       }
 
       return NextResponse.json({
@@ -102,9 +100,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (type === 'avatar') {
-      const filter = lang ? { lang } : {};
-      console.log('AVATAR UPLOAD →', { lang, url });
-      await profileModel.findOneAndUpdate(filter, { avatarUrl: url });
+      await profileModel.findOneAndUpdate({ lang }, { avatarUrl: url });
     }
 
     return NextResponse.json({
