@@ -4,4 +4,4 @@ const seedStatusSchema = new Schema({
   seededStatus: { type: Boolean, default: false },
 });
 
-export const SeedStatusModel = mongoose.models.SeedStatus || mongoose.model('SeedStatus', seedStatusSchema);
+export const SeedStatusModel = mongoose.models.seedStatus || mongoose.model('seedStatus', seedStatusSchema);
