@@ -193,7 +193,7 @@ export default async function Page({ params: { locale } }: Props) {
       <section id="hero">
         <div className="mx-auto w-full max-w-2xl space-y-8">
           <div className="gap-3 flex justify-between max-md:items-center">
-            <div className="flex-col flex flex-1 space-y-1.5">
+            <div className="flex-col flex flex-1">
               {!!data.profile?.name && (
                 <h1 className="text-lg font-bold tracking-tighter sm:text-2xl xl:text-3xl/none">
                   <BlurFadeText
@@ -205,7 +205,7 @@ export default async function Page({ params: { locale } }: Props) {
                 </h1>
               )}
               {!!data.profile?.summary && (
-                <BlurFadeText className="max-w-[600px] text-sm md:text-lg" delay={BLUR_FADE_DELAY} text={data.profile?.summary} />
+                <BlurFadeText className="max-w-[600px] text-xs md:text-lg" delay={BLUR_FADE_DELAY} text={data.profile?.summary} />
               )}
             </div>
             {!!data.profile?.avatarUrl && (
@@ -302,7 +302,7 @@ export default async function Page({ params: { locale } }: Props) {
       </section>
       <section id="projects">
         {data.projects?.length ? (
-          <div className="space-y-12 w-full py-12">
+          <div className="space-y-12 w-full">
             <BlurFade delay={BLUR_FADE_DELAY * 11}>
               <div className="flex flex-col items-center justify-center space-y-5 text-center">
                 <div className="space-y-5">
