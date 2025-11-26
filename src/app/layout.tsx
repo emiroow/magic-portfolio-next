@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 import GoogleAnalytics from './analytics';
+import GTM from './gtm';
 
 export const metadata: Metadata = {
   // Setting a metadataBase ensures canonical/alternate links are absolute
@@ -70,6 +71,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {children}
         <GoogleAnalytics />
+        <GTM />
         <Analytics />
       </body>
     </html>
