@@ -6,11 +6,13 @@ interface Props {
   locale?: string;
 }
 
-const MainProvider = async ({ children }: Props) => {
-  const messages = await getMessages();
+const MainProvider = async ({ children, locale }: Props) => {
+  // getMessages will pick messages for the current route if locale is omitted,
+  // but when we receive an explicit `locale` from the layout we prefer that.
+  const messages = locale ? await getMessages({ locale }) : await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
       </ThemeProvider>
