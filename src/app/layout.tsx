@@ -3,6 +3,7 @@ import { AUTHOR, OG_IMAGE, SITE_DESCRIPTION, SITE_TITLE, TWITTER, getCanonical, 
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
+import GoogleAnalytics from './analytics';
 
 export const metadata: Metadata = {
   // Setting a metadataBase ensures canonical/alternate links are absolute
@@ -68,6 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body>
         {children}
+        <GoogleAnalytics />
         <Analytics />
       </body>
     </html>
