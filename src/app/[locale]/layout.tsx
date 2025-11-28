@@ -1,8 +1,6 @@
-import { getPathname, routing } from '@/i18n/routing';
-import { getSiteMeta } from '@/lib/getSiteDefultMetaData';
+import { routing } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import MainProvider from '@/providers/mainProvider';
-import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 /**
@@ -29,48 +27,4 @@ export default async function LocaleLayout({
       <MainProvider locale={locale}>{children}</MainProvider>
     </div>
   );
-}
-
-// Provide sensible defaults for SEO across all localized routes
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
-  const { title, description, author, twitter, siteUrl } = getSiteMeta(locale as 'fa' | 'en');
-  const test = getSiteMeta(locale as 'fa' | 'en');
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-  const SITE_TITLE = title || 'Portfolio';
-  const SITE_DESCRIPTION = description || 'Personal portfolio website';
-  const TWITTER = twitter || '';
-  const OG_IMAGE = process.env.NEXT_PUBLIC_OG_IMAGE || (site ? `${site}/favicon.ico` : '/favicon.ico');
-  const AUTHOR = author || '';
-  const currentFa = getPathname({ href: '/', locale: 'fa' });
-  const currentEn = getPathname({ href: '/', locale: 'en' });
-
-  return {
-    metadataBase: site ? new URL(site) : undefined,
-    title: {
-      default: SITE_TITLE,
-      template: `%s | ${SITE_TITLE}`,
-    },
-    authors: AUTHOR ? [{ name: AUTHOR }] : undefined,
-    description: SITE_DESCRIPTION,
-    alternates: {
-      canonical: getPathname({ href: '/', locale }),
-      languages: {
-        fa: currentFa,
-        en: currentEn,
-        'x-default': getPathname({ href: '/', locale }),
-      },
-    },
-    openGraph: {
-      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
-      title: SITE_TITLE,
-      description: SITE_DESCRIPTION,
-      url: site ? `${site}/${locale}` : undefined,
-      images: [OG_IMAGE],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      site: TWITTER || undefined,
-      creator: TWITTER || undefined,
-    },
-  } satisfies Metadata;
 }

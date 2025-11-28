@@ -1,7 +1,7 @@
 {
   "hero": {
     "hi": "Hi, I'm",
-    "iam" : ""
+    "iam": ""
   },
   "experience": "Work Experience",
   "about": "About",
@@ -111,7 +111,8 @@
       "emailPlaceholder": "Email address (e.g., name@example.com)",
       "telPlaceholder": "Phone number (e.g., +98 912 000 0000)",
       "summaryPlaceholder": "Short summary (e.g., Frontend Developer)",
-      "aboutPlaceholder": "About you (a brief bio)"
+      "aboutPlaceholder": "About you (a brief bio)",
+      "jobTitle": "Job Title"
     },
     "workExperience": {
       "experience": "Work Experience",

@@ -65,11 +65,7 @@ export const generateMetadata = async ({ params: { locale } }: Props) => {
       //   },
       // ],
     },
-    title: {
-      default: `${data.profile?.fullName} | ${t('personalWebsite')}`,
-      template: `%s | ${data.profile?.fullName} | ${t('personalWebsite')}`,
-      absolute: `${data.profile?.fullName} | ${t('personalWebsite')}`,
-    },
+    title: `${data.profile?.fullName} | ${data.profile?.jobTitle} | ${t('personalWebsite')}`,
     alternates: {
       types: {
         'application/rss+xml': site ? `${site}/rss.xml` : undefined,

@@ -1,8 +1,9 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 export const profileSchema = new Schema<IProfile>({
   name: { type: String, required: true },
   fullName: { type: String, required: true },
+  jobTitle: { type: String, required: true },
   description: { type: String },
   summary: { type: String },
   avatarUrl: { type: String },
@@ -11,5 +12,4 @@ export const profileSchema = new Schema<IProfile>({
   lang: { type: String },
 });
 
-export const profileModel =
-  mongoose.models.profile || mongoose.model<IProfile>("profile", profileSchema);
+export const profileModel = mongoose.models.profile || mongoose.model<IProfile>('profile', profileSchema);

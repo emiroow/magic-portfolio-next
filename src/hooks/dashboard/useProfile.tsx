@@ -22,12 +22,14 @@ const useProfile = () => {
     summary: string;
     avatarUrl?: string;
     description: string;
+    jobTitle: string;
   };
 
   const FormSchema = yup.object().shape({
     name: yup.string().required(t('requiredField')),
     fullName: yup.string().required(t('requiredField')),
     email: yup.string().required(t('requiredField')),
+    jobTitle: yup.string().required(t('requiredField')),
     tel: yup
       .string()
       .required(t('requiredField'))
@@ -53,6 +55,7 @@ const useProfile = () => {
       summary: '',
       avatarUrl: '',
       description: '',
+      jobTitle: '',
     },
   });
 
@@ -76,6 +79,7 @@ const useProfile = () => {
       setValue('summary', res.data.summary || '');
       setValue('avatarUrl', avatarUrl);
       setValue('description', res.data.description || '');
+      setValue('jobTitle', res.data.jobTitle || '');
       return { ...res.data, avatarUrl };
     },
   });

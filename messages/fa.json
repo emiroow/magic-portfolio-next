@@ -107,7 +107,8 @@
       "emailPlaceholder": "ایمیل (مثلاً: name@example.com)",
       "telPlaceholder": "شماره تماس (مثلاً: ۰۹۱۲ ۰۰۰ ۰۰۰۰)",
       "summaryPlaceholder": "خلاصه کوتاه (مثلاً: توسعه‌دهنده فرانت‌اند)",
-      "aboutPlaceholder": "چند خط درباره خودتان"
+      "aboutPlaceholder": "چند خط درباره خودتان",
+      "jobTitle": "عنوان شغلی"
     },
     "education": {
       "school": "مدرسه / دانشگاه",

@@ -4,10 +4,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-const AUTHOR_NAME = process.env.NEXT_PUBLIC_AUTHOR_NAME || 'Portfolio Owner';
 
 import { JsonLd } from '@/components/JsonLd';
 import { routing } from '@/i18n/routing';
+import axios from '@/service/axios';
 import Link from 'next/link';
 import { IoIosArrowBack } from 'react-icons/io';
 import ReactMarkdown from 'react-markdown';
@@ -20,46 +20,60 @@ export const dynamic = 'force-dynamic';
 // Dynamic route; we fetch data at request time from API/DB
 
 export async function generateMetadata({ params }: { params: { locale: string; slug: string } }): Promise<Metadata | undefined> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const res = await fetch(`${base}/api/${params.locale}/blog/${params.slug}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) return undefined;
-  const post = (await res.json()) as IBlog;
+  const { locale, slug } = params;
 
-  let { title, createdAt: publishedTime, summary: description } = post;
-  let ogImage = `${SITE_URL}/og?title=${encodeURIComponent(title)}`;
+  // Fetch post from API / DB
+  const { data: post } = await axios.get(`${process.env.NEXT_PUBLIC_API}/posts/${slug}?locale=${locale}`);
+
+  if (!post) {
+    return {
+      title: locale === 'fa' ? 'مقاله یافت نشد' : 'Article not found',
+    };
+  }
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL as string;
+  const url = `${site}/${locale}/blog/${slug}`;
+  const ogImage = post.ogImage || `${site}/api/og/blog?slug=${slug}`;
+  const title = post.title;
+  const description = post.excerpt || post.description || title;
 
   return {
+    metadataBase: new URL(site),
     title,
     description,
+    keywords: post.tags || [],
+
     alternates: {
-      canonical: `/${params.locale}/blog/${post.slug}`,
-      languages: {
-        en: `/en/blog/${post.slug}`,
-        fa: `/fa/blog/${post.slug}`,
-        'x-default': `/${routing.defaultLocale}/blog/${post.slug}`,
-      },
+      canonical: url,
     },
+
     openGraph: {
       title,
       description,
+      url,
       type: 'article',
-      publishedTime,
-      url: `${SITE_URL}/${params.locale}/blog/${post.slug}`,
+      locale,
+      siteName: 'Blog',
+      publishedTime: post.createdAt,
+      modifiedTime: post.updatedAt,
+      authors: [post.authorName],
       images: [
         {
           url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
         },
       ],
     },
+
     twitter: {
       card: 'summary_large_image',
+      site: process.env.NEXT_PUBLIC_TWITTER_HANDLE,
       title,
       description,
       images: [ogImage],
     },
-    robots: { index: true, follow: true },
   };
 }
 
@@ -99,7 +113,7 @@ export default async function Blog({ params }: { params: { locale: string; slug:
           description: post.summary,
           image: `${SITE_URL}/og?title=${encodeURIComponent(post.title)}`,
           url: `${SITE_URL}/${params.locale}/blog/${post.slug}`,
-          author: { '@type': 'Person', name: AUTHOR_NAME },
+          author: { '@type': 'Person' },
         }}
       />
       <JsonLd

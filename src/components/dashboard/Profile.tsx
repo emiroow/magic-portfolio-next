@@ -156,6 +156,12 @@ const Profile = () => {
           <Input id="profile-fullName" type="text" className="text-sm" {...register('fullName')} placeholder={t('fullName')} disabled={btnLoading} />
           <p className="text-red-600 text-xs">{errors.fullName?.message}</p>
 
+          <label htmlFor="profile-jobTitle" className="text-sm font-medium text-muted-foreground">
+            {t('jobTitle')}
+          </label>
+          <Input id="profile-jobTitle" className="text-sm" type="text" {...register('jobTitle')} placeholder={t('jobTitle')} disabled={btnLoading} />
+          <p className="text-red-600 text-xs">{errors.jobTitle?.message}</p>
+
           <label htmlFor="profile-email" className="text-sm font-medium text-muted-foreground">
             {t('email')}
           </label>
