@@ -1,4 +1,5 @@
 import { getPathname, routing } from '@/i18n/routing';
+import { getSiteMeta } from '@/lib/getSiteDefultMetaData';
 import { cn } from '@/lib/utils';
 import MainProvider from '@/providers/mainProvider';
 import type { Metadata } from 'next';
@@ -32,11 +33,14 @@ export default async function LocaleLayout({
 
 // Provide sensible defaults for SEO across all localized routes
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
+  const { title, description, author, twitter, siteUrl } = getSiteMeta(locale as 'fa' | 'en');
+  const test = getSiteMeta(locale as 'fa' | 'en');
   const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-  const SITE_TITLE = process.env.NEXT_PUBLIC_SITE_TITLE || 'Portfolio';
-  const SITE_DESCRIPTION = process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal portfolio website';
-  const TWITTER = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '';
+  const SITE_TITLE = title || 'Portfolio';
+  const SITE_DESCRIPTION = description || 'Personal portfolio website';
+  const TWITTER = twitter || '';
   const OG_IMAGE = process.env.NEXT_PUBLIC_OG_IMAGE || (site ? `${site}/favicon.ico` : '/favicon.ico');
+  const AUTHOR = author || '';
   const currentFa = getPathname({ href: '/', locale: 'fa' });
   const currentEn = getPathname({ href: '/', locale: 'en' });
 
@@ -46,6 +50,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
       default: SITE_TITLE,
       template: `%s | ${SITE_TITLE}`,
     },
+    authors: AUTHOR ? [{ name: AUTHOR }] : undefined,
     description: SITE_DESCRIPTION,
     alternates: {
       canonical: getPathname({ href: '/', locale }),
