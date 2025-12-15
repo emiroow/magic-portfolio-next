@@ -7,7 +7,6 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 
 import { JsonLd } from '@/components/JsonLd';
 import { routing } from '@/i18n/routing';
-import axios from '@/service/axios';
 import Link from 'next/link';
 import { IoIosArrowBack } from 'react-icons/io';
 import ReactMarkdown from 'react-markdown';
@@ -23,13 +22,18 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   const { locale, slug } = params;
 
   // Fetch post from API / DB
-  const { data: post } = await axios.get(`${process.env.NEXT_PUBLIC_API}/posts/${slug}?locale=${locale}`);
-
-  if (!post) {
+  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
+  const res = await fetch(`${base}/api/${locale}/blog/${slug}`, {
+    cache: 'no-store',
+  });
+  
+  if (!res.ok) {
     return {
       title: locale === 'fa' ? 'مقاله یافت نشد' : 'Article not found',
     };
   }
+
+  const post = (await res.json());
 
   const site = process.env.NEXT_PUBLIC_SITE_URL as string;
   const url = `${site}/${locale}/blog/${slug}`;
@@ -87,7 +91,7 @@ export default async function Blog({ params }: { params: { locale: string; slug:
   if (!res.ok) {
     notFound();
   }
-  const post = (await res.json()) as IBlog;
+  const post = (await res.json()) ;
   // Fetch all posts in same locale to compute prev/next and related
   const allRes = await fetch(`${base}/api/${params.locale}/blog`, {
     cache: 'no-store',

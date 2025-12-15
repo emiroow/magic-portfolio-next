@@ -15,9 +15,11 @@ const apiService = axios.create({
 // Request Interceptor: Attach token
 apiService.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -28,7 +30,7 @@ apiService.interceptors.request.use(
 apiService.interceptors.response.use(
   (response) => response, // Return response if successful
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       console.error("Unauthorized: Redirecting to login...");
       localStorage.removeItem("token"); // Remove token on auth failure
       window.location.href = "/login"; // Redirect to login page

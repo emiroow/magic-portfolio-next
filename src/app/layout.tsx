@@ -3,7 +3,6 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 import GoogleAnalytics from './analytics';
-import GTM from './gtm';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -23,7 +22,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {children}
         <GoogleAnalytics />
-        <GTM />
         <Analytics />
       </body>
     </html>
