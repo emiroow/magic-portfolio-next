@@ -5,11 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 // GET all education for a language
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
-    const educations = await educationModel.find({ lang: params.lang });
+    const educations = await educationModel.find({ lang });
     return NextResponse.json(educations, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -21,9 +22,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { id, ...updateData } = body;
@@ -31,7 +33,7 @@ export async function PUT(
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
     const updated = await educationModel.findOneAndUpdate(
-      { _id: id, lang: params.lang },
+      { _id: id, lang },
       updateData,
       { new: true }
     );
@@ -46,12 +48,13 @@ export async function PUT(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
-    const created = await educationModel.create({ ...body, lang: params.lang });
+    const created = await educationModel.create({ ...body, lang });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     return NextResponse.json(
@@ -63,16 +66,17 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { id } = body;
     if (!id) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
-    await educationModel.findOneAndDelete({ _id: id, lang: params.lang });
+    await educationModel.findOneAndDelete({ _id: id, lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }

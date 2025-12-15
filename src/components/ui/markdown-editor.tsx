@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 // Styles for the editor & preview
 import "@uiw/react-markdown-preview/markdown.css";
@@ -42,12 +42,10 @@ export default function MarkdownEditor({
   const locale = useLocale();
   const dir = locale === "fa" ? "rtl" : "ltr";
   const { theme, resolvedTheme } = useTheme();
-  const [colorMode, setColorMode] = useState<"light" | "dark" | "auto">("auto");
 
-  // Sync color mode with next-themes
-  useEffect(() => {
-    const current = theme === "system" ? (resolvedTheme as any) : theme;
-    setColorMode(current === "dark" ? "dark" : "light");
+  const colorMode = useMemo<"light" | "dark">(() => {
+    const current = theme === "system" ? resolvedTheme : theme;
+    return current === "dark" ? "dark" : "light";
   }, [theme, resolvedTheme]);
 
   const fallbackPlaceholder = useMemo(

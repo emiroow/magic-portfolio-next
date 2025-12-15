@@ -14,11 +14,12 @@ export async function generateMetadata() {
 
 export default async function DashboardLayout({
   children,
-  params: { locale },
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
+  const { locale } = await params;
   const direction = locale === "fa" ? "rtl" : "ltr";
   const messages: any = await getMessages();
 

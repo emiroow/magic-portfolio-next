@@ -11,8 +11,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 
-export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
 
   const site = process.env.NEXT_PUBLIC_SITE_URL as string;
   const url = `${site}/${locale}/blog`;
@@ -63,8 +63,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
 
 const BLUR_FADE_DELAY = 0.04;
 
-export default async function BlogPage({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export default async function BlogPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   if (!routing.locales.includes(locale as any)) notFound();
   const base = absoluteUrl('') || '';
   const res = await fetch(`${base}/api/${locale}/blog`, { cache: 'no-store' });
@@ -96,14 +96,14 @@ export default async function BlogPage({ params }: { params: { locale: string } 
             {
               '@type': 'ListItem',
               position: 1,
-              name: params.locale === 'fa' ? 'صفحه اصلی' : 'Home',
-              item: `${SITE_URL}/${params.locale}`,
+              name: locale === 'fa' ? 'صفحه اصلی' : 'Home',
+              item: `${SITE_URL}/${locale}`,
             },
             {
               '@type': 'ListItem',
               position: 2,
-              name: params.locale === 'fa' ? 'بلاگ' : 'Blog',
-              item: `${SITE_URL}/${params.locale}/blog`,
+              name: locale === 'fa' ? 'بلاگ' : 'Blog',
+              item: `${SITE_URL}/${locale}/blog`,
             },
           ],
         }}

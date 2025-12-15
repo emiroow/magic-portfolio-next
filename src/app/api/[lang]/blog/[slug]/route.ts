@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 // GET: Public blog post by slug for a given language
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { lang: string; slug: string } }
+  { params }: { params: Promise<{ lang: string; slug: string }> }
 ) {
-  const { lang, slug } = params;
+  const { lang, slug } = await params;
   try {
     await connectDB();
     const doc: any = await blogModel.findOne({ lang, slug }).lean();

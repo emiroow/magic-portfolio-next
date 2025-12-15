@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { Button } from "./button";
 import {
@@ -28,28 +28,31 @@ type ImageCropperProps = {
   onCropped: (file: File) => void;
 };
 
-export default function ImageCropperDialog({
-  open,
-  onOpenChange,
+type CropperBodyProps = {
+  src: string | null;
+  aspect: number;
+  dir: "rtl" | "ltr";
+  isDark: boolean;
+  labels: ImageCropperProps["labels"];
+  outputSize: number;
+  onCropped: (file: File) => void;
+  onClose: () => void;
+};
+
+function CropperBody({
   src,
-  aspect = 1,
-  dir = "ltr",
-  isDark = false,
+  aspect,
+  dir,
+  isDark,
   labels,
-  outputSize = 512,
+  outputSize,
   onCropped,
-}: ImageCropperProps) {
+  onClose,
+}: CropperBodyProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  // Reset states when src changes or dialog opens
-  useEffect(() => {
-    if (open) {
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
-    }
-  }, [open, src]);
   const onCropComplete = useCallback((_: Area, cropped: Area) => {
     setCroppedAreaPixels(cropped);
   }, []);
@@ -77,76 +80,98 @@ export default function ImageCropperDialog({
     if (!blob) return;
     const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
     onCropped(file);
-    onOpenChange(false);
-  }, [src, croppedAreaPixels, outputSize, aspect, onCropped, onOpenChange]);
+    onClose();
+  }, [src, croppedAreaPixels, outputSize, aspect, onCropped, onClose]);
 
+  return (
+    <>
+      <DialogHeader className={`${dir === "rtl" ? "text-right" : "text-left"}`}>
+        <DialogTitle>{labels.title}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-3" dir={dir}>
+        <div className="relative w-full h-[280px] bg-muted rounded-md overflow-hidden">
+          {src && (
+            <Cropper
+              image={src}
+              crop={crop}
+              zoom={zoom}
+              aspect={aspect}
+              onCropChange={setCrop}
+              onCropComplete={onCropComplete}
+              onZoomChange={setZoom}
+              objectFit="contain"
+              showGrid={false}
+              cropShape="rect"
+              classes={{ containerClassName: "!bg-background" }}
+            />
+          )}
+        </div>
+        <div
+          className={`flex items-center gap-3 ${dir === "rtl" ? "flex-row-reverse" : ""}`}
+        >
+          <label className="text-sm text-muted-foreground whitespace-nowrap">
+            {labels.zoom}
+          </label>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.01}
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="w-full"
+            style={{ accentColor: isDark ? "#ffffff" : "#000000" }}
+          />
+        </div>
+        <p
+          className={`text-xs text-muted-foreground ${
+            dir === "rtl" ? "text-right" : "text-left"
+          }`}
+        >
+          {labels.move}
+        </p>
+      </div>
+      <DialogFooter
+        className={`flex gap-2 ${dir === "rtl" ? "flex-row-reverse" : ""}`}
+      >
+        <Button variant="outline" type="button" onClick={onClose}>
+          {labels.cancel}
+        </Button>
+        <Button type="button" onClick={applyCrop}>
+          {labels.apply}
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
+export default function ImageCropperDialog({
+  open,
+  onOpenChange,
+  src,
+  aspect = 1,
+  dir = "ltr",
+  isDark = false,
+  labels,
+  outputSize = 512,
+  onCropped,
+}: ImageCropperProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95%] sm:w-full sm:max-w-[420px] left-[2.5%] translate-x-0 sm:left-1/2 sm:-translate-x-1/2">
-        <DialogHeader
-          className={`${dir === "rtl" ? "text-right" : "text-left"}`}
-        >
-          <DialogTitle>{labels.title}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3" dir={dir}>
-          <div className="relative w-full h-[280px] bg-muted rounded-md overflow-hidden">
-            {src && (
-              <Cropper
-                image={src}
-                crop={crop}
-                zoom={zoom}
-                aspect={aspect}
-                onCropChange={setCrop}
-                onCropComplete={onCropComplete}
-                onZoomChange={setZoom}
-                objectFit="contain"
-                showGrid={false}
-                cropShape="rect"
-                classes={{ containerClassName: "!bg-background" }}
-              />
-            )}
-          </div>
-          <div
-            className={`flex items-center gap-3 ${
-              dir === "rtl" ? "flex-row-reverse" : ""
-            }`}
-          >
-            <label className="text-sm text-muted-foreground whitespace-nowrap">
-              {labels.zoom}
-            </label>
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.01}
-              value={zoom}
-              onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="w-full"
-              style={{ accentColor: isDark ? "#ffffff" : "#000000" }}
-            />
-          </div>
-          <p
-            className={`text-xs text-muted-foreground ${
-              dir === "rtl" ? "text-right" : "text-left"
-            }`}
-          >
-            {labels.move}
-          </p>
-        </div>
-        <DialogFooter
-          className={`flex gap-2 ${dir === "rtl" ? "flex-row-reverse" : ""}`}
-        >
-          <Button
-            variant="outline"
-            type="button"
-            onClick={() => onOpenChange(false)}
-          >
-            {labels.cancel}
-          </Button>
-          <Button type="button" onClick={applyCrop}>
-            {labels.apply}
-          </Button>
-        </DialogFooter>
+        {open ? (
+          <CropperBody
+            key={src ?? "no-src"}
+            src={src}
+            aspect={aspect}
+            dir={dir}
+            isDark={isDark}
+            labels={labels}
+            outputSize={outputSize}
+            onCropped={onCropped}
+            onClose={() => onOpenChange(false)}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   );

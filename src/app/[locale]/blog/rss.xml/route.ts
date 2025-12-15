@@ -1,7 +1,7 @@
 import { connectDB } from "@/config/dbConnection";
 import { routing } from "@/i18n/routing";
 import { blogModel } from "@/models/blog";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +15,11 @@ function escapeXml(unsafe: string) {
 }
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { locale: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ locale: string }> }
 ) {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
-  const locale = params.locale;
+  const { locale } = await params;
 
   if (!routing.locales.includes(locale as any)) {
     return new NextResponse("Not Found", { status: 404 });

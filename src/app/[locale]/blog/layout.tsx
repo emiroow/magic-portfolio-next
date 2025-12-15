@@ -6,11 +6,12 @@ import { notFound } from "next/navigation";
 
 export default async function BlogLayout({
   children,
-  params: { locale },
+  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
+  const { locale } = await params;
   const direction = locale === "fa" ? "rtl" : "ltr";
   // Load messages to ensure client translations are available
   await getMessages();

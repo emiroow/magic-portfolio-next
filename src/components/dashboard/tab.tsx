@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import BlurFade from "../magicui/blur-fade";
 import Blog from "./Blog";
 import EducationExperience from "./Education";
@@ -12,7 +12,12 @@ import Socials from "./Socials";
 import WorkExperience from "./WorkExperience";
 
 const Tab = () => {
-  const [activeTab, setActiveTab] = useState(0); // default = Profile
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = window.localStorage.getItem("activeTab");
+    const value = saved ? Number(saved) : NaN;
+    return Number.isFinite(value) ? value : 0;
+  }); // default = Profile
 
   const t = useTranslations("dashboard.menu");
 
@@ -35,14 +40,6 @@ const Tab = () => {
     { component: <Socials />, trans: "Socials" },
     { component: <Blog />, trans: "Blog" },
   ];
-
-  // ✅ Load saved tab on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("activeTab");
-    if (saved && !isNaN(Number(saved))) {
-      setActiveTab(Number(saved));
-    }
-  }, []);
 
   const handleTabClick = (index: number) => {
     setActiveTab(index);

@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   try {
-    const profile = await profileModel.findOne({ lang: params.lang });
+    const { lang } = await params;
+    const profile = await profileModel.findOne({ lang });
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -18,12 +19,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   try {
     const body = await request.json();
+    const { lang } = await params;
     const profile = await profileModel.findOneAndUpdate(
-      { lang: params.lang },
+      { lang },
       { ...body },
       { new: true }
     );

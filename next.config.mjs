@@ -4,15 +4,12 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-
   images: {
-    domains: [
-      "api.emiroow.ir",
-      "localhost",
-      "127.0.0.1",
-      "your-vercel-blob-domain",
-    ],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.emiroow.ir",
+      },
       {
         protocol: "https",
         hostname: "**.public.blob.vercel-storage.com",
@@ -20,6 +17,14 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
+        protocol: "https",
+        hostname: "your-vercel-blob-domain",
       },
     ],
   },

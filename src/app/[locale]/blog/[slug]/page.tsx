@@ -18,8 +18,8 @@ export const dynamic = 'force-dynamic';
 
 // Dynamic route; we fetch data at request time from API/DB
 
-export async function generateMetadata({ params }: { params: { locale: string; slug: string } }): Promise<Metadata | undefined> {
-  const { locale, slug } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string; slug: string }> }): Promise<Metadata | undefined> {
+  const { locale, slug } = await params;
 
   // Fetch post from API / DB
   const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
@@ -81,10 +81,11 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   };
 }
 
-export default async function Blog({ params }: { params: { locale: string; slug: string } }) {
-  if (!routing.locales.includes(params.locale as any)) notFound();
+export default async function Blog({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  const { locale, slug } = await params;
+  if (!routing.locales.includes(locale as any)) notFound();
   const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || '';
-  const res = await fetch(`${base}/api/${params.locale}/blog/${params.slug}`, {
+  const res = await fetch(`${base}/api/${locale}/blog/${slug}`, {
     cache: 'no-store',
   });
 
@@ -93,7 +94,7 @@ export default async function Blog({ params }: { params: { locale: string; slug:
   }
   const post = (await res.json()) ;
   // Fetch all posts in same locale to compute prev/next and related
-  const allRes = await fetch(`${base}/api/${params.locale}/blog`, {
+  const allRes = await fetch(`${base}/api/${locale}/blog`, {
     cache: 'no-store',
   });
 
@@ -116,7 +117,7 @@ export default async function Blog({ params }: { params: { locale: string; slug:
           dateModified: post.updatedAt || post.createdAt,
           description: post.summary,
           image: `${SITE_URL}/og?title=${encodeURIComponent(post.title)}`,
-          url: `${SITE_URL}/${params.locale}/blog/${post.slug}`,
+          url: `${SITE_URL}/${locale}/blog/${post.slug}`,
           author: { '@type': 'Person' },
         }}
       />
@@ -128,33 +129,33 @@ export default async function Blog({ params }: { params: { locale: string; slug:
             {
               '@type': 'ListItem',
               position: 1,
-              name: params.locale === 'fa' ? 'صفحه اصلی' : 'Home',
-              item: `${SITE_URL}/${params.locale}`,
+              name: locale === 'fa' ? 'صفحه اصلی' : 'Home',
+              item: `${SITE_URL}/${locale}`,
             },
             {
               '@type': 'ListItem',
               position: 2,
-              name: params.locale === 'fa' ? 'بلاگ' : 'Blog',
-              item: `${SITE_URL}/${params.locale}/blog`,
+              name: locale === 'fa' ? 'بلاگ' : 'Blog',
+              item: `${SITE_URL}/${locale}/blog`,
             },
             {
               '@type': 'ListItem',
               position: 3,
               name: post.title,
-              item: `${SITE_URL}/${params.locale}/blog/${post.slug}`,
+              item: `${SITE_URL}/${locale}/blog/${post.slug}`,
             },
           ],
         }}
       />
 
-      <Link href={`/${params.locale}/blog`} className="sm:hidden absolute top-5 left-4">
+      <Link href={`/${locale}/blog`} className="sm:hidden absolute top-5 left-4">
         <IoIosArrowBack className="text-2xl" />
       </Link>
 
       <h1 className="title font-semibold text-2xl tracking-tighter max-w-[650px]">{post.title}</h1>
       <div className="flex flex-col gap-1 mt-2 mb-4 text-sm max-w-[650px]">
         <Suspense fallback={<p className="h-5" />}>
-          <p className="text-neutral-600 dark:text-neutral-400">{formatYearMonthLocal(post.createdAt || '', params.locale as any)}</p>
+          <p className="text-neutral-600 dark:text-neutral-400">{formatYearMonthLocal(post.createdAt || '', locale as any)}</p>
         </Suspense>
       </div>
 
@@ -168,14 +169,14 @@ export default async function Blog({ params }: { params: { locale: string; slug:
       {(prev || next) && (
         <nav className="mt-10 flex items-center justify-between text-sm">
           {next ? (
-            <Link href={`/${params.locale}/blog/${next.slug}`} className="hover:underline">
+            <Link href={`/${locale}/blog/${next.slug}`} className="hover:underline">
               → {next.title}
             </Link>
           ) : (
             <span />
           )}
           {prev ? (
-            <Link href={`/${params.locale}/blog/${prev.slug}`} className="hover:underline">
+            <Link href={`/${locale}/blog/${prev.slug}`} className="hover:underline">
               {prev.title} ←
             </Link>
           ) : (

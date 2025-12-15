@@ -17,10 +17,11 @@ import Markdown from 'react-markdown';
 const BLUR_FADE_DELAY = 0.04;
 
 type Props = {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
-export const generateMetadata = async ({ params: { locale } }: Props) => {
+export const generateMetadata = async ({ params }: Props) => {
+  const { locale } = await params;
   const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
   const t = await getTranslations();
   const tHero = await getTranslations('hero');
@@ -145,7 +146,8 @@ export function generateViewport() {
 // Avoid build-time data fetching for this route
 export const dynamic = 'force-dynamic';
 
-export default async function Page({ params: { locale } }: Props) {
+export default async function Page({ params }: Props) {
+  const { locale } = await params;
   const t = await getTranslations();
   const tHero = await getTranslations('hero');
   const tProject = await getTranslations('project');

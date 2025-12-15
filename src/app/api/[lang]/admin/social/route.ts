@@ -5,11 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 // GET all socials for a language
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
-    const socials = await socialModel.find({ lang: params.lang });
+    const socials = await socialModel.find({ lang });
     return NextResponse.json(socials, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -22,9 +23,10 @@ export async function GET(
 // POST: Create a new social for a language
 export async function POST(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { name, url, icon } = body || {};
@@ -38,7 +40,7 @@ export async function POST(
       name,
       url,
       icon,
-      lang: params.lang,
+      lang,
     });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
@@ -52,9 +54,10 @@ export async function POST(
 // PUT: Update a social by _id
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id, ...updateData } = body;
@@ -62,7 +65,7 @@ export async function PUT(
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
     const updated = await socialModel.findOneAndUpdate(
-      { _id, lang: params.lang },
+      { _id, lang },
       updateData,
       { new: true }
     );
@@ -78,16 +81,17 @@ export async function PUT(
 // DELETE: Remove a social by _id
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id } = body;
     if (!_id) {
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
-    await socialModel.deleteOne({ _id, lang: params.lang });
+    await socialModel.deleteOne({ _id, lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }

@@ -5,12 +5,13 @@ import { NextRequest, NextResponse } from "next/server";
 // GET all blogs for a language (admin)
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const blogs = await blogModel
-      .find({ lang: params.lang })
+      .find({ lang })
       .sort({ createdAt: -1 })
       .lean();
     return NextResponse.json(blogs, { status: 200 });
@@ -25,9 +26,10 @@ export async function GET(
 // POST: Create a new blog post for a language
 export async function POST(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const required = ["title", "slug"]; // minimal required
@@ -39,7 +41,7 @@ export async function POST(
         );
       }
     }
-    const created = await blogModel.create({ ...body, lang: params.lang });
+    const created = await blogModel.create({ ...body, lang });
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     return NextResponse.json(
@@ -52,9 +54,10 @@ export async function POST(
 // PUT: Update a blog post by _id for a language
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id, ...update } = body;
@@ -62,7 +65,7 @@ export async function PUT(
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
     const updated = await blogModel.findOneAndUpdate(
-      { _id, lang: params.lang },
+      { _id, lang },
       update,
       { new: true }
     );
@@ -78,16 +81,17 @@ export async function PUT(
 // DELETE: Remove a blog post by _id for a language
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id } = body;
     if (!_id) {
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
-    await blogModel.deleteOne({ _id, lang: params.lang });
+    await blogModel.deleteOne({ _id, lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }

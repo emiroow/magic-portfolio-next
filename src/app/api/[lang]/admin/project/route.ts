@@ -5,11 +5,12 @@ import { NextRequest, NextResponse } from "next/server";
 // GET all projects for a language
 export async function GET(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
-    const projects = await projectModel.find({ lang: params.lang });
+    const projects = await projectModel.find({ lang });
     return NextResponse.json(projects, { status: 200 });
   } catch (error) {
     return NextResponse.json(
@@ -22,9 +23,10 @@ export async function GET(
 // PUT: Update a project by _id
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id, ...updateData } = body;
@@ -32,7 +34,7 @@ export async function PUT(
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
     const updated = await projectModel.findOneAndUpdate(
-      { _id, lang: params.lang },
+      { _id, lang },
       updateData,
       { new: true }
     );
@@ -48,16 +50,17 @@ export async function PUT(
 // DELETE: Remove a project by _id
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
     const { _id } = body;
     if (!_id) {
       return NextResponse.json({ error: "_id is required" }, { status: 400 });
     }
-    await projectModel.deleteOne({ _id, lang: params.lang });
+    await projectModel.deleteOne({ _id, lang });
     return NextResponse.json(
       { message: "Deleted successfully" },
       { status: 200 }
@@ -73,9 +76,10 @@ export async function DELETE(
 // POST: Create a new project for a language
 export async function POST(
   request: NextRequest,
-  { params }: { params: { lang: string } }
+  { params }: { params: Promise<{ lang: string }> }
 ) {
   await connectDB();
+  const { lang } = await params;
   try {
     const body = await request.json();
 
@@ -88,7 +92,7 @@ export async function POST(
     }
 
     // Ensure the document has the correct lang field from route params
-    const projectData = { ...body, lang: params.lang };
+    const projectData = { ...body, lang };
 
     const created = await projectModel.create(projectData);
 
