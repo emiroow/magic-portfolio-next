@@ -211,7 +211,7 @@ const Projects = () => {
                   }
                 }}
                 src={cropSrc}
-                aspect={1}
+                aspect={4 / 2}
                 labels={{
                   title: tcrop('title'),
                   apply: tcrop('apply'),
@@ -221,7 +221,6 @@ const Projects = () => {
                 }}
                 dir={locale === 'fa' ? 'rtl' : 'ltr'}
                 isDark={theme === 'dark'}
-                outputSize={512}
                 onCropped={file => {
                   const formData = new FormData();
                   formData.append('image', file);
