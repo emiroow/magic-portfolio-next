@@ -1,3 +1,4 @@
+import { FlickeringGrid } from '@/components/magicui/flickering-grid';
 import { routing } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import MainProvider from '@/providers/mainProvider';
@@ -23,8 +24,18 @@ export default async function LocaleLayout({
   }
 
   return (
-    <div dir={direction} className={cn(`bg-background antialiased ${locale === 'en' ? 'font-robotRegular' : 'font-estedadRegular'} `)}>
-      {/* Global providers needed on both client and server paths */}
+    <div dir={direction} className={cn(`relative bg-background antialiased ${locale === 'en' ? 'font-robotRegular' : 'font-estedadRegular'} `)}>
+      <div className="absolute inset-0 top-0 left-0 right-0 h-[100px] overflow-hidden z-0">
+        <FlickeringGrid
+          className="h-full w-full"
+          squareSize={2}
+          gridGap={2}
+          style={{
+            maskImage: 'linear-gradient(to bottom, black, transparent)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)',
+          }}
+        />
+      </div>
       <MainProvider locale={locale}>{children}</MainProvider>
     </div>
   );

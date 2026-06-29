@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 import GoogleAnalytics from './analytics';
+import { FlickeringGrid } from '@/components/magicui/flickering-grid';
 
 export const viewport: Viewport = {
   width: 'device-width',
