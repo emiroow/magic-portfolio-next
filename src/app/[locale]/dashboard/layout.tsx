@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 /**
- * Dashboard layout: enforces an admin session and constrains width.
- * Providers and locale validation are handled by `[locale]/layout.tsx`.
+ * Dashboard layout: enforces an admin session and applies the shared page
+ * rhythm. Providers and locale validation come from `[locale]/layout.tsx`.
  */
 export default async function DashboardLayout({
   children,
@@ -36,5 +36,5 @@ export default async function DashboardLayout({
     redirect(`/${locale}/auth?callbackUrl=${callback}`);
   }
 
-  return <div className="mx-auto min-h-screen w-full max-w-3xl px-4 pb-28 pt-6 sm:px-6 sm:py-12">{children}</div>;
+  return <div className="site-shell max-w-4xl">{children}</div>;
 }
