@@ -8,8 +8,10 @@ import React from 'react';
 type LanguageToggleProps = Omit<React.ComponentPropsWithoutRef<typeof Link>, 'href'>;
 
 /**
- * Switches to the same page in the other locale while preserving the
- * current path. (Named `ThemeToggle` historically; it controls language.)
+ * Switches to the same page in the other locale, preserving the current path.
+ * The button is labelled in the language it leads to (`فا` / `EN`), which is
+ * readable even for visitors who cannot read the current UI language.
+ * (Named `ThemeToggle` historically; it controls language.)
  */
 const ThemeToggle = React.forwardRef<HTMLAnchorElement, LanguageToggleProps>(({ className, ...props }, ref) => {
   const { locale } = useParams<{ locale: string }>();
@@ -23,13 +25,15 @@ const ThemeToggle = React.forwardRef<HTMLAnchorElement, LanguageToggleProps>(({ 
   return (
     <Link
       ref={ref}
-      {...props}
       href={href}
       locale={targetLocale}
-      className={cn('text-xs font-semibold', className)}
+      className={cn('inline-flex items-center justify-center', className)}
       aria-label={`Switch to ${targetLocale.toUpperCase()}`}
+      {...props}
     >
-      {targetLocale.toUpperCase()}
+      <span aria-hidden className="text-xs font-semibold leading-none">
+        {targetLocale === 'fa' ? 'فا' : 'EN'}
+      </span>
     </Link>
   );
 });
