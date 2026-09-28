@@ -1,181 +1,147 @@
 <div align="center">
-  <h1>Magic Portfolio Next</h1>
-  <p>Open‑source, bilingual (FA/EN) portfolio + blog + dashboard built with Next.js 14 App Router, TypeScript, Tailwind CSS, shadcn/ui, next‑intl, and MongoDB.</p>
 
-  <p>
-    <a href="#">English</a> ·
-    <a href="./README.fa.md">فارسی</a>
-  </p>
+# Magic Portfolio Next
 
-  <p>
-    <a href="https://nextjs.org"><img alt="Next.js" src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" /></a>
-    <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" /></a>
-    <a href="https://tailwindcss.com"><img alt="Tailwind" src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" /></a>
-    <a href="https://ui.shadcn.com/"><img alt="shadcn/ui" src="https://img.shields.io/badge/shadcn/ui-Components-000" /></a>
-    <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Femiroow%2Fmagic-portfolio-next"><img alt="Deploy with Vercel" src="https://vercel.com/button" /></a>
-    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" /></a>
-  </p>
+**A minimal, bilingual (EN/FA) developer portfolio with blog, admin dashboard and one-click Vercel deployment.**
+
+Built with Next.js 16 (App Router), TypeScript, Tailwind CSS, shadcn/ui, MongoDB and next-intl.
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-black)](https://ui.shadcn.com)
+[![MongoDB](https://img.shields.io/badge/DB-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+[English](README.md) · [فارسی](README.fa.md) · [Deploy to Vercel](#deploy-on-vercel)
+
 </div>
 
-## Overview
-
-Magic Portfolio Next is a production‑ready portfolio template with:
-
-- App Router (Next.js 14) + TypeScript
-- Design system via Tailwind CSS and shadcn/ui
-- Internationalization with next‑intl (fa, en) and automatic RTL for Persian
-- Blog support (MDX and MongoDB via Mongoose model)
-- Auth (NextAuth Credentials, demo‑friendly)
-- Dashboard sections (profile, projects, education, skills, socials, work)
-- SEO: metadata, sitemap, robots, manifest, and JSON‑LD component
-
-Ideal for quickly launching a personal site, customizing, and deploying to Vercel.
-
-## Live Demo
-
-- Demo URL: Add your deployment link here (e.g., Vercel) once deployed
+---
 
 ## Features
 
-- Next.js 14 App Router with strict typing
-- Bilingual (fa/en) with default locale fa and RTL support
-- MDX rendering and code highlighting via Shiki/rehype‑pretty‑code
-- MongoDB/Mongoose models and seed scripts to bootstrap content
-- Credentials‑based auth with easily configurable demo credentials
-- Responsive UI with Tailwind and shadcn/ui components
-- SEO‑friendly: canonical, alternates, sitemap, robots, manifest, JSON‑LD
-- Ready for Vercel with a one‑click deploy button
+- **Two languages, one codebase** — English (default, `/`) and Persian (`/fa`) with automatic RTL, Persian digits and Jalali (Solar Hijri) dates.
+- **Strictly monochrome design system** — pure black & white shadcn/ui tokens, light/dark themes, subtle animations that respect `prefers-reduced-motion`.
+- **Content dashboard** at `/{locale}/dashboard` — profile, work experience, education, skills, projects, socials and a Markdown blog editor. Every form has validation, loading, error and empty states.
+- **Secure by default** — all admin APIs require a session; credentials live in server-only env vars; request bodies validated with Zod on the server.
+- **Complete SEO** — per-page metadata, canonical + hreflang alternates, Open Graph / Twitter cards with a generated OG image, JSON-LD (Person, Blog, BlogPosting, BreadcrumbList), localized sitemap, robots, RSS feed and a web manifest.
+- **Server-side data access** — pages read from Mongoose directly (no HTTP self-fetching); public JSON APIs stay available at `/api/{lang}`.
+- **ISR + on-demand revalidation** — content edits refresh the public site immediately.
+- **Fully typed** — strict TypeScript, shared domain types, ESLint (core-web-vitals + TypeScript) and `npm run verify` in one command.
 
-## Tech Stack
+## Quick start (5 minutes)
 
-- Framework: Next.js 14 (React 18)
-- Language: TypeScript
-- Styling: Tailwind CSS, shadcn/ui, Framer Motion
-- i18n: next‑intl (locales: fa, en)
-- Data: MongoDB + Mongoose
-- Auth: NextAuth (Credentials)
-- Content: MDX (unified/remark/rehype)
-
-## Quick Start
-
-Prerequisites:
-
-- Node.js >= 18
-- pnpm or npm
-- MongoDB (local or Atlas)
-
-Steps:
-
-1. Clone the repo
-2. Install dependencies
-3. Create and fill `.env.local` (see below)
-4. Seed sample data (optional)
-5. Run the dev server
+Prerequisites: **Node.js >= 20** and a MongoDB instance (local or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster).
 
 ```bash
-# Install
-pnpm install
+# 1. Clone and install
+git clone https://github.com/emiroow/magic-portfolio-next.git
+cd magic-portfolio-next
+npm install            # pnpm install works too
 
-# Seed database (optional – requires Mongo running)
-pnpm run seed
+# 2. Configure environment
+cp .env.example .env.local
+# then edit .env.local: set MONGODB_URI and NEXTAUTH_SECRET
 
-# Start development
-pnpm run dev
+# 3. Load demo content (optional but recommended)
+npm run seed
+
+# 4. Run
+npm run dev
 ```
 
-## Environment Variables
+Open [http://localhost:3000](http://localhost:3000) — the site serves `/en` and `/fa` from there.
+The dashboard is at `/en/dashboard` (demo credentials: `admin@example.com` / `admin1234` — override with `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
 
-Create `.env.local` in the project root:
+## Scripts
 
-```env
-# Site
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+| Script               | Purpose                                              |
+| -------------------- | ---------------------------------------------------- |
+| `npm run dev`        | Start the development server                         |
+| `npm run build`      | Production build                                     |
+| `npm run start`      | Serve the production build                           |
+| `npm run seed`       | Insert demo content (skips if DB is not empty)       |
+| `npm run seed:force` | Drop the database, then seed demo content            |
+| `npm run lint`       | ESLint                                               |
+| `npm run typecheck`  | `tsc --noEmit`                                       |
+| `npm run verify`     | Lint + typecheck + build — the CI/quality gate       |
 
-# Public API base (used by Axios client)
-NEXT_PUBLIC_API_URL=http://localhost:3000
+## Environment variables
 
-# Database
-DB_CONNECTION=mongodb://localhost:27017/Magic
+| Variable                      | Required | Description                                                        |
+| ----------------------------- | -------- | ------------------------------------------------------------------ |
+| `MONGODB_URI`                 | Yes      | MongoDB connection string                                          |
+| `NEXT_PUBLIC_SITE_URL`        | Yes      | Canonical site origin (e.g. `https://portfolio.example.com`)       |
+| `NEXTAUTH_SECRET`             | Yes      | Session encryption key — `openssl rand -base64 32`                 |
+| `NEXTAUTH_URL`                | Prod     | Same origin as the app (NextAuth compatibility)                    |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | No   | Dashboard credentials (fall back to demo values)                   |
+| `BLOB_READ_WRITE_TOKEN`       | Prod     | Vercel Blob token — required for image uploads in production       |
+| `NEXT_PUBLIC_SITE_TITLE`      | No       | PWA manifest / metadata title                                      |
+| `NEXT_PUBLIC_TWITTER_HANDLE`  | No       | `@handle` for Twitter cards                                        |
+| `NEXT_PUBLIC_GA_ID`           | No       | Optional Google Analytics 4 ID                                     |
 
-# Auth (required in production)
-NEXTAUTH_SECRET=replace-with-strong-secret
-NEXTAUTH_URL=https://your-domain.com
+## Project structure
 
-# Demo credentials (used by Credentials provider)
-NEXT_PUBLIC_DEMO_EMAIL=admin@example.com
-NEXT_PUBLIC_DEMO_PASSWORD=admin1234
+```
+src/
+├── app/
+│   ├── [locale]/            # Localized routes (en default, fa with RTL)
+│   │   ├── (client)/        # Home page (hero, about, experience, projects…)
+│   │   ├── auth/            # Admin sign-in
+│   │   ├── blog/            # Blog list, post pages and RSS route
+│   │   └── dashboard/       # Admin dashboard (session protected)
+│   ├── api/
+│   │   ├── [lang]/          # Public JSON API (portfolio data, blog)
+│   │   ├── [lang]/admin/    # Guarded CRUD APIs (Zod validated)
+│   │   ├── auth/            # NextAuth
+│   │   └── og/              # Generated Open Graph image
+│   └── layout.tsx           # Fonts, global metadata, analytics
+├── components/
+│   ├── dashboard/           # Admin sections (one file per resource)
+│   ├── home/ & sections/    # Public page sections
+│   ├── magicui/             # Dock, blur-fade, flickering grid
+│   └── ui/                  # shadcn/ui primitives (see components.json)
+├── config/                  # NextAuth options + cached DB connection
+├── hooks/                   # react-hook-form + react-query hooks
+├── lib/                     # data layer, zod schemas, API helpers, utils
+├── models/                  # Mongoose schemas
+├── seed/                    # Demo content seeds (npm run seed)
+├── types/                   # Shared domain types
+└── i18n/                    # next-intl routing & request config
 ```
 
-Notes:
+## Deploy on Vercel
 
-- `NEXT_PUBLIC_SITE_URL` is used for SEO metadata base/canonical.
-- `DB_CONNECTION` is read by `src/config/dbConnection.ts`.
-- Credentials provider accepts only the demo pair unless you extend it.
+1. Push this repository to GitHub.
+2. On [Vercel](https://vercel.com/new), import the repo.
+3. Add the environment variables (see the table above). Use a MongoDB **Atlas** connection string.
+4. To enable image uploads, create a [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) store — `BLOB_READ_WRITE_TOKEN` is injected automatically.
+5. Deploy, then set `NEXT_PUBLIC_SITE_URL` to your final domain and redeploy once so metadata picks it up.
 
-## Localization
+In production, uploads go to Vercel Blob; in development they are saved under `public/` — no extra setup for local work.
 
-- Locales: `fa`, `en` (default: `fa`) configured in `src/i18n/routing.ts`.
-- Automatic RTL for Persian is set in `src/app/layout.tsx`.
-- Middleware enforces localized routes: see `src/middleware.ts`.
+## Customization
 
-## SEO
+- **Colors** — edit the CSS variables in `src/app/globals.css` (single source of truth for the monochrome theme).
+- **Content** — everything is data-driven from MongoDB via the dashboard; re-run `npm run seed:force` to reset demo content.
+- **Add a section** — create a model + types in `src/models` and `src/types`, expose it with `createAdminCrud` in `src/app/api/[lang]/admin/...`, and add a section component under `src/components/sections`.
+- **Languages** — translations live in `messages/en.json` and `messages/fa.json`; locales are configured in `src/i18n/routing.ts`.
 
-- Global metadata in `src/app/layout.tsx` (title, description, canonical, alternates)
-- `src/app/robots.ts` for robots.txt
-- `src/app/sitemap.ts` for a localized sitemap
-- `src/app/manifest.ts` for PWA manifest
-- `src/components/JsonLd.tsx` to inject structured data (schema.org)
+## Troubleshooting
 
-## Project Structure
-
-Key folders:
-
-- `src/app/[locale]` – localized routes (blog, dashboard, auth)
-- `src/components` – UI, dashboard modules, MDX, theme toggles
-- `src/models` – Mongoose models (blog, profile, etc.)
-- `src/seed` – seed scripts and sample data
-- `src/config` – auth and database connection
-- `src/i18n` – routing and helpers for next‑intl
-- `messages` – translation messages (en/fa)
-- `content` – sample MDX content
-
-## Development
-
-Useful scripts:
-
-```bash
-pnpm run dev        # Start dev server
-pnpm run lint       # Lint with ESLint
-pnpm run typecheck  # TypeScript type check
-pnpm run build      # Production build
-pnpm run start      # Start production server
-pnpm run seed       # Seed MongoDB with sample data
-```
-
-## Deployment
-
-1. Set env vars on your host (Vercel recommended)
-2. Ensure `NEXTAUTH_SECRET` is set (required in prod)
-3. Provide `DB_CONNECTION` to your MongoDB instance
-4. Build and deploy
-
-One‑click deploy to Vercel:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Femiroow%2Fmagic-portfolio-next)
+| Symptom                                   | Fix                                                                       |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| Home shows “No content yet”               | `MONGODB_URI` missing/incorrect — check `.env.local`, then `npm run seed` |
+| Images fail in production                 | Set `BLOB_READ_WRITE_TOKEN` (Vercel Blob)                                 |
+| Login redirects endlessly                 | `NEXTAUTH_URL` must match the deployed origin exactly                     |
+| Persian dates look Gregorian              | Node >= 20 with full ICU (the official builds include it)                 |
+| `npm run seed` says file `.env.local` not found | Create `.env.local` first (it is required by the seed script)        |
 
 ## Contributing
 
-Contributions are welcome! Please:
-
-- Open an issue to discuss major changes
-- Fork the repo, create a feature branch, and open a PR
+Issues and pull requests are welcome. Please run `npm run verify` before submitting — it is the exact CI gate (lint + typecheck + build).
 
 ## License
 
-MIT © 2025 — See [LICENSE](./LICENSE)
-
-## Acknowledgements
-
-- [shadcn/ui](https://ui.shadcn.com/) for the UI primitives
-- [magicui.design](https://magicui.design/) components included in `src/components/magicui`
-- [next-intl](https://next-intl-docs.vercel.app/) for localization
+[MIT](LICENSE) — free to use for your personal portfolio, commercially and in derivative templates.
