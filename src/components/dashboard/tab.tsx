@@ -1,92 +1,73 @@
-"use client";
-import { AnimatePresence, motion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import BlurFade from "../magicui/blur-fade";
-import Blog from "./Blog";
-import EducationExperience from "./Education";
-import Profile from "./Profile";
-import Projects from "./Projects";
-import Skills from "./Skills";
-import Socials from "./Socials";
-import WorkExperience from "./WorkExperience";
+'use client';
 
+import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import Blog from './Blog';
+import EducationExperience from './Education';
+import Profile from './Profile';
+import Projects from './Projects';
+import Skills from './Skills';
+import Socials from './Socials';
+import WorkExperience from './WorkExperience';
+
+/** Ordered dashboard sections; `trans` is a key under `dashboard.menu`. */
+const TABS = [
+  { trans: 'Profile', component: Profile },
+  { trans: 'Work', component: WorkExperience },
+  { trans: 'Education', component: EducationExperience },
+  { trans: 'Skills', component: Skills },
+  { trans: 'Projects', component: Projects },
+  { trans: 'Socials', component: Socials },
+  { trans: 'Blog', component: Blog },
+] as const;
+
+/** Dashboard section switcher with animated content transitions. */
 const Tab = () => {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    const saved = window.localStorage.getItem("activeTab");
-    const value = saved ? Number(saved) : NaN;
-    return Number.isFinite(value) ? value : 0;
-  }); // default = Profile
+  const t = useTranslations('dashboard.menu');
+  const [activeTab, setActiveTab] = useState(0);
 
-  const t = useTranslations("dashboard.menu");
-
-  const tab = [
-    { trans: "Profile" },
-    { trans: "Work" },
-    { trans: "Education" },
-    { trans: "Skills" },
-    { trans: "Projects" },
-    { trans: "Socials" },
-    { trans: "Blog" },
-  ];
-
-  const content = [
-    { component: <Profile />, trans: "Profile" },
-    { component: <WorkExperience />, trans: "Work" },
-    { component: <EducationExperience />, trans: "Education" },
-    { component: <Skills />, trans: "Skills" },
-    { component: <Projects />, trans: "Projects" },
-    { component: <Socials />, trans: "Socials" },
-    { component: <Blog />, trans: "Blog" },
-  ];
-
-  const handleTabClick = (index: number) => {
-    setActiveTab(index);
-    localStorage.setItem("activeTab", index.toString());
-  };
+  const Active = TABS[activeTab].component;
 
   return (
-    <BlurFade yOffset={20} delay={0.04}>
-      {/* tabs */}
-      <div className="bg-muted rounded-md py-1.5 px-2 flex overflow-auto sm:w-max w-full gap-3 text-sm mt-7 m-auto">
-        {tab.map((item, index) => (
-          <motion.div
-            key={index}
-            onClick={() => handleTabClick(index)}
-            className={`w-max px-3 py-1 rounded-md text-nowrap cursor-pointer transition-colors duration-200
-              ${
-                index === activeTab
-                  ? "bg-white text-black border border-white shadow"
-                  : "dark:bg-black dark:text-white"
-              }`}
-            whileTap={{ scale: 0.99 }}
-            whileHover={{ scale: 1.05 }}
-            layout
+    <div className="mt-7">
+      <div
+        role="tablist"
+        aria-label="Dashboard sections"
+        className="m-auto flex w-full gap-1.5 overflow-x-auto rounded-xl border bg-muted/50 p-1.5 sm:w-max"
+      >
+        {TABS.map((tab, index) => (
+          <button
+            key={tab.trans}
+            role="tab"
+            type="button"
+            aria-selected={index === activeTab}
+            onClick={() => setActiveTab(index)}
+            className={cn(
+              'whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors',
+              index === activeTab ? 'bg-primary font-medium text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            )}
           >
-            {t(item.trans)}
-          </motion.div>
+            {t(tab.trans)}
+          </button>
         ))}
       </div>
 
-      {/* divider */}
-      <hr className="h-1 mt-2 mb-3 dark:bg-secondary bg-muted rounded-[300%]" />
-
-      {/* content */}
-      <div className="w-full h-max">
+      <div className="w-full">
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTab} // important for AnimatePresence
+            key={activeTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {content[activeTab]?.component}
+            <Active />
           </motion.div>
         </AnimatePresence>
       </div>
-    </BlurFade>
+    </div>
   );
 };
 

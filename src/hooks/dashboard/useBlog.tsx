@@ -1,138 +1,100 @@
-import { IBlog } from "@/interface/IBlog";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as yup from "yup";
+'use client';
 
+import { api } from '@/lib/client-api';
+import { blogSchema } from '@/lib/validations';
+import type { IBlog } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+// Same schema as the API plus the optional document id for edits.
+const formSchema = blogSchema.extend({ _id: z.string().optional() });
+type BlogForm = z.infer<typeof formSchema>;
+
+const EMPTY: BlogForm = { title: '', slug: '', summary: '', content: '' };
+
+/** Slug from a title: ASCII transliteration-free, keeps letters/digits/dash. */
+export function slugify(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, '')
+    .replace(/-{2,}/g, '-')
+    .slice(0, 80);
+}
+
+/** Blog post list + CRUD for the dashboard editor. */
 const useBlog = () => {
   const locale = useLocale();
-  const t = useTranslations();
-  const tDashboard = useTranslations("dashboard");
-  const tBlog = useTranslations("dashboard.blog");
-  const [isEdit, setIsEdit] = useState(false);
-
-  type FormType = {
-    _id?: string;
-    title: string;
-    slug: string;
-    summary: string;
-    content: string;
-    lang: "fa" | "en";
-  };
-
-  const Schema = yup.object({
-    _id: yup.string().notRequired(),
-    title: yup.string().required(t("requiredField")),
-    slug: yup.string().required(t("requiredField")),
-    summary: yup.string().default(""),
-    content: yup.string().default(""),
-    lang: yup.mixed<"fa" | "en">().oneOf(["fa", "en"]).required(),
-  });
+  const { ok, fail } = useToastMessages();
 
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
+    watch,
     reset,
-    control,
-    getValues,
-    formState: { errors, isDirty },
-  } = useForm<FormType>({
-    resolver: yupResolver(Schema) as any,
-    defaultValues: {
-      _id: undefined,
-      title: "",
-      slug: "",
-      summary: "",
-      content: "",
-      lang: (locale as "fa" | "en") || "fa",
-    },
+    formState: { errors },
+  } = useForm<BlogForm>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched',
   });
 
   const {
-    data: blogs,
-    isLoading,
-    refetch,
+    data: posts,
+    isPending,
+    isError,
+    error,
+    refetch: refetchPosts,
   } = useQuery({
-    enabled: !!locale,
-    queryKey: ["blogs", locale],
-    queryFn: async () => {
-      const res = await axios.get<IBlog[]>(`/api/${locale}/admin/blog`);
-      return res.data;
-    },
+    queryKey: ['blog-posts', locale],
+    queryFn: () => api.get<IBlog[]>(`/api/${locale}/admin/blog`),
   });
 
-  const {
-    mutate: saveBlog,
-    isPending: isSaving,
-    reset: resetSaveMutation,
-  } = useMutation({
-    mutationFn: async (data: FormType) => {
-      if (data._id) {
-        const res = await axios.put(`/api/${locale}/admin/blog`, data);
-        return res.data;
-      }
-      const res = await axios.post(`/api/${locale}/admin/blog`, data);
-      return res.data;
-    },
+  const save = useMutation({
+    mutationFn: (data: BlogForm) =>
+      data._id ? api.put<IBlog>(`/api/${locale}/admin/blog`, data) : api.post<IBlog>(`/api/${locale}/admin/blog`, data),
     onSuccess: () => {
-      toast(tDashboard("successMessage"));
+      ok();
       reset();
-      setIsEdit(false);
-      refetch();
+      refetchPosts();
     },
-    onError: () => toast.error(tDashboard("errorMessage")),
+    onError: () => fail(),
   });
 
-  const { mutate: deleteBlog, isPending: isDeleting } = useMutation({
-    mutationFn: async (_id: string) => {
-      const res = await axios.delete(`/api/${locale}/admin/blog`, {
-        data: { _id },
-      });
-      return res.data;
-    },
+  const { mutate: deletePost, isPending: deleting } = useMutation({
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/blog?id=${encodeURIComponent(id)}`),
     onSuccess: () => {
-      toast(tDashboard("successMessage"));
-      refetch();
+      ok();
+      refetchPosts();
     },
-    onError: () => toast.error(tDashboard("errorMessage")),
+    onError: () => fail(),
   });
 
-  const editBlog = (b: IBlog) => {
-    setValue("_id", b._id);
-    setValue("title", b.title);
-    setValue("slug", b.slug);
-    setValue("summary", b.summary || "");
-    setValue("content", b.content || "");
-    setIsEdit(true);
-  };
+  const startEdit = (post: IBlog) => reset({ ...EMPTY, ...post, _id: post._id });
 
   return {
     register,
     handleSubmit,
-    watch,
     setValue,
+    watch,
     reset,
-    control,
-    getValues,
     errors,
-    isDirty,
-    blogs,
-    isLoading,
-    refetch,
-    saveBlog,
-    isSaving,
-    deleteBlog,
-    isDeleting,
-    editBlog,
-    isEdit,
-    setIsEdit,
-    resetSaveMutation,
+    posts,
+    isPending,
+    isError,
+    error,
+    refetchPosts,
+    save,
+    deletePost,
+    deleting,
+    startEdit,
+    onSubmit: (data: BlogForm) => save.mutate(data),
   };
 };
 

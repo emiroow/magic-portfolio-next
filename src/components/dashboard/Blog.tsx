@@ -1,382 +1,154 @@
-"use client";
-import useBlog from "@/hooks/dashboard/useBlog";
-import { formatYearMonthLocal } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { GoPlus } from "react-icons/go";
-import { IoMdClose } from "react-icons/io";
-import BlurFade from "../magicui/blur-fade";
-import { Button } from "../ui/button";
-import { ConfirmDialog } from "../ui/confirm-dialog";
-import { Input } from "../ui/input";
-import Loading from "../ui/loading";
-import MarkdownEditor from "../ui/markdown-editor";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+'use client';
 
+import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Input } from '@/components/ui/input';
+import Loading from '@/components/ui/loading';
+import MarkdownEditor from '@/components/ui/markdown-editor';
+import useBlog, { slugify } from '@/hooks/dashboard/useBlog';
+import type { IBlog } from '@/types';
+import { formatYearMonthLocal } from '@/lib/utils';
+import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useState } from 'react';
+
+/** Blog section: markdown post editor with search, edit and delete. */
 const Blog = () => {
+  const t = useTranslations('dashboard.blog');
+  const tDash = useTranslations('dashboard');
   const locale = useLocale();
-  const t = useTranslations("dashboard.blog");
-  const tDash = useTranslations("dashboard");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const lang = locale === 'fa' ? 'fa' : 'en';
 
-  // simple reading time estimation (~200 wpm)
-  const readingTime = (text: string | undefined) => {
-    if (!text) return "";
-    const words = text.trim().split(/\s+/).length;
-    const minutes = Math.max(1, Math.ceil(words / 200));
-    return `${minutes} min`;
+  const { register, handleSubmit, setValue, watch, reset, errors, posts, isPending, isError, error, save, deletePost, deleting, startEdit, onSubmit, refetchPosts } =
+    useBlog();
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+
+  const title = watch('title');
+  const content = watch('content');
+  const editingId = watch('_id');
+
+  const closeForm = () => {
+    setFormOpen(false);
+    reset();
   };
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    blogs,
-    isLoading,
-    saveBlog,
-    isSaving,
-    deleteBlog,
-    isDeleting,
-    editBlog,
-    isEdit,
-    setIsEdit,
-    getValues,
-    isDirty,
-    resetSaveMutation,
-  } = useBlog();
+  const beginCreate = () => {
+    reset();
+    setFormOpen(true);
+  };
 
-  // computed filtered/sorted list for nicer UX
-  const filteredBlogs = useMemo(() => {
-    const list = Array.isArray(blogs) ? [...blogs] : [];
-    const sorted = list.sort((a: any, b: any) => {
-      const at = new Date(a?.createdAt || 0).getTime();
-      const bt = new Date(b?.createdAt || 0).getTime();
-      return bt - at;
-    });
-    if (!query) return sorted;
-    const q = query.toLowerCase();
-    return sorted.filter(
-      (b: any) =>
-        (b.title || "").toLowerCase().includes(q) ||
-        (b.slug || "").toLowerCase().includes(q)
-    );
-  }, [blogs, query]);
+  const beginEdit = (post: IBlog) => {
+    startEdit(post);
+    setFormOpen(true);
+  };
 
-  // ensure RHF knows about content field since we removed the textarea
-  useEffect(() => {
-    register("content");
-  }, [register]);
+  // Auto-derive the slug from the title while creating (never overwrites a
+  // manually edited slug once the field has been touched with a value).
+  const slug = watch('slug');
+  const autoSlug = !editingId && title ? slugify(title) : slug;
 
-  // bind editor to form value
-  const contentValue = watch ? watch("content") : getValues("content");
-
-  if (isLoading) return <Loading className="h-[50vh]" />;
+  const filtered = (posts ?? []).filter(
+    post => !query.trim() || post.title.toLowerCase().includes(query.toLowerCase()) || post.slug.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
-    <section
-      className="flex flex-col mb-20"
-      dir={locale === "fa" ? "rtl" : "ltr"}
+    <SectionShell
+      title={t('title')}
+      action={
+        !formOpen && (
+          <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createBlog')}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        )
+      }
     >
-      <AnimatePresence mode="wait">
-        {isEdit ? (
-          <motion.div
-            key="blog-edit-form"
-            initial={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.1,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-          >
-            <div className="w-full max-w-3xl mx-auto">
-              <div className="flex flex-row justify-between items-center">
-                <h3 className="text-xl font-bold mt-3">
-                  {getValues("_id")
-                    ? t("edit")
-                    : t("createBlog", { defaultValue: "Create blog post" })}
-                </h3>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => {
-                        reset();
-                        resetSaveMutation();
-                        setIsEdit(false);
-                      }}
-                      variant={"secondary"}
-                      size={"icon"}
-                      className="size-8"
-                    >
-                      <IoMdClose className="text-red-700 text-lg" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{tDash("cancel")}</p>
-                  </TooltipContent>
-                </Tooltip>
+      <FormPanel open={formOpen} title={editingId ? t('edit') : t('createBlog')} onClose={closeForm}>
+        <form
+          onSubmit={handleSubmit(data => onSubmit({ ...data, slug: autoSlug }))}
+          className="space-y-4"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label={t('titlePlaceholder')} error={errors.title?.message}>
+              <Input {...register('title')} placeholder={t('titlePlaceholder')} />
+            </Field>
+            <Field label={t('slugPlaceholder')} error={errors.slug?.message}>
+              <Input value={autoSlug} onChange={e => setValue('slug', e.target.value)} placeholder={t('slugPlaceholder')} dir="ltr" />
+            </Field>
+          </div>
+
+          <Field label={t('summaryPlaceholder')} error={errors.summary?.message}>
+            <Input {...register('summary')} placeholder={t('summaryPlaceholder')} />
+          </Field>
+
+          <Field label={t('contentPlaceholder')} error={errors.content?.message}>
+            {/* The editor is uncontrolled from RHF's perspective; sync via setValue. */}
+            <input type="hidden" {...register('content')} />
+            <MarkdownEditor value={content ?? ''} onChange={value => setValue('content', value, { shouldValidate: true, shouldDirty: true })} height={360} />
+          </Field>
+
+          <div className="flex gap-2 max-sm:flex-col">
+            <Button type="submit" disabled={save.isPending} className="w-full sm:w-auto">
+              {save.isPending ? <Loading size="sm" className="me-2" /> : null}
+              {t('save')}
+            </Button>
+            <Button type="button" variant="outline" onClick={closeForm} className="w-full sm:w-auto">
+              {tDash('cancel')}
+            </Button>
+          </div>
+        </form>
+      </FormPanel>
+
+      {isPending ? (
+        <LoadingRows />
+      ) : isError ? (
+        <ErrorState message={error?.message} onRetry={() => refetchPosts()} />
+      ) : posts && posts.length > 0 ? (
+        <div className="space-y-3">
+          <Input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} className="mb-1 max-w-sm" />
+          {filtered.map(post => (
+            <div key={post._id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-3 sm:p-4">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{post.title}</p>
+                <p className="text-xs text-muted-foreground" dir="ltr">
+                  /{post.slug} · {formatYearMonthLocal(post.createdAt, lang)}
+                </p>
               </div>
-
-              {/* form */}
-              <form
-                onSubmit={handleSubmit((data) => saveBlog(data as any))}
-                className="flex flex-col gap-5 mb-2 mt-5"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {t("title")}
-                    </label>
-                    <Input
-                      {...register("title")}
-                      placeholder={t("titlePlaceholder")}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Slug
-                    </label>
-                    <Input
-                      {...register("slug")}
-                      placeholder={t("slugPlaceholder")}
-                      className="w-full"
-                    />
-                    <p className="text-[10px] text-muted-foreground">
-                      e.g. my-first-post
-                    </p>
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {t("summaryPlaceholder")}
-                    </label>
-                    <Input
-                      {...register("summary")}
-                      placeholder={t("summaryPlaceholder")}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    {t("contentPlaceholder")}
-                  </label>
-                  <div className="rounded-md border">
-                    <MarkdownEditor
-                      value={contentValue || ""}
-                      onChange={(val) =>
-                        setValue("content", val, { shouldDirty: true })
-                      }
-                      placeholder={t("contentPlaceholder")}
-                      className="w-full"
-                      height={420}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2 max-sm:flex-col mt-2 mb-24">
-                  <Button
-                    disabled={isSaving}
-                    type="submit"
-                    className="w-full sm:w-auto"
-                  >
-                    {isSaving ? <Loading size="sm" /> : t("save")}
+              <div className="flex shrink-0 items-center gap-1">
+                <Link href={`/${locale}/blog/${post.slug}`} target="_blank">
+                  <Button size="icon" variant="ghost" className="size-8" aria-label={t('openPost')}>
+                    <ExternalLink className="h-4 w-4" />
                   </Button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="blog-list"
-            initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.25,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-            className="flex flex-col gap-5"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-              <h3 className="text-xl font-bold mt-3">
-                {t("title")}{" "}
-                {!!blogs?.length && (
-                  <span className="text-sm text-muted-foreground font-normal">
-                    ({blogs.length})
-                  </span>
-                )}
-              </h3>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={
-                    locale === "fa" ? "جستجو عنوان/اسلاگ" : "Search title/slug"
-                  }
-                  className="w-full text-sm text-center sm:w-64"
-                />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={() => setIsEdit(true)}
-                      variant={"secondary"}
-                      size={"icon"}
-                      className="size-8"
-                    >
-                      <GoPlus className="text-xl text-green-500" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {t("createBlog", { defaultValue: "Create blog post" })}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-
-            {filteredBlogs && filteredBlogs.length > 0 ? (
-              filteredBlogs.map((b: any, index: number) => (
-                <BlurFade key={b._id} delay={0.04 * 8 + index * 0.05}>
-                  <div className="w-full border rounded p-4 flex flex-col gap-3 hover:bg-muted/30 transition-colors">
-                    <div className="min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="font-bold text-base line-clamp-2 sm:line-clamp-1">
-                          {b.title}
-                        </div>
-                        <div className="hidden sm:flex gap-2">
-                          <Link
-                            href={`/${locale}/blog/${b.slug}`}
-                            target="_blank"
-                          >
-                            <Button variant="ghost" size="sm" className="h-8">
-                              {locale === "fa" ? "پیش‌نمایش" : "Preview"}
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8"
-                            onClick={() => editBlog(b)}
-                          >
-                            {t("edit")}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="h-8"
-                            onClick={() => {
-                              setSelectedId(b._id);
-                              setConfirmOpen(true);
-                            }}
-                            disabled={isDeleting}
-                          >
-                            {tDash("delete")}
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        <div className="flex items-center gap-2 justify-between max-sm:flex-col max-sm:items-start">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <code className="text-[11px] break-all font-normal bg-muted/50 px-1 py-0.5 rounded">
-                              {b.slug}
-                            </code>
-                            {b.content && (
-                              <span className="inline-flex items-center gap-1 text-[11px] px-1 py-0.5 rounded bg-muted/40">
-                                {locale === "fa" ? "زمان مطالعه:" : "Read:"}{" "}
-                                {readingTime(b.content)}
-                              </span>
-                            )}
-                          </div>
-                          <span>
-                            {formatYearMonthLocal(
-                              b.createdAt || "",
-                              locale as any
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                      {b.summary && (
-                        <div className="text-xs text-muted-foreground line-clamp-3 sm:line-clamp-2 mt-1">
-                          {b.summary}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex w-full gap-2 sm:hidden">
-                      <Link
-                        href={`/${locale}/blog/${b.slug}`}
-                        target="_blank"
-                        className="flex-1"
-                      >
-                        <Button variant="ghost" className="w-full">
-                          {locale === "fa" ? "پیش‌نمایش" : "Preview"}
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        onClick={() => editBlog(b)}
-                        className="flex-1"
-                      >
-                        {t("edit")}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          setSelectedId(b._id);
-                          setConfirmOpen(true);
-                        }}
-                        disabled={isDeleting}
-                        className="flex-1"
-                      >
-                        {tDash("delete")}
-                      </Button>
-                    </div>
-                  </div>
-                </BlurFade>
-              ))
-            ) : (
-              <div className="text-center py-8 mt-24">
-                <p className="text-muted-foreground">{t("noBlogs")}</p>
-                <Button
-                  onClick={() => setIsEdit(true)}
-                  variant="outline"
-                  className="mt-2"
-                >
-                  {t("createBlog", { defaultValue: "Create blog post" })}
+                </Link>
+                <Button size="icon" variant="ghost" className="size-8" onClick={() => beginEdit(post)} aria-label={t('edit')}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" className="size-8" onClick={() => post._id && setPendingDelete(post._id)} disabled={deleting} aria-label={tDash('delete')}>
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          ))}
+          {filtered.length === 0 && <EmptyState text={t('noBlogs')} />}
+        </div>
+      ) : (
+        !formOpen && <EmptyState text={t('noBlogs')} actionText={t('createBlog')} onAction={beginCreate} />
+      )}
 
       <ConfirmDialog
-        confirmText={tDash("delete")}
-        itemName={
-          selectedId ? blogs?.find((b) => b._id === selectedId)?.title : ""
-        }
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        dir={locale === "fa" ? "rtl" : "ltr"}
-        locale={locale}
+        open={Boolean(pendingDelete)}
+        onOpenChange={open => !open && setPendingDelete(null)}
+        itemName={posts?.find(p => p._id === pendingDelete)?.title}
         onConfirm={() => {
-          if (selectedId) deleteBlog(selectedId);
-          setConfirmOpen(false);
+          if (pendingDelete) deletePost(pendingDelete);
+          setPendingDelete(null);
         }}
       />
-    </section>
+    </SectionShell>
   );
 };
 

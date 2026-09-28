@@ -1,254 +1,122 @@
-"use client";
-import useSocials from "@/hooks/dashboard/useSocials";
-import { useLocale, useTranslations } from "next-intl";
-import { cloneElement, isValidElement, useState } from "react";
-import { iconDecider } from "../icons";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { ConfirmDialog } from "../ui/confirm-dialog";
-import { Input } from "../ui/input";
-import Loading from "../ui/loading";
+'use client';
 
-const availableIcons = [
-  "linkedin",
-  "github",
-  "instagram",
-  "telegram",
-  "youtube",
-  "whatsapp",
-  "x",
-  "website",
-];
+import { iconDecider } from '@/components/icons';
+import { EmptyState, ErrorState, Field, LoadingRows, SectionShell } from '@/components/dashboard/shared';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Input } from '@/components/ui/input';
+import Loading from '@/components/ui/loading';
+import useSocials from '@/hooks/dashboard/useSocials';
+import { Pencil, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
+const AVAILABLE_ICONS = ['github', 'linkedin', 'x', 'instagram', 'telegram', 'whatsapp', 'youtube', 'website', 'email'];
+
+/** Social links section: inline create/edit form plus a badge list. */
 const Socials = () => {
-  const t = useTranslations("dashboard.social");
-  const tDash = useTranslations("dashboard");
-  const locale = useLocale();
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const t = useTranslations('dashboard.social');
+  const tDash = useTranslations('dashboard');
+  const { socials, isPending, isError, error, register, handleSubmit, reset, watch, errors, onsubmit, save, deleteSocial, edit } =
+    useSocials();
 
-  const {
-    socials,
-    isLoading,
-    register,
-    registerName,
-    registerUrl,
-    registerIcon,
-    handleSubmit,
-    setValue,
-    reset,
-    watch,
-    formState: { isDirty, isValid, errors },
-    onsubmit,
-    isEdit,
-    setIsEdit,
-    deleteSocial,
-    deleting,
-    creating,
-    updating,
-  } = useSocials();
-  const selectedIcon = watch("icon");
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const selectedIcon = watch('icon');
+  const editingId = watch('_id');
+
+  const selectClass =
+    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 
   return (
-    <section>
-      <div className="flex flex-row justify-between items-center">
-        <h3 className="text-xl font-bold mt-3">{t("title")}</h3>
-      </div>
+    <SectionShell title={t('title')}>
+      {/* Create / edit form */}
+      <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-3 md:grid-cols-12">
+        <Field label={t('name')} error={errors.name?.message} className="md:col-span-3">
+          <Input {...register('name')} placeholder={t('namePlaceholder')} autoComplete="off" />
+        </Field>
 
-      {/* Create/Edit Form */}
-      <form
-        onSubmit={handleSubmit(onsubmit)}
-        className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-5 items-end"
-      >
-        <div className="space-y-1 md:col-span-3">
-          <label className="text-sm font-medium text-muted-foreground">
-            {t("name")}
-          </label>
-          <Input
-            {...registerName}
-            placeholder={t("namePlaceholder")}
-            autoComplete="off"
-          />
-          {errors?.name?.type === "required" && (
-            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
-          )}
-          {errors?.name?.type === "minLength" && (
-            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
-          )}
-        </div>
+        <Field label={t('url')} error={errors.url?.message} className="md:col-span-4">
+          <Input {...register('url')} placeholder={t('urlPlaceholder')} type="url" />
+        </Field>
 
-        <div className="space-y-1 md:col-span-4">
-          <label className="text-sm font-medium text-muted-foreground">
-            {t("url")}
-          </label>
-          <Input
-            {...registerUrl}
-            placeholder={t("urlPlaceholder")}
-            type="url"
-          />
-          {errors?.url?.type === "required" && (
-            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
-          )}
-          {errors?.url?.type === "pattern" && (
-            <p className="text-xs text-red-500">Must be a valid URL</p>
-          )}
-        </div>
-
-        <div className="space-y-1 md:col-span-3">
-          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            {locale === "fa" ? (
-              <>
-                {selectedIcon ? (
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted text-foreground">
-                    {(() => {
-                      const node = iconDecider(selectedIcon);
-                      return isValidElement(node)
-                        ? cloneElement(node as any, { className: "w-4 h-4" })
-                        : node;
-                    })()}
-                  </span>
-                ) : null}
-                {t("icon")}
-              </>
-            ) : (
-              <>
-                {selectedIcon ? (
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-muted text-foreground">
-                    {(() => {
-                      const node = iconDecider(selectedIcon);
-                      return isValidElement(node)
-                        ? cloneElement(node as any, { className: "w-4 h-4" })
-                        : node;
-                    })()}
-                  </span>
-                ) : null}
-                {t("icon")}
-              </>
-            )}
-          </label>
-          <select
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            {...registerIcon}
-          >
-            <option value="">{t("selectIcon")}</option>
-            {availableIcons.map((ic) => (
-              <option key={ic} value={ic}>
-                {ic}
+        <Field label={t('icon')} error={errors.icon?.message} className="md:col-span-3">
+          <select className={selectClass} {...register('icon')}>
+            <option value="">{t('selectIcon')}</option>
+            {AVAILABLE_ICONS.map(icon => (
+              <option key={icon} value={icon}>
+                {icon}
               </option>
             ))}
           </select>
-          {errors?.icon && (
-            <p className="text-xs text-red-500">{tDash("errorMessage")}</p>
-          )}
-        </div>
+        </Field>
 
-        <div
-          className={`flex items-end gap-2 md:col-span-2 ${
-            locale === "fa" ? "md:justify-start" : "md:justify-end"
-          }`}
-        >
-          <Button
-            type="submit"
-            disabled={
-              creating || updating || (socials?.length || 0) >= 4 || !isValid
-            }
-            className="w-full md:w-auto"
-          >
-            {creating || updating ? (
-              <span className="inline-flex items-center gap-2">
-                <Loading size="sm" />
-                {t("save")}
-              </span>
-            ) : (
-              t("save")
-            )}
+        <div className="flex gap-2 md:col-span-2">
+          <Button type="submit" disabled={save.isPending} className="w-full md:w-auto">
+            {save.isPending ? <Loading size="sm" className="me-2" /> : null}
+            {t('save')}
           </Button>
-          {isEdit && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                reset();
-                setIsEdit(false);
-              }}
-              className="w-full md:w-auto"
-            >
-              {tDash("cancel")}
+          {editingId && (
+            <Button type="button" variant="outline" onClick={reset} className="w-full md:w-auto">
+              {tDash('cancel')}
             </Button>
           )}
         </div>
       </form>
 
-      {/* List */}
-      {isLoading ? (
-        <Loading className="h-64" />
-      ) : (
-        <div className="flex flex-col gap-4 mt-8">
-          <div className="flex gap-2 flex-wrap md:flex-nowrap md:overflow-x-auto md:whitespace-nowrap">
-            {socials?.map((s) => (
-              <Badge
-                key={s._id}
-                onDelete={() => {
-                  setSelectedId(s._id!);
-                  setConfirmOpen(true);
-                }}
-                className="flex items-center gap-1"
-                onClick={() => {
-                  setIsEdit(true);
-                  setValue("_id", s._id);
-                  setValue("name", s.name);
-                  setValue("url", s.url);
-                  setValue("icon", s.icon);
-                }}
-              >
-                <span className="text-base">{iconDecider(s.icon)}</span>
-                {s.name}
-              </Badge>
-            ))}
-          </div>
-
-          {(!socials || socials.length === 0) && (
-            <div className="text-center py-8 mt-10">
-              <p className="text-muted-foreground mb-3">{t("noSocials")}</p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsEdit(false);
-                  // Focus name input for quick add
-                  const el =
-                    document.querySelector<HTMLInputElement>(
-                      "input[name='name']"
-                    );
-                  el?.focus();
-                }}
-              >
-                {t("addFirstSocial")}
-              </Button>
+      {/* Selected icon preview + list */}
+      <div className="mt-8">
+        {isPending ? (
+          <LoadingRows rows={1} />
+        ) : isError ? (
+          <ErrorState message={error?.message} />
+        ) : (
+          <>
+            {selectedIcon && (
+              <p className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex size-6 items-center justify-center rounded bg-muted">{iconDecider(selectedIcon, 'size-4')}</span>
+                {t('icon')}: {selectedIcon}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {socials?.map(social => (
+                <Badge key={social._id} variant="outline" className="gap-2 px-3 py-1 text-sm">
+                  {iconDecider(social.icon, 'size-4')}
+                  {social.name}
+                  <button
+                    type="button"
+                    aria-label={tDash('edit')}
+                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
+                    onClick={() => edit(social)}
+                  >
+                    <Pencil className="size-3" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={tDash('delete')}
+                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
+                    onClick={() => social._id && setPendingDelete(social._id)}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ))}
             </div>
-          )}
-          {socials && socials.length >= 4 && (
-            <p className="text-xs text-muted-foreground">{t("maxReached")}</p>
-          )}
-        </div>
-      )}
+            {(!socials || socials.length === 0) && <EmptyState text={t('noSocials')} />}
+          </>
+        )}
+      </div>
 
       <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        title={tDash("confirmTitle")}
-        confirmText={tDash("delete")}
-        cancelText={tDash("cancel")}
-        danger
-        dir={locale === "fa" ? "rtl" : "ltr"}
-        locale={locale}
-        itemName={socials?.find((x) => x._id === selectedId)?.name}
+        open={Boolean(pendingDelete)}
+        onOpenChange={open => !open && setPendingDelete(null)}
+        itemName={socials?.find(s => s._id === pendingDelete)?.name}
         onConfirm={() => {
-          if (selectedId) deleteSocial(selectedId);
-          setConfirmOpen(false);
-          setSelectedId(null);
+          if (pendingDelete) deleteSocial(pendingDelete);
+          setPendingDelete(null);
         }}
       />
-    </section>
+    </SectionShell>
   );
 };
 

@@ -1,448 +1,214 @@
-"use client";
-import useEducation from "@/hooks/dashboard/useEducation";
-import { formatYearMonthLocal } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { Fragment, useState } from "react";
-import { Controller } from "react-hook-form";
-import { GoPlus } from "react-icons/go";
-import { IoMdClose } from "react-icons/io";
-import BlurFade from "../magicui/blur-fade";
-import { ResumeCard } from "../resume-card";
-import { Button } from "../ui/button";
-import { ConfirmDialog } from "../ui/confirm-dialog";
-import { DateRangePicker } from "../ui/date-range-picker";
-import ImageCropperDialog from "../ui/image-cropper";
-import { Input } from "../ui/input";
-import Loading from "../ui/loading";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+'use client';
 
+import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
+import { ResumeCard } from '@/components/resume-card';
+import ImageCropperDialog from '@/components/ui/image-cropper';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Input } from '@/components/ui/input';
+import Loading from '@/components/ui/loading';
+import useEducation from '@/hooks/dashboard/useEducation';
+import type { IEducation } from '@/types';
+import { formatYearMonthLocal } from '@/lib/utils';
+import { Plus } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useState } from 'react';
+
+/** Education section: schools/universities with logo and date range. */
 const EducationExperience = () => {
-  const t = useTranslations("dashboard.education");
-  const tcrop = useTranslations("dashboard.crop");
-  const tDash = useTranslations("dashboard");
-  const [cropOpen, setCropOpen] = useState(false);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const tBase = useTranslations("");
+  const t = useTranslations('dashboard.education');
+  const tcrop = useTranslations('dashboard.crop');
+  const locale = useLocale();
+  const lang = locale === 'fa' ? 'fa' : 'en';
 
   const {
-    fileInputRef,
-    getEducations,
-    isEdit,
-    isLoading,
-    refetchGetEducations,
-    setIsEdit,
-    BLUR_FADE_DELAY,
-    control,
-    formState: { errors, isDirty },
-    getValues,
-    handleSubmit,
     register,
-    reset,
+    handleSubmit,
     setValue,
-    locale,
-    theme,
-    btnLoading,
-    isPostingEducation,
-    onsubmit,
-    postEducation,
+    reset,
+    getValues,
+    errors,
+    educations,
+    isPending,
+    isError,
+    error,
+    save,
     deleteEducation,
-    deleteUploadedEducationImage,
-    isDeletingEducation,
-    uploadEducationImage,
+    uploadLogo,
+    deleteLogo,
+    startEdit,
+    onSubmit,
+    fileInputRef,
+    refetchEducations,
   } = useEducation();
 
-  const { id: IsEditItem, logoUrl, school } = getValues();
+  const [formOpen, setFormOpen] = useState(false);
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
-  if (isLoading) return <Loading className="h-[50vh]" />;
+  const closeForm = () => {
+    setFormOpen(false);
+    reset();
+  };
+
+  const beginCreate = () => {
+    reset();
+    setFormOpen(true);
+  };
+
+  const beginEdit = (education: IEducation) => {
+    startEdit(education);
+    setFormOpen(true);
+  };
+
+  const logoUrl = getValues('logoUrl');
+
   return (
-    <section className="flex flex-col mb-20">
-      <AnimatePresence mode="wait">
-        {isEdit ? (
-          // Edit & create
-          <motion.div
-            key="edit-form"
-            initial={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.1,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-          >
-            {/* create */}
-            <div className="flex flex-row justify-between items-center ">
-              <h3 className="text-xl font-bold mt-3">
-                {IsEditItem ? t("editTitle") : t("createEducation")}
-              </h3>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      reset({
-                        degree: "",
-                        end: "",
-                        href: "",
-                        id: "",
-                        logoUrl: "",
-                        school: "",
-                        start: "",
-                      });
-                      setIsEdit(false);
-                    }}
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="size-8"
-                  >
-                    {deleteUploadedEducationImage.isPending ? (
-                      <Loading size="sm" />
-                    ) : (
-                      <IoMdClose className="text-red-700 text-lg" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("cancel")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            {/* form */}
-            <form
-              onSubmit={handleSubmit(onsubmit)}
-              onReset={() => {
-                reset({
-                  degree: "",
-                  end: "",
-                  href: "",
-                  id: "",
-                  logoUrl: "",
-                  school: "",
-                  start: "",
-                });
-              }}
-              className="flex flex-col gap-1 mb-2 mt-5"
-            >
-              {/* Image Upload Section */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("logoImage")}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 items-start">
-                  <div className="relative w-full sm:w-auto">
-                    <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
-                      {logoUrl ? (
-                        <Image
-                          src={logoUrl}
-                          alt={school || "Education logo"}
-                          width={120}
-                          height={120}
-                          className="object-cover w-full h-full rounded-md"
-                        />
-                      ) : (
-                        <div className="text-center p-2">
-                          <div className="text-muted-foreground text-2xl mb-1">
-                            📷
-                          </div>
-                          <span className="text-muted-foreground text-xs">
-                            {t("noImage")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {logoUrl && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                        onClick={() => deleteUploadedEducationImage.mutate()}
-                        disabled={deleteUploadedEducationImage.isPending}
-                      >
-                        <IoMdClose className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    {!logoUrl && (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadEducationImage.isPending}
-                          className="w-full sm:w-auto"
-                        >
-                          {uploadEducationImage.isPending ? (
-                            <>
-                              <Loading size="sm" className="mr-2" />
-                              {t("uploading")}
-                            </>
-                          ) : (
-                            <>📷 {t("uploadImage")}</>
-                          )}
-                        </Button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            const url = URL.createObjectURL(file);
-                            setCropSrc(url);
-                            setCropOpen(true);
-                          }}
-                          disabled={uploadEducationImage.isPending}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {t("uploadImageHint")}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Cropper Dialog */}
-              <ImageCropperDialog
-                open={cropOpen}
-                onOpenChange={(v) => {
-                  setCropOpen(v);
-                  if (!v && cropSrc) {
-                    URL.revokeObjectURL(cropSrc);
-                    setCropSrc(null);
-                    if (fileInputRef.current) {
-                      // @ts-ignore
-                      fileInputRef.current.value = "";
-                    }
-                  }
-                }}
-                src={cropSrc}
-                aspect={1}
-                labels={{
-                  title: tcrop("title"),
-                  apply: tcrop("apply"),
-                  cancel: t("cancel"),
-                  zoom: tcrop("zoom"),
-                  move: tcrop("move"),
-                }}
-                dir={locale === "fa" ? "rtl" : "ltr"}
-                isDark={theme === "dark"}
-                outputSize={512}
-                onCropped={(file) => {
-                  const formData = new FormData();
-                  formData.append("image", file);
-                  uploadEducationImage.mutate(formData);
-                }}
-              />
-
-              <label
-                htmlFor="education-school"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("school")}
-              </label>
-              <Input
-                id="education-school"
-                type="text"
-                className="text-sm"
-                {...register("school")}
-                placeholder={t("schoolPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.school?.message}</p>
-
-              <label
-                htmlFor="education-href"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("href")}
-              </label>
-              <Input
-                id="education-href"
-                type="text"
-                className="text-sm"
-                {...register("href")}
-                placeholder={t("hrefPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.href?.message}</p>
-
-              <label
-                htmlFor="education-degree"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("degree")}
-              </label>
-              <Input
-                id="education-degree"
-                type="text"
-                className="text-sm"
-                {...register("degree")}
-                placeholder={t("degreePlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.degree?.message}</p>
-
-              {/* Date Range Picker */}
-              <Controller
-                control={control}
-                name="start"
-                render={({
-                  field: { value: startValue, onChange: onStartChange },
-                }) => (
-                  <Controller
-                    control={control}
-                    name="end"
-                    render={({
-                      field: { value: endValue, onChange: onEndChange },
-                    }) => (
-                      <DateRangePicker
-                        startValue={startValue}
-                        endValue={endValue}
-                        onStartChange={onStartChange}
-                        onEndChange={onEndChange}
-                        locale={locale as "fa" | "en"}
-                        theme={theme as "dark" | "light"}
-                        startLabel={t("start")}
-                        endLabel={t("end")}
-                        error={{
-                          start: errors.start?.message,
-                          end: errors.end?.message,
-                        }}
-                      />
-                    )}
-                  />
+    <SectionShell
+      title={t('educationTitle')}
+      action={
+        !formOpen && (
+          <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createEducation')}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        )
+      }
+    >
+      <FormPanel open={formOpen} title={getValues('_id') ? t('editTitle') : t('createEducation')} onClose={closeForm}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Logo */}
+          <Field label={t('logoImage')}>
+            <div className="flex items-center gap-3">
+              <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20">
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt={t('logoImage')} className="size-full object-contain p-1" />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">{t('noImage')}</span>
                 )}
-              />
-
-              <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
-                <Button
-                  disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
-                  type="submit"
-                  className="w-full sm:w-auto"
-                >
-                  {btnLoading ? <Loading size="sm" /> : t("save")}
-                </Button>
               </div>
-            </form>
-          </motion.div>
-        ) : (
-          // List
-          <motion.div
-            key="experience-list"
-            initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.25,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-            className="flex flex-col gap-5"
-          >
-            {/* Title & create btn */}
-            <div className="flex flex-row justify-between items-center mb-3">
-              <h3 className="text-xl font-bold mt-3">{t("title")}</h3>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsEdit(true)}
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="size-8"
-                  >
-                    <GoPlus className="text-xl text-green-500" />
+              <div className="flex flex-col gap-1">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadLogo.isPending}>
+                  {uploadLogo.isPending ? <Loading size="sm" className="me-2" /> : null}
+                  {t('uploadImage')}
+                </Button>
+                {logoUrl && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => deleteLogo.mutate()} disabled={deleteLogo.isPending}>
+                    {t('noImage')}
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("createEducation")}</p>
-                </TooltipContent>
-              </Tooltip>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setCropSrc(URL.createObjectURL(file));
+                    setCropOpen(true);
+                  }}
+                />
+              </div>
             </div>
-            {/* List */}
-            <Fragment>
-              {getEducations?.length ? (
-                getEducations?.map((item, index) => (
-                  <BlurFade
-                    key={index}
-                    delay={BLUR_FADE_DELAY * 8 + (index + index++) * 0.05}
-                  >
-                    {/* Confirm Delete Dialog per-item */}
-                    {/* Using local state per item key is heavier; instead open with selected id */}
-                    <ResumeCard
-                      key={item.school}
-                      href={item.href}
-                      logoUrl={item.logoUrl}
-                      altText={item.school}
-                      title={item.school}
-                      subtitle={item.degree}
-                      period={`${formatYearMonthLocal(
-                        item.start || "",
-                        locale as "fa" | "en"
-                      )} - ${formatYearMonthLocal(
-                        item.end || "",
-                        locale as "fa" | "en"
-                      )}`}
-                      onEdit={() => {
-                        setValue("id", item._id || "");
-                        setValue("degree", item.degree || "");
-                        setValue("end", item.end || "");
-                        setValue("start", item.start || "");
-                        setValue("href", item.href || "");
-                        setValue("logoUrl", item.logoUrl || "");
-                        setValue("school", item.school || "");
-                        setIsEdit(true);
-                      }}
-                      onDelete={() => {
-                        setSelectedId(item._id);
-                        setConfirmOpen(true);
-                      }}
-                    />
-                  </BlurFade>
-                ))
-              ) : (
-                // empty state
-                <div className="text-center py-8 mt-24">
-                  <p className="text-muted-foreground">{t("noEducations")}</p>
-                  <Button
-                    onClick={() => setIsEdit(true)}
-                    variant="outline"
-                    className="mt-2"
-                  >
-                    {t("createFirstEducation")}
-                  </Button>
-                </div>
-              )}
-            </Fragment>
-            <ConfirmDialog
-              open={confirmOpen}
-              onOpenChange={setConfirmOpen}
-              title={tDash("confirmTitle")}
-              confirmText={tDash("delete")}
-              cancelText={t("cancel")}
-              danger
-              dir={locale === "fa" ? "rtl" : "ltr"}
-              locale={locale}
-              itemName={
-                getEducations?.find((e) => e._id === selectedId)?.school
+          </Field>
+
+          <ImageCropperDialog
+            open={cropOpen}
+            onOpenChange={v => {
+              setCropOpen(v);
+              if (!v && cropSrc) {
+                URL.revokeObjectURL(cropSrc);
+                setCropSrc(null);
+                if (fileInputRef.current) fileInputRef.current.value = '';
               }
-              onConfirm={() => {
-                if (selectedId) deleteEducation(selectedId);
-                setConfirmOpen(false);
-                setSelectedId(null);
-              }}
+            }}
+            src={cropSrc}
+            aspect={1}
+            labels={{ title: tcrop('title'), apply: tcrop('apply'), cancel: t('cancel'), zoom: tcrop('zoom'), move: tcrop('move') }}
+            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            outputSize={256}
+            onCropped={file => {
+              const formData = new FormData();
+              formData.append('image', file);
+              uploadLogo.mutate(formData);
+            }}
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label={t('school')} error={errors.school?.message}>
+              <Input {...register('school')} placeholder={t('schoolPlaceholder')} />
+            </Field>
+            <Field label={t('degree')} error={errors.degree?.message}>
+              <Input {...register('degree')} placeholder={t('degreePlaceholder')} />
+            </Field>
+            <Field label={t('href')} error={errors.href?.message} className="sm:col-span-2">
+              <Input {...register('href')} placeholder={t('hrefPlaceholder')} type="url" />
+            </Field>
+          </div>
+
+          <DateRangePicker
+            startValue={getValues('start')}
+            endValue={getValues('end')}
+            onStartChange={value => setValue('start', value, { shouldValidate: true, shouldDirty: true })}
+            onEndChange={value => setValue('end', value, { shouldValidate: true, shouldDirty: true })}
+            startLabel={t('start')}
+            endLabel={t('end')}
+            locale={lang}
+            error={{ start: errors.start?.message, end: errors.end?.message }}
+          />
+
+          <div className="flex gap-2 max-sm:flex-col">
+            <Button type="submit" disabled={save.isPending} className="w-full sm:w-auto">
+              {save.isPending ? <Loading size="sm" className="me-2" /> : null}
+              {t('save')}
+            </Button>
+            <Button type="button" variant="outline" onClick={closeForm} className="w-full sm:w-auto">
+              {t('cancelForm')}
+            </Button>
+          </div>
+        </form>
+      </FormPanel>
+
+      {isPending ? (
+        <LoadingRows />
+      ) : isError ? (
+        <ErrorState message={error?.message} onRetry={() => refetchEducations()} />
+      ) : educations && educations.length > 0 ? (
+        <div className="space-y-3">
+          {educations.map(education => (
+            <ResumeCard
+              key={education._id}
+              logoUrl={education.logoUrl}
+              altText={education.school}
+              title={education.school}
+              subtitle={education.degree}
+              href={education.href}
+              period={`${formatYearMonthLocal(education.start, lang)}${education.start && education.end ? ' – ' : ''}${formatYearMonthLocal(
+                education.end,
+                lang
+              )}`}
+              onEdit={() => beginEdit(education)}
+              onDelete={() => education._id && setPendingDelete(education._id)}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+          ))}
+        </div>
+      ) : (
+        !formOpen && <EmptyState text={t('noEducations')} actionText={t('createFirstEducation')} onAction={beginCreate} />
+      )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={open => !open && setPendingDelete(null)}
+        itemName={educations?.find(e => e._id === pendingDelete)?.school}
+        onConfirm={() => {
+          if (pendingDelete) deleteEducation(pendingDelete);
+          setPendingDelete(null);
+        }}
+      />
+    </SectionShell>
   );
 };
 

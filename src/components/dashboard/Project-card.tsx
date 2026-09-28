@@ -1,135 +1,59 @@
-"use client";
-import { iconDecider } from "@/components/icons";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Loading from "@/components/ui/loading";
-import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
-import { useState } from "react";
-import { MdDelete, MdEdit } from "react-icons/md";
-import { ConfirmDialog } from "../ui/confirm-dialog";
+'use client';
 
-interface Link {
-  type: string;
-  href: string;
-  icon: string;
-}
-
-interface Project {
-  _id: string;
-  title: string;
-  href: string;
-  dates: string;
-  active: boolean;
-  description: string;
-  technologies: string[];
-  links: Link[];
-  image: string;
-  lang: string;
-}
+import { iconDecider } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import Loading from '@/components/ui/loading';
+import type { IProject } from '@/types';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface ProjectItemProps {
-  project: Project;
-  onEdit: (project: Project) => void;
+  project: IProject;
+  onEdit: (project: IProject) => void;
   onDelete: (id: string) => void;
   isDeleting: boolean;
 }
 
-const ProjectCard = ({
-  project,
-  onEdit,
-  onDelete,
-  isDeleting,
-}: ProjectItemProps) => {
-  const t = useTranslations("dashboard.projects");
-  const tBase = useTranslations("dashboard");
-  const locale = useLocale();
-  const [open, setOpen] = useState(false);
+/** Dashboard list item for a single project. */
+const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps) => {
+  const t = useTranslations('dashboard.projects');
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
-    <Card className="relative transition-shadow hover:shadow-md bg-card border">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="space-y-1 flex-1 min-w-0 p-3">
-          <CardTitle className="text-base font-semibold">
-            <a
-              href={project.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline text-primary hover:text-primary/80 transition-colors"
-            >
-              {project.title}
-            </a>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">{project.dates}</p>
+    <Card className="transition-shadow hover:shadow-md">
+      <CardHeader className="flex-row items-center justify-between space-y-0 p-3 sm:p-4">
+        <div className="min-w-0 space-y-0.5">
+          <h4 className="truncate text-base font-semibold">{project.title}</h4>
+          {project.dates && <p className="text-xs text-muted-foreground">{project.dates}</p>}
         </div>
-        <div className="flex flex-shrink-0 ml-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={() => onEdit(project)}
-            title={t("edit")}
-          >
-            <MdEdit className="h-4 w-4" />
+        <div className="flex shrink-0 gap-1">
+          <Button size="icon" variant="ghost" className="size-8" onClick={() => onEdit(project)} aria-label={t('edit')}>
+            <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 text-red-500 hover:text-red-700"
-            onClick={() => setOpen(true)}
-            disabled={isDeleting}
-            title={t("delete")}
-          >
-            {isDeleting ? (
-              <Loading size="sm" />
-            ) : (
-              <MdDelete className="h-4 w-4" />
-            )}
+          <Button size="icon" variant="ghost" className="size-8" onClick={() => setConfirmOpen(true)} disabled={isDeleting} aria-label={t('delete')}>
+            {isDeleting ? <Loading size="sm" /> : <Trash2 className="h-4 w-4" />}
           </Button>
-          <ConfirmDialog
-            open={open}
-            onOpenChange={setOpen}
-            title={tBase("confirmTitle")}
-            confirmText={t("delete")}
-            cancelText={t("cancel")}
-            danger
-            dir={locale === "fa" ? "rtl" : "ltr"}
-            locale={locale}
-            itemName={project.title}
-            onConfirm={() => {
-              setOpen(false);
-              onDelete(project._id);
-            }}
-          />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col sm:flex-row sm:px-3 sm:pb-3 gap-2">
+      <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
+        <div className="flex flex-col gap-3 sm:flex-row">
           {project.image && (
-            <div className="flex-shrink-0">
-              <Image
-                src={project.image}
-                alt={project.title}
-                width={100}
-                height={100}
-                className="object-cover rounded-md border w-full h-auto sm:w-[100px] sm:h-[100px]"
-              />
+            <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border">
+              <Image src={project.image} alt={project.title} fill sizes="128px" className="object-cover" />
             </div>
           )}
-          <div className="flex-1 space-y-3 min-w-0 max-sm:p-2">
-            <p className="text-sm text-muted-foreground leading-relaxed ">
-              {project.description}
-            </p>
+          <div className="min-w-0 flex-1 space-y-2">
+            <p className="line-clamp-2 text-sm text-muted-foreground">{project.description}</p>
 
             {project.technologies?.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {project.technologies.map((tech: string, techIndex: number) => (
-                  <Badge
-                    key={techIndex}
-                    variant="secondary"
-                    className="text-xs"
-                  >
+                {project.technologies.map((tech, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
                     {tech}
                   </Badge>
                 ))}
@@ -137,34 +61,20 @@ const ProjectCard = ({
             )}
 
             <div className="flex flex-wrap items-center gap-2">
-              {project.active ? (
-                <Badge
-                  variant="outline"
-                  className="text-green-600 border-green-600"
-                >
-                  {t("active")}
-                </Badge>
-              ) : (
-                <Badge
-                  variant="outline"
-                  className="text-red-600 border-red-600"
-                >
-                  {t("disabled")}
-                </Badge>
-              )}
+              <Badge variant={project.active ? 'default' : 'outline'}>{project.active ? t('active') : t('disabled')}</Badge>
 
               {project.links?.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {project.links.map((link, linkIndex) => (
+                  {project.links.map((link, index) => (
                     <a
-                      key={linkIndex}
+                      key={index}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs px-2 py-1 bg-muted rounded hover:bg-muted/80 transition-colors"
+                      className="flex items-center gap-1 rounded bg-muted px-2 py-1 text-xs transition-colors hover:bg-muted/70"
                       title={link.type}
                     >
-                      {iconDecider(link.icon)}
+                      {iconDecider(link.icon, 'size-3')}
                       {link.type}
                     </a>
                   ))}
@@ -174,6 +84,16 @@ const ProjectCard = ({
           </div>
         </div>
       </CardContent>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        itemName={project.title}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          onDelete(project._id!);
+        }}
+      />
     </Card>
   );
 };

@@ -1,488 +1,226 @@
-"use client";
-import useWorkExperience from "@/hooks/dashboard/useWorkExperience";
-import { formatYearMonthLocal } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
-import Image from "next/image";
-import { Fragment, useState } from "react";
-import { Controller } from "react-hook-form";
-import { GoPlus } from "react-icons/go";
-import { IoMdClose } from "react-icons/io";
-import "react-multi-date-picker/styles/backgrounds/bg-dark.css";
-import BlurFade from "../magicui/blur-fade";
-import { ResumeCard } from "../resume-card";
-import { Button } from "../ui/button";
-import { ConfirmDialog } from "../ui/confirm-dialog";
-import { DateRangePicker } from "../ui/date-range-picker";
-import ImageCropperDialog from "../ui/image-cropper";
-import { Input } from "../ui/input";
-import Loading from "../ui/loading";
-import { Textarea } from "../ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+'use client';
 
+import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
+import { ResumeCard } from '@/components/resume-card';
+import ImageCropperDialog from '@/components/ui/image-cropper';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Input } from '@/components/ui/input';
+import Loading from '@/components/ui/loading';
+import { Textarea } from '@/components/ui/textarea';
+import useWorkExperience from '@/hooks/dashboard/useWorkExperience';
+import type { IWork } from '@/types';
+import { formatYearMonthLocal } from '@/lib/utils';
+import { Plus } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useState } from 'react';
+
+/** Work experience section: timeline entries with logo and date range. */
 const WorkExperience = () => {
+  const t = useTranslations('dashboard.workExperience');
+  const tRoot = useTranslations();
+  const tcrop = useTranslations('dashboard.crop');
+  const locale = useLocale();
+  const lang = locale === 'fa' ? 'fa' : 'en';
+
   const {
-    workExperienceData,
-    isLoading,
-    formState: { errors, isDirty },
-    handleSubmit,
     register,
-    reset,
-    onsubmit,
-    control,
-    btnLoading,
-    getValues,
+    handleSubmit,
     setValue,
-    isEdit,
-    setIsEdit,
-    deleteWorkExperience,
-    uploadWorkExperienceImage,
+    reset,
+    getValues,
+    errors,
+    works,
+    isPending,
+    isError,
+    error,
+    save,
+    deleteWork,
+    uploadLogo,
+    deleteLogo,
+    startEdit,
+    onSubmit,
     fileInputRef,
-    deleteUploadedWorkExperienceImage,
-    expandedIndex,
-    setExpandedIndex,
+    refetchWorks,
   } = useWorkExperience();
 
-  const { id: IsEditItem, logoUrl, title } = getValues();
-  const t = useTranslations("dashboard.workExperience");
-  const tDash = useTranslations("dashboard");
-  const tBase = useTranslations("");
-  const tCrop = useTranslations("dashboard.crop");
-  const { theme } = useTheme();
-  const locale = useLocale();
-  const BLUR_FADE_DELAY = 0.04;
+  const [formOpen, setFormOpen] = useState(false);
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
-  if (isLoading) return <Loading className="h-[50vh]" />;
+  const closeForm = () => {
+    setFormOpen(false);
+    reset();
+  };
+
+  const beginCreate = () => {
+    reset();
+    setFormOpen(true);
+  };
+
+  const beginEdit = (work: IWork) => {
+    startEdit(work);
+    setFormOpen(true);
+  };
+
+  const logoUrl = getValues('logoUrl');
+
   return (
-    <section className="flex flex-col mb-20">
-      <AnimatePresence mode="wait">
-        {isEdit ? (
-          // Edit & create
-          <motion.div
-            key="edit-form"
-            initial={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.1,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-          >
-            {/* create */}
-            <div className="flex flex-row justify-between items-center ">
-              <h3 className="text-xl font-bold mt-3">
-                {IsEditItem ? t("editWork") : t("createWork")}
-              </h3>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      reset({
-                        company: "",
-                        description: "",
-                        end: "",
-                        href: "",
-                        location: "",
-                        logoUrl: "",
-                        start: "",
-                        title: "",
-                      });
-                      setIsEdit(false);
-                    }}
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="size-8"
-                  >
-                    <IoMdClose className="text-red-700 text-lg" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("cancel")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-
-            {/* form */}
-            <form
-              onSubmit={handleSubmit(onsubmit)}
-              onReset={() => {
-                reset({
-                  company: "",
-                  description: "",
-                  end: "",
-                  href: "",
-                  location: "",
-                  logoUrl: "",
-                  start: "",
-                  title: "",
-                });
-              }}
-              className="flex flex-col gap-1 mb-2 mt-5"
-            >
-              {/* Image Upload Section */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("logoImage")}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 items-start">
-                  <div className="relative w-full sm:w-auto">
-                    <div className="w-full h-48 sm:w-32 sm:h-32 border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors">
-                      {logoUrl ? (
-                        <Image
-                          src={logoUrl}
-                          alt={title || "Work experience logo"}
-                          width={120}
-                          height={120}
-                          className="object-cover w-full h-full rounded-md"
-                        />
-                      ) : (
-                        <div className="text-center p-2">
-                          <div className="text-muted-foreground text-2xl mb-1">
-                            📷
-                          </div>
-                          <span className="text-muted-foreground text-xs">
-                            {t("noImage")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {logoUrl && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                        onClick={() =>
-                          deleteUploadedWorkExperienceImage.mutate()
-                        }
-                        disabled={deleteUploadedWorkExperienceImage.isPending}
-                      >
-                        <IoMdClose className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    {!logoUrl && (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={uploadWorkExperienceImage.isPending}
-                          className="w-full sm:w-auto"
-                        >
-                          {uploadWorkExperienceImage.isPending ? (
-                            <>
-                              <Loading size="sm" className="mr-2" />
-                              {t("uploading")}
-                            </>
-                          ) : (
-                            <>📷 {t("uploadImage")}</>
-                          )}
-                        </Button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            const url = URL.createObjectURL(file);
-                            setCropSrc(url);
-                            setCropOpen(true);
-                          }}
-                          disabled={uploadWorkExperienceImage.isPending}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {t("uploadImageHint")}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Cropper Dialog */}
-              <ImageCropperDialog
-                open={cropOpen}
-                onOpenChange={(v) => {
-                  setCropOpen(v);
-                  if (!v && cropSrc) {
-                    URL.revokeObjectURL(cropSrc);
-                    setCropSrc(null);
-                    if (fileInputRef.current) {
-                      // @ts-ignore
-                      fileInputRef.current.value = "";
-                    }
-                  }
-                }}
-                src={cropSrc}
-                aspect={1}
-                labels={{
-                  title: t("editWork"),
-                  apply: t("save"),
-                  cancel: t("cancel"),
-                  zoom: tCrop("zoom"),
-                  move: tCrop("move"),
-                }}
-                dir={locale === "fa" ? "rtl" : "ltr"}
-                isDark={theme === "dark"}
-                outputSize={512}
-                onCropped={(file) => {
-                  const formData = new FormData();
-                  formData.append("image", file);
-                  uploadWorkExperienceImage.mutate(formData);
-                }}
-              />
-
-              <label
-                htmlFor="work-title"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("title")}
-              </label>
-              <Input
-                id="work-title"
-                type="text"
-                className="text-sm"
-                {...register("title")}
-                placeholder={t("titlePlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.title?.message}</p>
-
-              <label
-                htmlFor="work-company"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("company")}
-              </label>
-              <Input
-                id="work-company"
-                type="text"
-                className="text-sm"
-                {...register("company")}
-                placeholder={t("companyPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.company?.message}</p>
-
-              <label
-                htmlFor="work-href"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("href")}
-              </label>
-              <Input
-                id="work-href"
-                type="text"
-                className="text-sm"
-                {...register("href")}
-                placeholder={t("hrefPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.href?.message}</p>
-
-              <label
-                htmlFor="work-location"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("location")}
-              </label>
-              <Input
-                id="work-location"
-                type="text"
-                className="text-sm"
-                {...register("location")}
-                placeholder={t("locationPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">{errors.location?.message}</p>
-
-              <label
-                htmlFor="work-description"
-                className="text-sm font-medium text-muted-foreground"
-              >
-                {t("description")}
-              </label>
-              <Textarea
-                id="work-description"
-                className="text-sm"
-                {...register("description")}
-                placeholder={t("descriptionPlaceholder")}
-              />
-              <p className="text-red-600 text-xs">
-                {errors.description?.message}
-              </p>
-
-              {/* Date Range Picker */}
-              <Controller
-                control={control}
-                name="start"
-                render={({
-                  field: { value: startValue, onChange: onStartChange },
-                }) => (
-                  <Controller
-                    control={control}
-                    name="end"
-                    render={({
-                      field: { value: endValue, onChange: onEndChange },
-                    }) => (
-                      <DateRangePicker
-                        startValue={startValue}
-                        endValue={endValue}
-                        onStartChange={onStartChange}
-                        onEndChange={onEndChange}
-                        locale={locale as "fa" | "en"}
-                        theme={theme as "dark" | "light"}
-                        startLabel={t("start")}
-                        endLabel={t("end")}
-                        error={{
-                          start: errors.start?.message,
-                          end: errors.end?.message,
-                        }}
-                      />
-                    )}
-                  />
+    <SectionShell
+      title={t('experience')}
+      action={
+        !formOpen && (
+          <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createWork')}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        )
+      }
+    >
+      <FormPanel open={formOpen} title={getValues('_id') ? t('editWork') : t('createWork')} onClose={closeForm}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Logo */}
+          <Field label={t('logoImage')}>
+            <div className="flex items-center gap-3">
+              <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20">
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt={t('logoImage')} className="size-full object-contain p-1" />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">{t('noImage')}</span>
                 )}
-              />
-
-              <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
-                <Button
-                  disabled={IsEditItem ? !isDirty || btnLoading : btnLoading}
-                  type="submit"
-                  className="w-full sm:w-auto"
-                >
-                  {btnLoading ? <Loading size="sm" /> : t("save")}
-                </Button>
               </div>
-            </form>
-          </motion.div>
-        ) : (
-          // List
-          <motion.div
-            key="experience-list"
-            initial={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 15, scale: 0.97, filter: "blur(6px)" }}
-            transition={{
-              duration: 0.25,
-              type: "spring",
-              stiffness: 180,
-              damping: 18,
-            }}
-            className="flex flex-col gap-5"
-          >
-            {/* Title & create btn */}
-            <div className="flex flex-row justify-between items-center mb-3">
-              <h3 className="text-xl font-bold mt-3">{t("experience")}</h3>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsEdit(true)}
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="size-8"
-                  >
-                    <GoPlus className="text-xl text-green-500" />
+              <div className="flex flex-col gap-1">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadLogo.isPending}>
+                  {uploadLogo.isPending ? <Loading size="sm" className="me-2" /> : null}
+                  {t('uploadImage')}
+                </Button>
+                {logoUrl && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => deleteLogo.mutate()} disabled={deleteLogo.isPending}>
+                    {t('noImage')}
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("createWork")}</p>
-                </TooltipContent>
-              </Tooltip>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setCropSrc(URL.createObjectURL(file));
+                    setCropOpen(true);
+                  }}
+                />
+              </div>
             </div>
-            {/* List */}
-            <Fragment>
-              {workExperienceData?.length ? (
-                workExperienceData?.map((item, index) => (
-                  <BlurFade
-                    key={index}
-                    delay={BLUR_FADE_DELAY * 8 + (index + index++) * 0.05}
-                  >
-                    <ResumeCard
-                      key={index}
-                      logoUrl={item.logoUrl}
-                      altText={item.company}
-                      title={item.company}
-                      subtitle={item.title}
-                      href={item.href}
-                      period={`${formatYearMonthLocal(
-                        item.start || "",
-                        locale as "fa" | "en"
-                      )} - ${formatYearMonthLocal(
-                        item.end || "",
-                        locale as "fa" | "en"
-                      )}`}
-                      description={item.description}
-                      isExpanded={expandedIndex === index}
-                      onToggle={() => {
-                        setExpandedIndex(
-                          expandedIndex === index ? null : index
-                        );
-                      }}
-                      onEdit={() => {
-                        setValue("id", item._id || "");
-                        setValue("company", item.company || "");
-                        setValue("description", item.description || "");
-                        setValue("end", item.end || "");
-                        setValue("href", item.href || "");
-                        setValue("location", item.location || "");
-                        setValue("start", item.start || "");
-                        setValue("logoUrl", item.logoUrl || "");
-                        setValue("title", item.title || "");
-                        setIsEdit(true);
-                      }}
-                      onDelete={() => {
-                        setSelectedId(item._id || "");
-                        setConfirmOpen(true);
-                      }}
-                    />
-                  </BlurFade>
-                ))
-              ) : (
-                // empty state
-                <div className="text-center py-8 mt-24">
-                  <p className="text-muted-foreground">
-                    {t("noWorkExperiences")}
-                  </p>
-                  <Button
-                    onClick={() => setIsEdit(true)}
-                    variant="outline"
-                    className="mt-2"
-                  >
-                    {t("createFirstWorkExperience")}
-                  </Button>
-                </div>
-              )}
-            </Fragment>
-            <ConfirmDialog
-              open={confirmOpen}
-              onOpenChange={setConfirmOpen}
-              title={tDash("confirmTitle")}
-              confirmText={tDash("delete")}
-              cancelText={t("cancel")}
-              danger
-              dir={locale === "fa" ? "rtl" : "ltr"}
-              locale={locale}
-              itemName={
-                workExperienceData?.find((e) => e._id === selectedId)?.company
+          </Field>
+
+          <ImageCropperDialog
+            open={cropOpen}
+            onOpenChange={v => {
+              setCropOpen(v);
+              if (!v && cropSrc) {
+                URL.revokeObjectURL(cropSrc);
+                setCropSrc(null);
+                if (fileInputRef.current) fileInputRef.current.value = '';
               }
-              onConfirm={() => {
-                if (selectedId) deleteWorkExperience(selectedId);
-                setConfirmOpen(false);
-                setSelectedId(null);
-              }}
+            }}
+            src={cropSrc}
+            aspect={1}
+            labels={{ title: tcrop('title'), apply: tcrop('apply'), cancel: t('cancel'), zoom: tcrop('zoom'), move: tcrop('move') }}
+            dir={locale === 'fa' ? 'rtl' : 'ltr'}
+            outputSize={256}
+            onCropped={file => {
+              const formData = new FormData();
+              formData.append('image', file);
+              uploadLogo.mutate(formData);
+            }}
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label={t('company')} error={errors.company?.message}>
+              <Input {...register('company')} placeholder={t('companyPlaceholder')} />
+            </Field>
+            <Field label={t('title')} error={errors.title?.message}>
+              <Input {...register('title')} placeholder={t('titlePlaceholder')} />
+            </Field>
+            <Field label={t('href')} error={errors.href?.message}>
+              <Input {...register('href')} placeholder={t('hrefPlaceholder')} type="url" />
+            </Field>
+            <Field label={t('location')} error={errors.location?.message}>
+              <Input {...register('location')} placeholder={t('locationPlaceholder')} />
+            </Field>
+          </div>
+
+          <DateRangePicker
+            startValue={getValues('start')}
+            endValue={getValues('end')}
+            onStartChange={value => setValue('start', value, { shouldValidate: true, shouldDirty: true })}
+            onEndChange={value => setValue('end', value, { shouldValidate: true, shouldDirty: true })}
+            startLabel={t('start')}
+            endLabel={t('end')}
+            locale={lang}
+            error={{ start: errors.start?.message, end: errors.end?.message }}
+          />
+
+          <Field label={t('description')} error={errors.description?.message}>
+            <Textarea rows={3} {...register('description')} placeholder={t('descriptionPlaceholder')} />
+          </Field>
+
+          <div className="flex gap-2 max-sm:flex-col">
+            <Button type="submit" disabled={save.isPending} className="w-full sm:w-auto">
+              {save.isPending ? <Loading size="sm" className="me-2" /> : null}
+              {t('save')}
+            </Button>
+            <Button type="button" variant="outline" onClick={closeForm} className="w-full sm:w-auto">
+              {t('cancelForm')}
+            </Button>
+          </div>
+        </form>
+      </FormPanel>
+
+      {isPending ? (
+        <LoadingRows />
+      ) : isError ? (
+        <ErrorState message={error?.message} onRetry={() => refetchWorks()} />
+      ) : works && works.length > 0 ? (
+        <div className="space-y-3">
+          {works.map(work => (
+            <ResumeCard
+              key={work._id}
+              logoUrl={work.logoUrl}
+              altText={work.company}
+              title={work.company}
+              subtitle={work.title}
+              href={work.href}
+              description={work.description}
+              period={`${formatYearMonthLocal(work.start, lang)}${work.start && work.end ? ' – ' : ''}${
+                work.end ? formatYearMonthLocal(work.end, lang) : work.start ? tRoot('present') : ''
+              }`}
+              isExpanded={expanded === work._id}
+              onToggle={() => setExpanded(expanded === work._id ? null : (work._id ?? null))}
+              onEdit={() => beginEdit(work)}
+              onDelete={() => work._id && setPendingDelete(work._id)}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+          ))}
+        </div>
+      ) : (
+        !formOpen && <EmptyState text={t('noWorkExperiences')} actionText={t('createFirstWorkExperience')} onAction={beginCreate} />
+      )}
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={open => !open && setPendingDelete(null)}
+        itemName={works?.find(w => w._id === pendingDelete)?.company}
+        onConfirm={() => {
+          if (pendingDelete) deleteWork(pendingDelete);
+          setPendingDelete(null);
+        }}
+      />
+    </SectionShell>
   );
 };
 

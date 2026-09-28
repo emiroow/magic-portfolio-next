@@ -1,31 +1,33 @@
 import { profileModel } from '@/models/profile';
 
+/** Demo owner profile for both locales. */
 export const seedUserData = async () => {
   const profileData = [
     {
-      name: 'Amir',
-      fullName: 'Amir esmaeelzadeh',
-      summary: 'Summary of Amir esmaeelzadeh',
-      description:
-        'Web developer with 2 years of relevant work experience in the field of programming, adhering to the principles of web programming and Clean Code, as well as in UI design, website development and web applications.',
-      avatarUrl: '',
-      tel: '09142369599',
-      email: 'dillion@example.com',
-      lang: 'en',
+      name: 'Alex',
+      fullName: 'Alex Carter',
       jobTitle: 'Full Stack Developer',
+      summary: 'Full stack developer focused on React, Next.js and clean, accessible user interfaces.',
+      description:
+        'Web developer with years of experience building production applications. I care about clean code, thoughtful UX and shipping fast without cutting corners. Currently focused on React/Next.js ecosystems, TypeScript and design systems.',
+      avatarUrl: '',
+      tel: '',
+      email: 'hello@example.com',
+      lang: 'en',
     },
     {
-      name: 'امیر',
-      fullName: 'امیر اسماعیل زاده',
-      summary: 'خلاصه‌ای از دیلیون ورما',
+      name: 'الکس',
+      fullName: 'الکس کارتر',
+      jobTitle: 'توسعه‌دهنده فول استک',
+      summary: 'توسعه‌دهنده فول استک با تمرکز بر React، Next.js و رابط‌های کاربری تمیز و در دسترس.',
       description:
-        'توسعه دهنده وب با سابقه 4 سال کار مرتبط در زمینه برنامه نویسی، پایبند به اصول برنامه نوسی تحت وب و Clean Code و همچنین در طراحی UI ، توسعه وبسایت و وب اپلیکیشن‌ ها',
+        'توسعه‌دهنده وب با چند سال تجربه ساخت اپلیکیشن‌های واقعی. کد تمیز، تجربه کاربری منطقی و انتشار سریع بدون کوتاه‌آمدن از کیفیت، اولویت‌های من است. در حال حاضر روی اکوسیستم React/Next.js، TypeScript و سیستم‌های طراحی تمرکز دارم.',
       avatarUrl: '',
-      tel: '09142369599',
-      jobTitle: 'توسعه دهنده فول استک',
-      email: 'dillion@example.com',
+      tel: '',
+      email: 'hello@example.com',
       lang: 'fa',
     },
   ];
+
   await profileModel.create(profileData);
 };

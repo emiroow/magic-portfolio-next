@@ -1,213 +1,148 @@
 'use client';
-import useProfile from '@/hooks/dashboard/useProfile';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useLocale, useTranslations } from 'next-intl';
-import { useTheme } from 'next-themes';
-import Image from 'next/image';
-import { useRef, useState } from 'react';
-import { Button } from '../ui/button';
-import ImageCropperDialog from '../ui/image-cropper';
-import { Input } from '../ui/input';
-import Loading from '../ui/loading';
-import { Textarea } from '../ui/textarea';
 
+import { Field } from '@/components/dashboard/shared';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Loading from '@/components/ui/loading';
+import ImageCropperDialog from '@/components/ui/image-cropper';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import useProfile from '@/hooks/dashboard/useProfile';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import { ImagePlus } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRef, useState } from 'react';
+
+/** Profile section: identity, contact info and avatar upload with crop. */
 const Profile = () => {
   const t = useTranslations('dashboard.profile');
+  const tDash = useTranslations('dashboard');
   const tcrop = useTranslations('dashboard.crop');
   const locale = useLocale();
-  const { theme } = useTheme();
 
-  const {
-    handleSubmit,
-    register,
-    formState: { errors, isDirty, defaultValues },
-    btnLoading,
-    pageLoading,
-    onsubmit,
-    reset,
-    profile,
-    uploadAvatar,
-    profileImageShowImageFromUrlLoading,
-    setProfileImageShowImageFromUrlLoading,
-    refetchGetProfile,
-    pageFetching,
-  } = useProfile();
+  const { register, handleSubmit, formState: { errors }, profile, isPending, isError, error, saving, onsubmit, uploadAvatar, refetchGetProfile } = useProfile();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
 
-  if (pageLoading) return <Loading className="h-[50vh]" />;
+  if (isPending) {
+    return (
+      <div className="mt-8 space-y-4" aria-busy="true">
+        <Skeleton className="h-24 w-24 rounded-full" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-destructive/40 py-14 text-center">
+        <p className="text-sm text-muted-foreground">{error?.message || tDash('loadError')}</p>
+        <Button variant="outline" size="sm" onClick={() => refetchGetProfile()}>
+          {tDash('retry')}
+        </Button>
+      </div>
+    );
+  }
+
+  const openCropper = () => fileInputRef.current?.click();
+
   return (
-    <section>
-      <form
-        onSubmit={handleSubmit(onsubmit)}
-        onReset={() => {
-          reset();
-          refetchGetProfile();
-        }}
-      >
-        {/* inputs */}
-        <div className="flex flex-col gap-1 mb-2 mt-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-full flex flex-row items-center gap-3">
-              {profile?.avatarUrl ? (
-                <div className="border-2 dark:border-white border-black rounded-full">
-                  {profileImageShowImageFromUrlLoading ||
-                    (uploadAvatar.isPending && <Loading className="absolute inset-0 flex items-center justify-center bg-background/75" size="sm" />)}
-                  <Image
-                    src={profile?.avatarUrl}
-                    alt={profile?.fullName}
-                    width={100}
-                    height={100}
-                    className="object-cover rounded-full"
-                    onLoad={() => {
-                      setProfileImageShowImageFromUrlLoading(false);
-                    }}
-                    onLoadStart={() => {
-                      setProfileImageShowImageFromUrlLoading(false);
-                    }}
-                    onError={() => {
-                      setProfileImageShowImageFromUrlLoading(true);
-                    }}
-                  />
-                </div>
-              ) : (
-                <span className="text-muted-foreground text-xs border-2 w-28 h-28 text-center items-center justify-center flex rounded-full">
-                  {t('noImage')}
-                </span>
-              )}
-              <div className="flex gap-2 flex-col">
-                <label className="text-sm font-medium text-muted-foreground">{t('profileImage')}</label>
-                <span className="font-bold text-2xl">{profile?.fullName}</span>
-                <div className="w-max">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mb-1"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadAvatar.isPending}
-                  >
-                    {t('uploadImage')}
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const url = URL.createObjectURL(file);
-                      setCropSrc(url);
-                      setCropOpen(true);
-                    }}
-                    disabled={uploadAvatar.isPending}
-                  />
-                  <p className="text-red-600 text-xs mt-1">{errors.avatarUrl?.message}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('uploadImage')}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cropper Dialog */}
-          <ImageCropperDialog
-            open={cropOpen}
-            onOpenChange={v => {
-              setCropOpen(v);
-              if (!v && cropSrc) {
-                URL.revokeObjectURL(cropSrc);
-                setCropSrc(null);
-                if (fileInputRef.current) {
-                  // @ts-ignore
-                  fileInputRef.current.value = '';
-                }
-              }
-            }}
-            src={cropSrc}
-            aspect={1}
-            labels={{
-              title: tcrop('title'),
-              apply: tcrop('apply'),
-              cancel: t('cancelForm'),
-              zoom: tcrop('zoom'),
-              move: tcrop('move'),
-            }}
-            dir={locale === 'fa' ? 'rtl' : 'ltr'}
-            isDark={theme === 'dark'}
-            outputSize={512}
-            onCropped={file => {
-              const formData = new FormData();
-              formData.append('image', file);
-              uploadAvatar.mutate(formData);
-            }}
-          />
-          <label htmlFor="profile-name" className="text-sm font-medium text-muted-foreground">
-            {t('name')}
-          </label>
-          <Input id="profile-name" className="text-sm" type="text" {...register('name')} placeholder={t('name')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.name?.message}</p>
-
-          <label htmlFor="profile-fullName" className="text-sm font-medium text-muted-foreground">
-            {t('fullName')}
-          </label>
-          <Input id="profile-fullName" type="text" className="text-sm" {...register('fullName')} placeholder={t('fullName')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.fullName?.message}</p>
-
-          <label htmlFor="profile-jobTitle" className="text-sm font-medium text-muted-foreground">
-            {t('jobTitle')}
-          </label>
-          <Input id="profile-jobTitle" className="text-sm" type="text" {...register('jobTitle')} placeholder={t('jobTitle')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.jobTitle?.message}</p>
-
-          <label htmlFor="profile-email" className="text-sm font-medium text-muted-foreground">
-            {t('email')}
-          </label>
-          <Input id="profile-email" className="text-sm" type="email" {...register('email')} placeholder={t('email')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.email?.message}</p>
-
-          <label htmlFor="profile-tel" className="text-sm font-medium text-muted-foreground">
-            {t('phoneNumber')}
-          </label>
-          <Input id="profile-tel" className="text-sm" type="text" placeholder={t('phoneNumber')} {...register('tel')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.tel?.message}</p>
-          <label htmlFor="profile-summary" className="text-sm font-medium text-muted-foreground">
-            {t('summary')}
-          </label>
-          <Input id="profile-summary" type="text" className="text-sm" {...register('summary')} placeholder={t('summary')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.summary?.message}</p>
-
-          <label htmlFor="profile-about" className="text-sm font-medium text-muted-foreground">
-            {t('about')}
-          </label>
-          <Textarea id="profile-about" className="text-sm" {...register('description')} placeholder={t('about')} disabled={btnLoading} />
-          <p className="text-red-600 text-xs">{errors.description?.message}</p>
-        </div>
-
-        <div className="flex gap-2 max-sm:flex-col mt-4 mb-24">
-          <Button disabled={!isDirty || btnLoading} type="submit" className="w-full sm:w-auto">
-            {btnLoading ? <Loading size="sm" /> : t('save')}
-          </Button>
-
-          <AnimatePresence>
-            {isDirty && (
-              <motion.div
-                key="cancel-btn"
-                layout
-                initial={{ opacity: 0, x: 0 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 0 }}
-                transition={{ duration: 0.25, ease: 'easeInOut' }}
-              >
-                <Button type="reset" className="w-full" variant="outline" size="sm">
-                  {t('cancelForm')}
-                </Button>
-              </motion.div>
+    <section className="mb-24">
+      <form onSubmit={handleSubmit(onsubmit)} className="mt-5 space-y-4">
+        {/* Avatar */}
+        <div className="flex items-center gap-4">
+          <div className={cn('relative flex size-24 items-center justify-center overflow-hidden rounded-full border-2')}>
+            {profile?.avatarUrl ? (
+              <Avatar className="size-full">
+                <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
+              </Avatar>
+            ) : (
+              <span className="text-xs text-muted-foreground">{t('noImage')}</span>
             )}
-          </AnimatePresence>
+            {uploadAvatar.isPending && (
+              <span className="absolute inset-0 flex items-center justify-center bg-background/70">
+                <Loading size="sm" />
+              </span>
+            )}
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">{t('profileImage')}</p>
+            <Button type="button" variant="outline" size="sm" onClick={openCropper} disabled={uploadAvatar.isPending}>
+              <ImagePlus className="me-2 h-4 w-4" />
+              {t('uploadImage')}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setCropSrc(URL.createObjectURL(file));
+                setCropOpen(true);
+              }}
+            />
+            {errors.avatarUrl && <p className="text-xs text-destructive">{errors.avatarUrl.message}</p>}
+          </div>
         </div>
+
+        <ImageCropperDialog
+          open={cropOpen}
+          onOpenChange={v => {
+            setCropOpen(v);
+            if (!v && cropSrc) {
+              URL.revokeObjectURL(cropSrc);
+              setCropSrc(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+          }}
+          src={cropSrc}
+          aspect={1}
+          labels={{ title: tcrop('title'), apply: tcrop('apply'), cancel: t('cancelForm'), zoom: tcrop('zoom'), move: tcrop('move') }}
+          dir={locale === 'fa' ? 'rtl' : 'ltr'}
+          outputSize={512}
+          onCropped={file => {
+            const formData = new FormData();
+            formData.append('image', file);
+            uploadAvatar.mutate(formData);
+          }}
+        />
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label={t('name')} error={errors.name?.message}>
+            <Input id="profile-name" {...register('name')} placeholder={t('namePlaceholder')} />
+          </Field>
+          <Field label={t('fullName')} error={errors.fullName?.message}>
+            <Input id="profile-fullName" {...register('fullName')} placeholder={t('fullNamePlaceholder')} />
+          </Field>
+          <Field label={t('jobTitle')} error={errors.jobTitle?.message}>
+            <Input id="profile-jobTitle" {...register('jobTitle')} placeholder={t('jobTitle')} />
+          </Field>
+          <Field label={t('email')} error={errors.email?.message}>
+            <Input id="profile-email" type="email" {...register('email')} placeholder={t('emailPlaceholder')} />
+          </Field>
+          <Field label={t('phoneNumber')} error={errors.tel?.message}>
+            <Input id="profile-tel" {...register('tel')} placeholder={t('telPlaceholder')} />
+          </Field>
+          <Field label={t('summary')} error={errors.summary?.message}>
+            <Input id="profile-summary" {...register('summary')} placeholder={t('summaryPlaceholder')} />
+          </Field>
+        </div>
+
+        <Field label={t('about')} error={errors.description?.message}>
+          <Textarea id="profile-about" rows={4} {...register('description')} placeholder={t('aboutPlaceholder')} />
+        </Field>
+
+        <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+          {saving ? <Loading size="sm" className="me-2" /> : null}
+          {t('save')}
+        </Button>
       </form>
     </section>
   );

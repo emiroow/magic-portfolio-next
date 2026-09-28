@@ -1,139 +1,99 @@
 'use client';
-import { yupResolver } from '@hookform/resolvers/yup';
+
+import { api } from '@/lib/client-api';
+import type { IProfile } from '@/types';
+import { profileSchema } from '@/lib/validations';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import * as yup from 'yup';
+import type { z } from 'zod';
 
+type ProfileForm = z.infer<typeof profileSchema>;
+
+const EMPTY: ProfileForm = {
+  name: '',
+  fullName: '',
+  jobTitle: '',
+  email: '',
+  tel: '',
+  summary: '',
+  description: '',
+  avatarUrl: '',
+};
+
+/** Profile form state, loading and mutations (single doc per locale). */
 const useProfile = () => {
-  const t = useTranslations();
-  const lang = useLocale();
-
-  const [profileImageShowImageFromUrlLoading, setProfileImageShowImageFromUrlLoading] = useState(false);
-
-  type formType = {
-    name: string;
-    fullName: string;
-    email: string;
-    tel: string;
-    summary: string;
-    avatarUrl?: string;
-    description: string;
-    jobTitle: string;
-  };
-
-  const FormSchema = yup.object().shape({
-    name: yup.string().required(t('requiredField')),
-    fullName: yup.string().required(t('requiredField')),
-    email: yup.string().required(t('requiredField')),
-    jobTitle: yup.string().required(t('requiredField')),
-    tel: yup
-      .string()
-      .required(t('requiredField'))
-      .matches(/^09\d{9}$/, 'شماره موبایل معتبر وارد کنید'),
-    summary: yup.string().required(t('requiredField')),
-    description: yup.string().required(t('requiredField')),
-  });
+  const locale = useLocale() as 'fa' | 'en';
+  const { ok, fail } = useToastMessages();
 
   const {
     handleSubmit,
     register,
     setValue,
     reset,
-    resetField,
-    formState: { errors, isDirty, defaultValues },
-  } = useForm<formType>({
-    resolver: yupResolver(FormSchema),
-    defaultValues: {
-      name: '',
-      fullName: '',
-      email: '',
-      tel: '',
-      summary: '',
-      avatarUrl: '',
-      description: '',
-      jobTitle: '',
-    },
+    formState: { errors },
+  } = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched',
   });
 
   const {
     data: profile,
-    isLoading: pageLoading,
-    isFetching: pageFetching,
-    error,
+    isPending,
+    isError,
+    error: queryError,
     refetch: refetchGetProfile,
   } = useQuery({
-    enabled: !!lang,
-    queryKey: ['profile', lang],
+    queryKey: ['profile', locale],
     queryFn: async () => {
-      const res = await axios.get<IProfile>(`/api/${lang}/admin/profile`);
-      // Add cache-busting param to avatarUrl
-      const avatarUrl = res.data.avatarUrl ? `${res.data.avatarUrl}?cb=${Date.now()}` : '';
-      setValue('name', res.data.name || '');
-      setValue('fullName', res.data.fullName || '');
-      setValue('email', res.data.email || '');
-      setValue('tel', res.data.tel || '');
-      setValue('summary', res.data.summary || '');
-      setValue('avatarUrl', avatarUrl);
-      setValue('description', res.data.description || '');
-      setValue('jobTitle', res.data.jobTitle || '');
-      return { ...res.data, avatarUrl };
+      const data = await api.get<IProfile | null>(`/api/${locale}/admin/profile`);
+      // The cache-buster keeps avatars fresh in the browser after re-upload.
+      const avatarUrl = data?.avatarUrl ? `${data.avatarUrl.split('?')[0]}?cb=${Date.now()}` : '';
+      reset({ ...EMPTY, ...(data ?? {}), avatarUrl });
+      return data ? { ...data, avatarUrl } : null;
     },
   });
 
-  const { mutate: putProfile, status: mutationStatus } = useMutation({
-    mutationFn: async (data: formType) => {
-      const res = await axios.put(`/api/${lang}/admin/profile`, data);
-      return res.data;
+  const { mutate: putProfile, isPending: saving } = useMutation({
+    mutationFn: (data: ProfileForm) => {
+      // Store clean URLs only: strip the display-only ?cb= cache buster
+      // so it never accumulates in the database.
+      const clean = { ...data, avatarUrl: data.avatarUrl ? data.avatarUrl.split('?')[0] : '' };
+      return api.put<IProfile>(`/api/${locale}/admin/profile`, clean);
     },
     onSuccess: () => {
-      toast(t('dashboard.successMessage'));
-      reset();
+      ok();
       refetchGetProfile();
     },
+    onError: () => fail(),
   });
 
   const uploadAvatar = useMutation({
-    mutationFn: async (formData: any) => {
-      console.log(lang);
-      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
-        params: { lang, type: 'avatar' },
-      });
-      return res.data;
-    },
-    onSuccess: data => {
-      reset();
-      // Add cache-busting param to avatarUrl
-      const avatarUrl = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : '';
-      setValue('avatarUrl', avatarUrl);
+    mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=avatar`, formData),
+    onSuccess: ({ fileUrl }) => {
+      setValue('avatarUrl', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
       refetchGetProfile();
     },
+    onError: () => fail(),
   });
-
-  const btnLoading = mutationStatus === 'pending';
-
-  const onsubmit = (data: formType) => putProfile(data);
 
   return {
     handleSubmit,
     register,
     setValue,
     reset,
-    resetField,
-    formState: { errors, isDirty, defaultValues },
-    onsubmit,
-    btnLoading,
-    pageLoading,
-    error,
+    formState: { errors },
+    onsubmit: (data: ProfileForm) => putProfile(data),
+    saving,
+    isPending,
+    isError,
+    error: queryError,
     profile,
     uploadAvatar,
-    profileImageShowImageFromUrlLoading,
-    setProfileImageShowImageFromUrlLoading,
     refetchGetProfile,
-    pageFetching,
   };
 };
 

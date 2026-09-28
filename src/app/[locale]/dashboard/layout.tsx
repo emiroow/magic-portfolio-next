@@ -1,17 +1,22 @@
-import { getServerAuthSession } from "@/config/auth";
-import { routing } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
-import DashboardProvider from "@/providers/dashboardProvider";
-import { getMessages, getTranslations } from "next-intl/server";
-import { notFound, redirect } from "next/navigation";
+import { getServerAuthSession } from '@/config/auth';
+import { notFound, redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
 
-export async function generateMetadata() {
-  const t = await getTranslations();
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'dashboard' });
+  // Admin area must never be indexed.
   return {
-    title: `${t("dashboard.title")} | ${t("personalWebsite")}`,
+    title: t('title'),
+    robots: { index: false, follow: false },
   };
 }
 
+/**
+ * Dashboard layout: enforces an admin session and constrains width.
+ * Providers and locale validation are handled by `[locale]/layout.tsx`.
+ */
 export default async function DashboardLayout({
   children,
   params,
@@ -20,32 +25,16 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
-  const direction = locale === "fa" ? "rtl" : "ltr";
-  const messages: any = await getMessages();
 
-  // Require authentication
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
+    notFound();
+  }
+
   const session = await getServerAuthSession();
   if (!session) {
     const callback = encodeURIComponent(`/${locale}/dashboard`);
     redirect(`/${locale}/auth?callbackUrl=${callback}`);
   }
 
-  if (!routing.locales.includes(locale as any)) {
-    notFound();
-  }
-
-  return (
-    <div
-      dir={direction}
-      className={cn(
-        `min-h-screen bg-background antialiased max-w-2xl mx-auto sm:py-12 px-6 ${
-          locale === "en" ? "font-robotRegular" : "font-estedadRegular"
-        } `
-      )}
-    >
-      <DashboardProvider locale={locale} messages={messages}>
-        {children}
-      </DashboardProvider>
-    </div>
-  );
+  return <div className="mx-auto min-h-screen w-full max-w-3xl px-4 pb-28 pt-6 sm:px-6 sm:py-12">{children}</div>;
 }

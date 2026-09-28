@@ -1,83 +1,46 @@
-import { ISkill } from "@/interface/ISkills";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useLocale, useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+'use client';
 
+import { api } from '@/lib/client-api';
+import type { ISkill } from '@/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
+
+/** Skills list + add/delete mutations for the dashboard. */
 const useSkills = () => {
-  const t = useTranslations("dashboard");
   const locale = useLocale();
-  const BLUR_FADE_DELAY = 0.04;
+  const { ok, fail } = useToastMessages();
 
   const {
-    register,
-    setValue,
-    handleSubmit,
-    formState: { isDirty, dirtyFields },
-  } = useForm<{ name: string }>({ defaultValues: { name: "" } });
-
-  const {
-    data: getSkills,
-    isLoading: getSkillsIsLoading,
-    refetch: refetchGetSkills,
+    data: skills,
+    isPending,
+    isError,
+    error,
+    refetch: refetchSkills,
   } = useQuery({
-    queryKey: ["getSkills"],
-    queryFn: async () => {
-      const res = await axios.get<ISkill[]>(`/api/${locale}/admin/skill`);
-      return res.data;
-    },
+    queryKey: ['skills', locale],
+    queryFn: () => api.get<ISkill[]>(`/api/${locale}/admin/skill`),
   });
 
-  const { mutate: addSkillMutate, isPending: addSkillIsLoading } = useMutation({
-    mutationFn: async (body: { name: string }) => {
-      const res = await axios.post(`/api/${locale}/admin/skill`, body);
-      return res.data;
-    },
+  const { mutate: addSkill, isPending: adding } = useMutation({
+    mutationFn: (name: string) => api.post<ISkill>(`/api/${locale}/admin/skill`, { name }),
     onSuccess: () => {
-      toast(t("successMessage"));
-      refetchGetSkills();
-      setValue("name", "");
+      ok();
+      refetchSkills();
     },
-    onError: () => {
-      toast(t("errorMessage"));
-    },
+    onError: () => fail(),
   });
 
-  const { mutate: deleteSkillMutate, isPending: deleteSkillIsLoading } =
-    useMutation({
-      mutationFn: async (body: { id: string }) => {
-        const res = await axios.delete(`/api/${locale}/admin/skill`, {
-          data: body,
-        });
-        return res.data;
-      },
-      onSuccess: () => {
-        toast(t("successMessage"));
-        refetchGetSkills();
-      },
-      onError: () => {
-        toast(t("errorMessage"));
-      },
-    });
+  const { mutate: deleteSkill, isPending: deleting } = useMutation({
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/skill?id=${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      ok();
+      refetchSkills();
+    },
+    onError: () => fail(),
+  });
 
-  const onSubmit = (data: { name: string }) => addSkillMutate(data);
-
-  return {
-    getSkills,
-    locale,
-    BLUR_FADE_DELAY,
-    getSkillsIsLoading,
-    formState: { isDirty, dirtyFields },
-    register,
-    setValue,
-    handleSubmit,
-    onSubmit,
-    addSkillMutate,
-    addSkillIsLoading,
-    deleteSkillMutate,
-    deleteSkillIsLoading,
-  };
+  return { skills, isPending, isError, error, addSkill, adding, deleteSkill, deleting, refetchSkills };
 };
 
 export default useSkills;

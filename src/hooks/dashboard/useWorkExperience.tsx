@@ -1,207 +1,128 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useLocale, useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as yup from "yup";
+'use client';
+
+import { api } from '@/lib/client-api';
+import { workSchema } from '@/lib/validations';
+import type { IWork } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
+import { useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+// Same schema as the API plus the optional document id for edits.
+const formSchema = workSchema.extend({ _id: z.string().optional() });
+type WorkForm = z.infer<typeof formSchema>;
+
+const EMPTY: WorkForm = {
+  company: '',
+  title: '',
+  href: '',
+  location: '',
+  logoUrl: '',
+  start: '',
+  end: '',
+  description: '',
+};
+
+/** Work experience list + CRUD and logo upload for the dashboard. */
 const useWorkExperience = () => {
   const locale = useLocale();
-  const t = useTranslations();
-  const lang = useLocale();
-  const [isEdit, setIsEdit] = useState(false);
+  const { ok, fail } = useToastMessages();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-  type formType = {
-    id?: string;
-    company: string;
-    href?: string;
-    location: string;
-    title: string;
-    logoUrl?: string;
-    start: string;
-    end: string;
-    description: string;
-  };
-
-  const FormSchema = yup.object().shape({
-    company: yup.string().required(t("requiredField")),
-    location: yup.string().required(t("requiredField")),
-    title: yup.string().required(t("requiredField")),
-    start: yup.string().required(t("requiredField")),
-    end: yup.string().required(t("requiredField")),
-    description: yup.string().required(t("requiredField")),
-    id: yup.string().optional(),
-    href: yup.string().optional(),
-    logoUrl: yup.string().optional(),
-  });
 
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     setValue,
     reset,
-    control,
-    formState: { errors, isDirty },
     getValues,
-  } = useForm<formType>({
-    resolver: yupResolver(FormSchema) as any,
-    defaultValues: {
-      id: "",
-      company: "",
-      href: "",
-      location: "",
-      title: "",
-      logoUrl: "",
-      start: "",
-      end: "",
-      description: "",
-    },
+    trigger,
+    formState: { errors },
+  } = useForm<WorkForm>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched',
   });
-
-  const { id: IsEditItem } = getValues();
 
   const {
-    data: workExperienceData,
-    isLoading,
-    refetch: refetchGetWorkExperience,
+    data: works,
+    isPending,
+    isError,
+    error,
+    refetch: refetchWorks,
   } = useQuery({
-    queryKey: ["getWorkExperience", locale],
-    queryFn: async () => {
-      const res = await axios.get<IWork[]>(`/api/${locale}/admin/work`);
-      return res.data;
-    },
+    queryKey: ['works', locale],
+    queryFn: () => api.get<IWork[]>(`/api/${locale}/admin/work`),
   });
 
-  const { mutate: putWorkExperience, status: mutationStatus } = useMutation({
-    mutationFn: async (data: formType) => {
-      const res = await axios.put(`/api/${lang}/admin/work`, data);
-      return res.data;
+  const save = useMutation({
+    mutationFn: (data: WorkForm) => {
+      // Store clean URLs: strip the display-only ?cb= cache buster.
+      const clean = { ...data, logoUrl: data.logoUrl ? data.logoUrl.split('?')[0] : '' };
+      return clean._id ? api.put<IWork>(`/api/${locale}/admin/work`, clean) : api.post<IWork>(`/api/${locale}/admin/work`, clean);
     },
     onSuccess: () => {
-      toast(t("dashboard.successMessage"));
+      ok();
       reset();
-      setIsEdit(false);
-      refetchGetWorkExperience();
+      refetchWorks();
     },
-    onError: (data) => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const { mutate: deleteWorkExperience, isPending: isDeletingWorkExperience } =
-    useMutation({
-      mutationFn: async (id?: string) => {
-        const res = await axios.delete(`/api/${lang}/admin/work`, {
-          data: { id },
-        });
-        return res.data;
-      },
-      onSuccess: () => {
-        toast(t("dashboard.successMessage"));
-        reset();
-        setIsEdit(false);
-        refetchGetWorkExperience();
-      },
-      onError: (data) => {
-        toast(data.message);
-      },
-    });
-
-  const { mutate: postWorkExperience, isPending: isPostingWorkExperience } =
-    useMutation({
-      mutationFn: async (data: formType) => {
-        const res = await axios.post(`/api/${lang}/admin/work`, data);
-        return res.data;
-      },
-      onSuccess: () => {
-        toast(t("dashboard.successMessage"));
-        reset();
-        setIsEdit(false);
-        refetchGetWorkExperience();
-      },
-      onError: (data) => {
-        toast(data.message);
-      },
-    });
-
-  const uploadWorkExperienceImage = useMutation({
-    mutationFn: async (formData: any) => {
-      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
-        params: { lang, type: "experience" },
-      });
-      return res.data;
+  const { mutate: deleteWork, isPending: deleting } = useMutation({
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/work?id=${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      ok();
+      refetchWorks();
     },
-    onSuccess: (data) => {
-      // Add cache-busting param to avatarUrl
-      const Url = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : "";
-      setValue("logoUrl", Url, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
-    },
-    onError: (data) => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const deleteUploadedWorkExperienceImage = useMutation({
-    mutationFn: async () => {
-      const res = await axios.delete(`/api/${lang}/admin/upload`, {
-        params: {
-          lang,
-          type: "experience",
-          fileName: getValues("logoUrl")?.split("/").pop()?.split("?")[0],
-        },
-      });
-      return res.data;
+  const uploadLogo = useMutation({
+    mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=experience`, formData),
+    onSuccess: ({ fileUrl }) => {
+      setValue('logoUrl', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
+      trigger('logoUrl');
+    },
+    onError: () => fail(),
+  });
+
+  const deleteLogo = useMutation({
+    mutationFn: () => {
+      const fileName = getValues('logoUrl')?.split('/').pop()?.split('?')[0];
+      return api.del(`/api/${locale}/admin/upload?lang=${locale}&type=experience&fileName=${encodeURIComponent(fileName ?? '')}`);
     },
     onSuccess: () => {
-      toast(t("dashboard.successMessage"));
-      setValue("logoUrl", "", {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true,
-      });
+      setValue('logoUrl', '', { shouldDirty: true });
+      trigger('logoUrl');
     },
-    onError: (data) => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const btnLoading = mutationStatus === "pending";
-
-  const onsubmit = (data: formType) =>
-    IsEditItem ? putWorkExperience(data) : postWorkExperience(data);
+  const startEdit = (work: IWork) => reset({ ...EMPTY, ...work, _id: work._id });
 
   return {
-    handleSubmit,
     register,
+    handleSubmit,
     setValue,
     reset,
-    formState: { errors, isDirty },
-    workExperienceData,
-    isLoading,
-    refetchGetWorkExperience,
-    onsubmit,
-    control,
-    putWorkExperience,
-    btnLoading,
     getValues,
-    isEdit,
-    setIsEdit,
-    isDeletingWorkExperience,
-    deleteWorkExperience,
-    mutate: postWorkExperience,
-    isPending: isPostingWorkExperience,
+    errors,
+    works,
+    isPending,
+    isError,
+    error,
+    refetchWorks,
+    save,
+    deleteWork,
+    deleting,
+    uploadLogo,
+    deleteLogo,
+    startEdit,
     fileInputRef,
-    uploadWorkExperienceImage,
-    deleteUploadedWorkExperienceImage,
-    expandedIndex,
-    setExpandedIndex,
+    onSubmit: (data: WorkForm) => save.mutate(data),
   };
 };
 

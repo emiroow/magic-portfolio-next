@@ -1,226 +1,142 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { useLocale, useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import * as yup from 'yup';
+'use client';
 
+import { api } from '@/lib/client-api';
+import { projectSchema } from '@/lib/validations';
+import type { IProject } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+// Same schema as the API plus the optional document id for edits.
+const formSchema = projectSchema.extend({ _id: z.string().optional() });
+type ProjectForm = z.infer<typeof formSchema>;
+
+const EMPTY: ProjectForm = {
+  title: '',
+  href: '',
+  dates: '',
+  active: true,
+  description: '',
+  technologies: [],
+  links: [],
+  image: '',
+};
+
+/** Projects list + CRUD, technology/link chips and image upload. */
 const useProjects = () => {
   const locale = useLocale();
-  const t = useTranslations();
-  const tDashboard = useTranslations('dashboard');
-  const tProjects = useTranslations('dashboard.projects');
-  const lang = useLocale();
-  const [isEdit, setIsEdit] = useState(false);
-  const [imageShowFromUrlLoading, setImageShowFromUrlLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [newTech, setNewTech] = useState('');
-  const [newLink, setNewLink] = useState({ type: '', href: '', icon: '' });
-
-  type formType = {
-    _id?: string;
-    title: string;
-    href: string;
-    dates: string;
-    active: boolean;
-    description: string;
-    technologies: string[];
-    links: { type: string; href: string; icon: string }[];
-    image: string;
-  };
-
-  const Schema = yup.object().shape({
-    title: yup.string().required(t('requiredField')),
-    href: yup.string().url('Must be a valid URL').required(t('requiredField')),
-    dates: yup.string().required(t('requiredField')),
-    active: yup.boolean().default(false),
-    description: yup.string().required(t('requiredField')),
-    technologies: yup.array().of(yup.string().required()).default([]),
-    links: yup
-      .array()
-      .of(
-        yup.object().shape({
-          type: yup.string().required(),
-          href: yup.string().url().required(),
-          icon: yup.string().required(),
-        })
-      )
-      .default([]),
-    image: yup.string().default(''),
-  });
+  const { ok, fail } = useToastMessages();
 
   const {
     register,
     handleSubmit,
     setValue,
     reset,
-    control,
     getValues,
-    trigger, // اضافه شد
-    formState: { errors, isDirty, dirtyFields },
-  } = useForm<formType>({
-    resolver: yupResolver(Schema),
-    defaultValues: {
-      title: '',
-      href: '',
-      dates: '',
-      active: false,
-      description: '',
-      technologies: [],
-      links: [],
-      image: '',
-    },
+    trigger,
+    formState: { errors },
+  } = useForm<ProjectForm>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched',
   });
 
   const {
     data: projects,
-    isLoading,
+    isPending,
+    isError,
     error,
-    refetch: refetchGetProjects,
+    refetch: refetchProjects,
   } = useQuery({
-    enabled: !!lang,
-    queryKey: ['projects', lang],
-    queryFn: async () => {
-      const res = await axios.get(`/api/${lang}/admin/project`);
-      return res.data;
-    },
+    queryKey: ['projects', locale],
+    queryFn: () => api.get<IProject[]>(`/api/${locale}/admin/project`),
   });
 
-  const {
-    mutate: postProject,
-    isPending: isPostingProject,
-    reset: resetMutation,
-  } = useMutation({
-    mutationFn: async (data: formType) => {
-      if (data._id) {
-        // Update existing project
-        const res = await axios.put(`/api/${lang}/admin/project`, data);
-        return res.data;
-      } else {
-        // Create new project
-        const res = await axios.post(`/api/${lang}/admin/project`, data);
-        return res.data;
-      }
+  const save = useMutation({
+    mutationFn: (data: ProjectForm) => {
+      // Store clean URLs: strip the display-only ?cb= cache buster.
+      const clean = { ...data, image: data.image ? data.image.split('?')[0] : '' };
+      return clean._id ? api.put<IProject>(`/api/${locale}/admin/project`, clean) : api.post<IProject>(`/api/${locale}/admin/project`, clean);
     },
-    onSuccess: data => {
-      toast(tDashboard('successMessage'));
+    onSuccess: () => {
+      ok();
       reset();
-      setIsEdit(false);
-      refetchGetProjects();
+      refetchProjects();
     },
-    onError: error => {
-      toast.error(tDashboard('errorMessage'));
-    },
+    onError: () => fail(),
   });
 
-  const { mutate: deleteProject, isPending: isDeletingProject } = useMutation({
-    mutationFn: async (_id: string) => {
-      const res = await axios.delete(`/api/${lang}/admin/project`, {
-        data: { _id },
-      });
-      return res.data;
-    },
+  const { mutate: deleteProject, isPending: deleting } = useMutation({
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/project?id=${encodeURIComponent(id)}`),
     onSuccess: () => {
-      toast(tProjects('deleteSuccessMessage'));
-      refetchGetProjects();
+      ok();
+      refetchProjects();
     },
-    onError: () => {
-      toast.error(tDashboard('errorMessage'));
-    },
+    onError: () => fail(),
   });
 
-  const uploadProjectImage = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
-        params: { lang, type: 'project' },
-      });
-      return res.data;
-    },
-    onSuccess: data => {
-      const imageUrl = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : '';
-      setValue('image', imageUrl);
-    },
-    onError: () => {
-      toast.error(tDashboard('errorMessage'));
-    },
-  });
-
-  const deleteUploadedProjectImage = useMutation({
-    mutationFn: async () => {
-      const res = await axios.delete(`/api/${lang}/admin/upload`, {
-        params: {
-          lang,
-          type: 'project',
-          fileName: getValues('image')?.split('/').pop()?.split('?')[0],
-        },
-      });
-      return res.data;
-    },
-    onSuccess: () => {
-      toast(t('dashboard.successMessage'));
-      setValue('image', '');
+  const uploadImage = useMutation({
+    mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=project`, formData),
+    onSuccess: ({ fileUrl }) => {
+      setValue('image', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
       trigger('image');
     },
-    onError: data => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const btnLoading = isPostingProject;
+  const deleteImage = useMutation({
+    mutationFn: () => {
+      const fileName = getValues('image')?.split('/').pop()?.split('?')[0];
+      return api.del(`/api/${locale}/admin/upload?lang=${locale}&type=project&fileName=${encodeURIComponent(fileName ?? '')}`);
+    },
+    onSuccess: () => {
+      setValue('image', '', { shouldDirty: true });
+      trigger('image');
+    },
+    onError: () => fail(),
+  });
 
-  const onsubmit = (data: formType) => {
-    postProject(data);
-  };
-
-  const editProject = (project: any) => {
-    setValue('_id', project._id);
-    setValue('title', project.title);
-    setValue('href', project.href);
-    setValue('dates', project.dates);
-    setValue('active', project.active);
-    setValue('description', project.description);
-    setValue('technologies', project.technologies || []);
-    setValue('links', project.links || []);
-    setValue('image', project.image);
-    setIsEdit(true);
-  };
-
-  const addTechnology = () => {
-    if (newTech.trim()) {
-      const currentTech = getValues('technologies') || [];
-      setValue('technologies', [...currentTech, newTech.trim()]);
-      setNewTech('');
-      trigger('technologies');
-    }
+  // --- technologies / links chip helpers ---
+  const addTechnology = (tech: string) => {
+    const value = tech.trim();
+    if (!value) return;
+    const current = getValues('technologies') || [];
+    setValue('technologies', [...current, value], { shouldDirty: true });
+    trigger('technologies');
   };
 
   const removeTechnology = (index: number) => {
-    const currentTech = getValues('technologies') || [];
+    const current = getValues('technologies') || [];
     setValue(
       'technologies',
-      currentTech.filter((_, i) => i !== index)
+      current.filter((_, i) => i !== index),
+      { shouldDirty: true }
     );
     trigger('technologies');
   };
 
-  const addLink = () => {
-    if (newLink.type.trim() && newLink.href.trim() && newLink.icon.trim()) {
-      const currentLinks = getValues('links') || [];
-      setValue('links', [...currentLinks, { ...newLink }]);
-      setNewLink({ type: '', href: '', icon: '' });
-      trigger('links');
-    }
+  const addLink = (link: { type: string; href: string; icon: string }) => {
+    if (!link.type || !link.href) return;
+    const current = getValues('links') || [];
+    setValue('links', [...current, link], { shouldDirty: true });
+    trigger('links');
   };
 
   const removeLink = (index: number) => {
-    const currentLinks = getValues('links') || [];
+    const current = getValues('links') || [];
     setValue(
       'links',
-      currentLinks.filter((_, i) => i !== index)
+      current.filter((_, i) => i !== index),
+      { shouldDirty: true }
     );
     trigger('links');
+  };
+
+  const startEdit = (project: IProject) => {
+    reset({ ...project, _id: project._id });
   };
 
   return {
@@ -228,37 +144,24 @@ const useProjects = () => {
     handleSubmit,
     setValue,
     reset,
-    control,
     getValues,
-    trigger,
-    formState: { errors, isDirty, dirtyFields },
-    onsubmit,
-    btnLoading,
-    isLoading,
-    error,
+    errors,
     projects,
-    refetchGetProjects,
-    isEdit,
-    setIsEdit,
-    postProject,
+    isPending,
+    isError,
+    error,
+    refetchProjects,
+    save,
     deleteProject,
-    isDeletingProject,
-    isPostingProject,
-    editProject,
-    uploadProjectImage,
-    deleteUploadedProjectImage,
-    imageShowFromUrlLoading,
-    setImageShowFromUrlLoading,
-    fileInputRef,
-    resetMutation,
-    newTech,
-    setNewTech,
-    newLink,
-    setNewLink,
+    deleting,
+    uploadImage,
+    deleteImage,
     addTechnology,
     removeTechnology,
     addLink,
     removeLink,
+    startEdit,
+    onSubmit: (data: ProjectForm) => save.mutate(data),
   };
 };
 

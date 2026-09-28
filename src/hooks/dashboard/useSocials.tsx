@@ -1,23 +1,26 @@
-import { ISocial } from "@/interface/ISocial";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+'use client';
 
-type SocialForm = {
-  _id?: string;
-  name: string;
-  url: string;
-  icon: string;
-};
+import { api } from '@/lib/client-api';
+import { socialSchema } from '@/lib/validations';
+import type { ISocial } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToastMessages } from './useToastMessages';
+import { useLocale, useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
+// Same schema as the API plus the optional document id for edits.
+const formSchema = socialSchema.extend({ _id: z.string().optional() });
+type SocialForm = z.infer<typeof formSchema>;
+
+const MAX_SOCIALS = 4;
+
+/** Social links list + CRUD mutations for the dashboard. */
 const useSocials = () => {
   const locale = useLocale();
-  const t = useTranslations("dashboard");
-  const tSocial = useTranslations("dashboard.social");
-  const [isEdit, setIsEdit] = useState(false);
+  const t = useTranslations('dashboard.social');
+  const { ok, fail, warn } = useToastMessages();
 
   const {
     register,
@@ -25,118 +28,80 @@ const useSocials = () => {
     setValue,
     reset,
     watch,
-    formState: { errors, isDirty, dirtyFields, isValid },
+    formState: { errors },
   } = useForm<SocialForm>({
-    defaultValues: { name: "", url: "", icon: "" },
-    mode: "onChange",
-    criteriaMode: "all",
-  });
-
-  // Register validations
-  const registerName = register("name", { required: true, minLength: 2 });
-  const registerIcon = register("icon", { required: true });
-  const urlPattern =
-    /^(https?:\/\/)([\w\-]+\.)+[\w\-]+(\:[0-9]+)?(\/[^\s]*)?$/i;
-  const registerUrl = register("url", {
-    required: true,
-    pattern: urlPattern,
+    resolver: zodResolver(formSchema),
+    defaultValues: { name: '', url: '', icon: '' },
+    mode: 'onTouched',
   });
 
   const {
     data: socials,
-    isLoading,
+    isPending,
+    isError,
+    error,
     refetch,
   } = useQuery({
-    queryKey: ["socials", locale],
-    queryFn: async () => {
-      const res = await axios.get<ISocial[]>(`/api/${locale}/admin/social`);
-      return res.data;
-    },
+    queryKey: ['socials', locale],
+    queryFn: () => api.get<ISocial[]>(`/api/${locale}/admin/social`),
   });
 
-  const { mutateAsync: createSocial, isPending: creating } = useMutation({
-    mutationFn: async (data: SocialForm) => {
-      const res = await axios.post(`/api/${locale}/admin/social`, data);
-      return res.data;
-    },
+  const save = useMutation({
+    mutationFn: (data: SocialForm) =>
+      data._id ? api.put<ISocial>(`/api/${locale}/admin/social`, data) : api.post<ISocial>(`/api/${locale}/admin/social`, data),
     onSuccess: () => {
-      toast.success(t("successMessage"));
-      refetch();
+      ok();
       reset();
-      setIsEdit(false);
-    },
-    onError: () => toast.error(t("errorMessage")),
-  });
-
-  const { mutateAsync: updateSocial, isPending: updating } = useMutation({
-    mutationFn: async (data: SocialForm) => {
-      const res = await axios.put(`/api/${locale}/admin/social`, data);
-      return res.data;
-    },
-    onSuccess: () => {
-      toast.success(t("successMessage"));
       refetch();
-      reset();
-      setIsEdit(false);
     },
-    onError: () => toast.error(t("errorMessage")),
+    onError: () => fail(),
   });
 
   const { mutate: deleteSocial, isPending: deleting } = useMutation({
-    mutationFn: async (_id: string) => {
-      const res = await axios.delete(`/api/${locale}/admin/social`, {
-        data: { _id },
-      });
-      return res.data;
-    },
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/social?id=${encodeURIComponent(id)}`),
     onSuccess: () => {
-      toast.success(t("successMessage"));
+      ok();
       refetch();
     },
-    onError: () => toast.error(t("errorMessage")),
+    onError: () => fail(),
   });
 
-  const onsubmit = async (data: SocialForm) => {
-    if (!data.name || !data.url || !data.icon) {
-      toast.error(t("errorMessage"));
+  const onsubmit = (data: SocialForm) => {
+    if (!data._id && (socials?.length ?? 0) >= MAX_SOCIALS) {
+      warn(t('maxReached'));
       return;
     }
-    // Max 4 socials
-    if (!data._id && (socials?.length || 0) >= 4) {
-      toast.error(tSocial("maxReached"));
-      return;
-    }
-    if (data._id) await updateSocial(data);
-    else await createSocial(data);
+    save.mutate(data);
   };
 
-  const edit = (s: ISocial) => {
-    setValue("_id", s._id);
-    setValue("name", s.name);
-    setValue("url", s.url);
-    setValue("icon", s.icon);
-    setIsEdit(true);
+  const edit = (social: ISocial) => {
+    setValue('_id', social._id);
+    setValue('name', social.name);
+    setValue('url', social.url);
+    setValue('icon', social.icon);
+  };
+
+  const resetForm = () => {
+    reset();
+    setValue('_id', undefined);
   };
 
   return {
     socials,
-    isLoading,
+    isPending,
+    isError,
+    error,
     register,
-    registerName,
-    registerUrl,
-    registerIcon,
     handleSubmit,
     setValue,
-    reset,
+    reset: resetForm,
     watch,
-    formState: { errors, isDirty, dirtyFields, isValid },
+    errors,
     onsubmit,
-    isEdit,
-    setIsEdit,
+    save,
     deleteSocial,
     deleting,
-    creating,
-    updating,
+    edit,
   };
 };
 

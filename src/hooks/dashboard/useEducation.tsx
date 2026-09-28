@@ -1,203 +1,119 @@
-import { IEducation } from '@/interface/IEducation';
-import { yupResolver } from '@hookform/resolvers/yup';
+'use client';
+
+import { api } from '@/lib/client-api';
+import { educationSchema } from '@/lib/validations';
+import type { IEducation } from '@/types';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { useLocale, useTranslations } from 'next-intl';
-import { useTheme } from 'next-themes';
-import { useRef, useState } from 'react';
+import { useToastMessages } from './useToastMessages';
+import { useLocale } from 'next-intl';
+import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import * as yup from 'yup';
+import { z } from 'zod';
+
+// Same schema as the API plus the optional document id for edits.
+const formSchema = educationSchema.extend({ _id: z.string().optional() });
+type EducationForm = z.infer<typeof formSchema>;
+
+const EMPTY: EducationForm = { school: '', degree: '', href: '', logoUrl: '', start: '', end: '' };
+
+/** Education list + CRUD and logo upload for the dashboard. */
 const useEducation = () => {
-  const [isEdit, setIsEdit] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const locale = useLocale();
-  const BLUR_FADE_DELAY = 0.04;
-  const t = useTranslations();
-  const { theme } = useTheme();
-  const lang = useLocale();
-
-  type formType = {
-    id?: string;
-    school: string;
-    href?: string;
-    degree: string;
-    logoUrl?: string;
-    start: string;
-    end: string;
-  };
-
-  const FormSchema = yup.object().shape({
-    school: yup.string().required(t('requiredField')),
-    href: yup.string().optional(),
-    degree: yup.string().required(t('requiredField')),
-    logoUrl: yup.string().optional(),
-    start: yup.string().required(t('requiredField')),
-    end: yup.string().required(t('requiredField')),
-    id: yup.string().optional(),
-  });
+  const { ok, fail } = useToastMessages();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     setValue,
     reset,
-    control,
-    formState: { errors, isDirty },
     getValues,
-  } = useForm<formType>({
-    resolver: yupResolver(FormSchema) as any,
-    defaultValues: {
-      degree: '',
-      end: '',
-      href: '',
-      id: '',
-      logoUrl: '',
-      school: '',
-      start: '',
-    },
+    trigger,
+    formState: { errors },
+  } = useForm<EducationForm>({
+    resolver: zodResolver(formSchema),
+    defaultValues: EMPTY,
+    mode: 'onTouched',
   });
-
-  const { id: IsEditItem } = getValues();
 
   const {
-    data: getEducations,
-    isLoading,
-    refetch: refetchGetEducations,
+    data: educations,
+    isPending,
+    isError,
+    error,
+    refetch: refetchEducations,
   } = useQuery({
-    queryKey: ['getEducations', locale],
-    queryFn: async () => {
-      const res = await axios.get<IEducation[]>(`/api/${locale}/admin/education`);
-      return res.data;
-    },
+    queryKey: ['educations', locale],
+    queryFn: () => api.get<IEducation[]>(`/api/${locale}/admin/education`),
   });
 
-  const { mutate: postEducation, isPending: isPostingEducation } = useMutation({
-    mutationFn: async (data: formType) => {
-      delete data.id;
-      const res = await axios.post(`/api/${lang}/admin/education`, data);
-      return res.data;
+  const save = useMutation({
+    mutationFn: (data: EducationForm) => {
+      // Store clean URLs: strip the display-only ?cb= cache buster.
+      const clean = { ...data, logoUrl: data.logoUrl ? data.logoUrl.split('?')[0] : '' };
+      return clean._id ? api.put<IEducation>(`/api/${locale}/admin/education`, clean) : api.post<IEducation>(`/api/${locale}/admin/education`, clean);
     },
     onSuccess: () => {
-      toast(t('dashboard.successMessage'));
+      ok();
       reset();
-      setIsEdit(false);
-      refetchGetEducations();
+      refetchEducations();
     },
-    onError: data => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const { mutate: putEducation, status: mutationStatus } = useMutation({
-    mutationFn: async (data: formType) => {
-      const res = await axios.put(`/api/${lang}/admin/education`, data);
-      return res.data;
+  const { mutate: deleteEducation, isPending: deleting } = useMutation({
+    mutationFn: (id: string) => api.del(`/api/${locale}/admin/education?id=${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      ok();
+      refetchEducations();
+    },
+    onError: () => fail(),
+  });
+
+  const uploadLogo = useMutation({
+    mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=education`, formData),
+    onSuccess: ({ fileUrl }) => {
+      setValue('logoUrl', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
+      trigger('logoUrl');
+    },
+    onError: () => fail(),
+  });
+
+  const deleteLogo = useMutation({
+    mutationFn: () => {
+      const fileName = getValues('logoUrl')?.split('/').pop()?.split('?')[0];
+      return api.del(`/api/${locale}/admin/upload?lang=${locale}&type=education&fileName=${encodeURIComponent(fileName ?? '')}`);
     },
     onSuccess: () => {
-      toast(t('dashboard.successMessage'));
-      reset();
-      setIsEdit(false);
-      refetchGetEducations();
+      setValue('logoUrl', '', { shouldDirty: true });
+      trigger('logoUrl');
     },
-    onError: data => {
-      toast(data.message);
-    },
+    onError: () => fail(),
   });
 
-  const { mutate: deleteEducation, isPending: isDeletingEducation } = useMutation({
-    mutationFn: async (id?: string) => {
-      const res = await axios.delete(`/api/${lang}/admin/education`, {
-        data: { id },
-      });
-      return res.data;
-    },
-    onSuccess: () => {
-      toast(t('dashboard.successMessage'));
-      reset();
-      setIsEdit(false);
-      refetchGetEducations();
-    },
-    onError: data => {
-      toast(data.message);
-    },
-  });
-
-  const uploadEducationImage = useMutation({
-    mutationFn: async (formData: any) => {
-      const res = await axios.post(`/api/${lang}/admin/upload`, formData, {
-        params: { lang, type: 'education' },
-      });
-      return res.data;
-    },
-    onSuccess: data => {
-      // Add cache-busting param to avatarUrl
-      const Url = data.fileUrl ? `${data.fileUrl}?cb=${Date.now()}` : '';
-      setValue('logoUrl', Url, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
-    },
-    onError: data => {
-      toast(data.message);
-    },
-  });
-
-  const deleteUploadedEducationImage = useMutation({
-    mutationFn: async () => {
-      const res = await axios.delete(`/api/${lang}/admin/upload`, {
-        params: {
-          lang,
-          type: 'education',
-          fileName: getValues('logoUrl')?.split('/').pop()?.split('?')[0],
-        },
-      });
-      return res.data;
-    },
-    onSuccess: () => {
-      toast(t('dashboard.successMessage'));
-      setValue('logoUrl', '', {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true,
-      });
-    },
-    onError: data => {
-      toast(data.message);
-    },
-  });
-
-  const btnLoading = mutationStatus === 'pending';
-
-  const onsubmit = (data: formType) => (IsEditItem ? putEducation(data) : postEducation(data));
+  const startEdit = (education: IEducation) => reset({ ...EMPTY, ...education, _id: education._id });
 
   return {
-    getEducations,
-    isLoading,
-    refetchGetEducations,
-    isEdit,
-    setIsEdit,
-    fileInputRef,
-    BLUR_FADE_DELAY,
-    handleSubmit,
     register,
+    handleSubmit,
     setValue,
     reset,
-    control,
-    formState: { errors, isDirty },
     getValues,
-    locale,
-    theme,
-    postEducation,
-    isPostingEducation,
-    btnLoading,
-    onsubmit,
-    IsEditItem,
+    errors,
+    educations,
+    isPending,
+    isError,
+    error,
+    refetchEducations,
+    save,
     deleteEducation,
-    isDeletingEducation,
-    uploadEducationImage,
-    deleteUploadedEducationImage,
+    deleting,
+    uploadLogo,
+    deleteLogo,
+    startEdit,
+    fileInputRef,
+    onSubmit: (data: EducationForm) => save.mutate(data),
   };
 };
 
