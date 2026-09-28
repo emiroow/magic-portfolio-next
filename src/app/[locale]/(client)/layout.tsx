@@ -1,7 +1,8 @@
 /**
- * Public site layout: constrains content width.
+ * Public site layout: constrains content width and applies the shared page
+ * rhythm (`.site-shell`), including clearance for the floating navbar.
  * Locale validation and providers come from `[locale]/layout.tsx`.
  */
 export default function ClientLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="mx-auto min-h-screen w-full max-w-3xl px-5 py-6 sm:px-6 sm:py-12">{children}</div>;
+  return <div className="site-shell max-w-4xl">{children}</div>;
 }

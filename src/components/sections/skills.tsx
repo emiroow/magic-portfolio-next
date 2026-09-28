@@ -1,30 +1,41 @@
 import BlurFade from '@/components/magicui/blur-fade';
-import { SectionHeader } from '@/components/sections/section-header';
-import { Badge } from '@/components/ui/badge';
+import { SectionHeader, type SectionHeadingProps } from '@/components/sections/section-header';
 import type { ISkill } from '@/types';
 
-interface SkillsProps {
-  title: string;
+interface SkillsProps extends SectionHeadingProps {
   skills: ISkill[];
   delay?: number;
 }
 
-/** Flat list of skill badges. */
-export function Skills({ title, skills, delay = 0 }: SkillsProps) {
+/**
+ * Toolkit pills. Hovering inverts a pill to solid ink — the only emphasis
+ * the monochrome palette needs.
+ */
+export function Skills({ index, label, title, description, meta, skills, delay = 0 }: SkillsProps) {
   if (!skills.length) return null;
 
   return (
-    <section id="skills" className="flex min-h-0 flex-col gap-y-3">
-      <SectionHeader title={title} delay={delay} />
-      <div className="flex flex-wrap gap-2">
+    <section id="skills" aria-labelledby="skills-heading">
+      <SectionHeader
+        index={index}
+        label={label}
+        title={title}
+        description={description}
+        meta={meta}
+        id="skills-heading"
+        delay={delay}
+      />
+      <ul className="flex flex-wrap gap-2">
         {skills.map((skill, id) => (
-          <BlurFade key={skill._id ?? `${skill.name}-${id}`} delay={delay + 0.06 + id * 0.03}>
-            <Badge variant="outline" className="px-3 py-1 text-xs">
-              {skill.name}
-            </Badge>
-          </BlurFade>
+          <li key={skill._id ?? `${skill.name}-${id}`}>
+            <BlurFade delay={delay + 0.04 + id * 0.02} inView>
+              <span className="inline-flex cursor-default items-center rounded-full border bg-card px-3.5 py-1.5 text-xs font-medium transition-colors hover:border-foreground hover:bg-foreground hover:text-background">
+                {skill.name}
+              </span>
+            </BlurFade>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

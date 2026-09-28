@@ -1,5 +1,6 @@
 {
   "present": "Present",
+  "loading": "Loading",
   "meta": {
     "home": {
       "description": "Personal developer portfolio: projects, experience, skills and blog."
@@ -9,25 +10,53 @@
     "title": "No content yet",
     "description": "Connect a MongoDB database via MONGODB_URI in .env.local, then run npm run seed to load demo content (or add your own from the dashboard)."
   },
-  "hero": {
-    "hi": "Hi, I'm",
-    "iam": ""
+  "sections": {
+    "hero": {
+      "greeting": "Hi, I’m",
+      "emailCta": "Get in touch"
+    },
+    "about": {
+      "label": "Profile",
+      "title": "About me"
+    },
+    "experience": {
+      "label": "Career",
+      "title": "Work experience",
+      "description": "The teams I’ve built with and the problems I shipped.",
+      "count": "{count, plural, one {# role} other {# roles}}"
+    },
+    "education": {
+      "label": "Learning",
+      "title": "Education",
+      "count": "{count, plural, one {# record} other {# records}}"
+    },
+    "skills": {
+      "label": "Toolkit",
+      "title": "Skills",
+      "description": "The tools and technologies I reach for every day.",
+      "count": "{count, plural, one {# skill} other {# skills}}"
+    },
+    "projects": {
+      "label": "Selected work",
+      "title": "Projects",
+      "description": "A few things I’ve designed, built and shipped — from small libraries to production applications.",
+      "count": "{count, plural, one {# project} other {# projects}}"
+    },
+    "contact": {
+      "label": "Contact",
+      "title": "Let’s build something",
+      "description": "Have a question, a role or an idea worth exploring? Reach me through any channel below — I read everything and usually reply within a day.",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "copyEmail": "Copy email address",
+      "copied": "Email address copied",
+      "copyFailed": "Couldn’t copy the email address"
+    }
   },
-  "experience": "Work Experience",
-  "about": "About",
-  "education": "Education",
-  "skills": "Skills",
-  "personalWebsite": "Personal Website",
-  "requiredField": "This field is required",
-  "project": {
-    "myProjects": "My Projects",
-    "title": "Check out my latest work",
-    "subTitle": "I've worked on a variety of projects, from simple websites to complex web applications. Here are a few of my favorites."
-  },
-  "notFound": "No experience found",
   "ErrorPage": {
-    "title": "Error",
-    "description": "Something went wrong. Please try again or return to the homepage.",
+    "eyebrow": "Unexpected error",
+    "title": "Something went wrong",
+    "description": "Please try again, or head back to the homepage.",
     "tryAgain": "Try again",
     "goHome": "Go to homepage"
   },
@@ -51,19 +80,15 @@
       "figma": "Figma"
     }
   },
-  "contact": {
-    "contact": "Contact",
-    "title": "Get in Touch",
-    "emailCta": "Send me an email",
-    "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
-  },
   "blogPage": {
     "title": "Blog",
     "eyebrow": "Writing",
-    "description": "My thoughts on software development, life, and more.",
+    "description": "Notes on software development, craft and everything in between.",
     "empty": "No posts yet.",
     "noResults": "No posts match your search.",
     "searchPlaceholder": "Search posts...",
+    "clearSearch": "Clear search",
+    "count": "{count, plural, one {# post} other {# posts}}",
     "rss": "RSS feed",
     "readingTime": "{minutes} min read"
   },
@@ -71,10 +96,13 @@
     "notFound": "Article not found",
     "defaultDescription": "Blog article.",
     "backToBlog": "Back to blog",
+    "previous": "Previous",
+    "next": "Next",
     "readingTime": "{minutes} min read",
     "pagination": "Article pagination"
   },
   "NotFoundPage": {
+    "eyebrow": "Error 404",
     "title": "Page not found",
     "description": "The page you’re looking for doesn’t exist or has been moved.",
     "goHome": "Go to homepage",
@@ -92,6 +120,7 @@
       "forgotPassword": "Forgot password?",
       "loginButton": "Sign in",
       "loggingIn": "Signing in...",
+      "backHome": "Back to portfolio",
       "show": "Show",
       "hide": "Hide",
       "showPassword": "Show password",
@@ -119,6 +148,9 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "eyebrow": "Admin",
+    "details": "Details",
+    "tabsAria": "Dashboard sections",
     "logout": "Log out",
     "confirmTitle": "Are you sure?",
     "confirmDescription": "This action cannot be undone.",
@@ -153,20 +185,20 @@
       "jobTitle": "Job Title"
     },
     "workExperience": {
-      "experience": "Work Experience",
-      "cancel": "close",
-      "createWork": "Create new work experience",
+      "experience": "Work experience",
+      "cancel": "Cancel",
+      "createWork": "Add work experience",
       "editWork": "Edit work experience",
-      "company": "company",
-      "href": "company url",
-      "location": "location",
-      "title": "title",
-      "logoUrl": "logo url",
-      "start": "start",
-      "end": "end",
+      "company": "Company",
+      "href": "Company URL",
+      "location": "Location",
+      "title": "Job title",
+      "logoUrl": "Logo URL",
+      "start": "Start",
+      "end": "End",
       "save": "Save",
       "cancelForm": "Cancel",
-      "description": "description",
+      "description": "Description",
       "noImage": "No Image",
       "uploadImage": "Upload Image",
       "logoImage": "Company Logo",
@@ -181,23 +213,23 @@
       "createFirstWorkExperience": "Create your first work experience"
     },
     "education": {
-      "school": "school / university",
-      "degree": "degree",
+      "school": "School / university",
+      "degree": "Degree",
       "educationTitle": "Education",
-      "createEducation": "Create education",
-      "editTitle": " Edit education",
-      "cancel": "cancel",
-      "start": "start",
-      "end": "end",
+      "createEducation": "Add education",
+      "editTitle": "Edit education",
+      "cancel": "Cancel",
+      "start": "Start",
+      "end": "End",
       "save": "Save",
-      "cancelForm": "cancel form",
+      "cancelForm": "Cancel",
       "uploadImage": "Upload Image",
       "noImage": "No Image",
       "logoImage": "School Logo",
       "uploading": "Uploading...",
       "uploadImageHint": "JPG, PNG up to 10MB",
-      "title": "title",
-      "href": "url",
+      "title": "Title",
+      "href": "URL",
       "schoolPlaceholder": "School / university (e.g., MIT)",
       "hrefPlaceholder": "Website URL (https://example.edu)",
       "degreePlaceholder": "Degree (e.g., B.Sc. Computer Science)",
@@ -206,8 +238,8 @@
     },
     "menu": {
       "Profile": "Profile",
-      "Work": "Work Experience",
-      "Education": "Education Experience",
+      "Work": "Work experience",
+      "Education": "Education",
       "Skills": "Skills",
       "Projects": "Projects",
       "Socials": "Socials",

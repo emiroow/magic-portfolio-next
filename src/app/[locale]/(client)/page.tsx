@@ -9,6 +9,7 @@ import { Projects } from '@/components/sections/projects';
 import { Skills } from '@/components/sections/skills';
 import { getPortfolioData, getProfile } from '@/lib/data';
 import { OG_IMAGE_URL, TWITTER_HANDLE, brandedTitle, languageAlternates, localeUrl, site } from '@/lib/seo';
+import { sectionIndex } from '@/lib/utils';
 import type { AppLocale } from '@/types';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -71,11 +72,9 @@ export default async function Page({ params }: Props) {
   const { locale } = await params;
   const lang = asLocale(locale);
 
-  const [t, tHero, tProject, tContact, data] = await Promise.all([
+  const [t, tSections, data] = await Promise.all([
     getTranslations({ locale }),
-    getTranslations({ locale, namespace: 'hero' }),
-    getTranslations({ locale, namespace: 'project' }),
-    getTranslations({ locale, namespace: 'contact' }),
+    getTranslations({ locale, namespace: 'sections' }),
     getPortfolioData(lang),
   ]);
 
@@ -84,10 +83,14 @@ export default async function Page({ params }: Props) {
   // First-run experience: no database (or no content) yet.
   if (!profile) {
     return (
-      <main className="flex min-h-[70dvh] flex-col items-center justify-center gap-4 px-6 text-center">
-        <AlertTriangle className="h-8 w-8 text-muted-foreground" aria-hidden />
-        <h1 className="text-xl font-bold">{t('empty.title')}</h1>
-        <p className="max-w-md text-sm text-muted-foreground">{t('empty.description')}</p>
+      <main className="flex min-h-[60dvh] flex-col items-center justify-center gap-5 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full border" aria-hidden>
+          <AlertTriangle className="size-5 text-muted-foreground" />
+        </span>
+        <div className="space-y-3">
+          <h1 className="text-xl font-bold ltr:tracking-tight">{t('empty.title')}</h1>
+          <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">{t('empty.description')}</p>
+        </div>
         <Navbar socials={[]} />
       </main>
     );
@@ -95,8 +98,24 @@ export default async function Page({ params }: Props) {
 
   const jsonLdBase = site ?? '';
 
+  // Ordinals follow the sections that actually render, so a missing record
+  // type never leaves a gap in the numbering.
+  const rendered = {
+    about: Boolean(profile.description?.trim()),
+    experience: works.length > 0,
+    education: educations.length > 0,
+    skills: skills.length > 0,
+    projects: projects.some(project => project.active),
+    contact: Boolean(profile.email?.trim() || profile.tel?.trim() || socials.some(social => social.url)),
+  };
+  const renderedKeys = (Object.keys(rendered) as (keyof typeof rendered)[]).filter(key => rendered[key]);
+  const ordinal = (key: keyof typeof rendered) => {
+    const position = renderedKeys.indexOf(key);
+    return position === -1 ? undefined : sectionIndex(position + 1, lang);
+  };
+
   return (
-    <main className="flex min-h-[100dvh] flex-col gap-12 sm:gap-16">
+    <main className="flex min-h-[100dvh] flex-col gap-14 sm:gap-20">
       {/* Structured data: person + breadcrumbs for rich results */}
       <JsonLd
         item={{
@@ -119,22 +138,61 @@ export default async function Page({ params }: Props) {
         }}
       />
 
-      <Hero profile={profile} greeting={tHero('hi')} />
-      <About title={t('about')} description={profile.description} delay={0.1} />
-      <Experience title={t('experience')} works={works} locale={lang} presentLabel={t('present')} delay={0.15} />
-      <Education title={t('education')} educations={educations} locale={lang} delay={0.2} />
-      <Skills title={t('skills')} skills={skills} delay={0.25} />
+      <Hero
+        profile={profile}
+        greeting={tSections('hero.greeting')}
+        emailLabel={profile.email ? tSections('hero.emailCta') : undefined}
+      />
+      <About
+        index={ordinal('about')}
+        label={tSections('about.label')}
+        title={tSections('about.title')}
+        description={profile.description}
+        delay={0.1}
+      />
+      <Experience
+        index={ordinal('experience')}
+        label={tSections('experience.label')}
+        title={tSections('experience.title')}
+        description={tSections('experience.description')}
+        meta={tSections('experience.count', { count: works.length })}
+        works={works}
+        locale={lang}
+        presentLabel={t('present')}
+        delay={0.15}
+      />
+      <Education
+        index={ordinal('education')}
+        label={tSections('education.label')}
+        title={tSections('education.title')}
+        meta={tSections('education.count', { count: educations.length })}
+        educations={educations}
+        locale={lang}
+        delay={0.2}
+      />
+      <Skills
+        index={ordinal('skills')}
+        label={tSections('skills.label')}
+        title={tSections('skills.title')}
+        description={tSections('skills.description')}
+        meta={tSections('skills.count', { count: skills.length })}
+        skills={skills}
+        delay={0.25}
+      />
       <Projects
-        label={tProject('myProjects')}
-        title={tProject('title')}
-        description={tProject('subTitle')}
+        index={ordinal('projects')}
+        label={tSections('projects.label')}
+        title={tSections('projects.title')}
+        description={tSections('projects.description')}
+        meta={tSections('projects.count', { count: projects.filter(project => project.active).length })}
         projects={projects}
         delay={0.3}
       />
       <Contact
-        title={tContact('title')}
-        description={tContact('subTitle')}
-        emailLabel={tContact('emailCta')}
+        index={ordinal('contact')}
+        label={tSections('contact.label')}
+        title={tSections('contact.title')}
+        description={tSections('contact.description')}
         profile={profile}
         socials={socials}
         delay={0.35}

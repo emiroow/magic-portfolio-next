@@ -2,48 +2,91 @@
 
 import BlurFade from '@/components/magicui/blur-fade';
 import BlurFadeText from '@/components/magicui/blur-fade-text';
+import { eyebrowClass } from '@/components/sections/section-header';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Mail } from 'lucide-react';
 import type { IProfile } from '@/types';
 
 interface HeroProps {
   profile: IProfile;
+  /** Eyebrow line rendered above the name. */
   greeting: string;
+  /** Label for the mailto shortcut; the button is hidden without it. */
+  emailLabel?: string;
   /** Base delay for the entrance stagger. */
   delay?: number;
 }
 
-/** Intro block: greeting, role headline, short summary and avatar. */
-export function Hero({ profile, greeting, delay = 0 }: HeroProps) {
-  const headline = [profile.name, profile.jobTitle].filter(Boolean).join(' — ');
+/**
+ * Intro block: eyebrow greeting, name, role, summary and portrait.
+ * Stacks portrait-first on small screens and sits side by side from `sm`.
+ */
+export function Hero({ profile, greeting, emailLabel, delay = 0 }: HeroProps) {
+  const name = profile.fullName?.trim() || profile.name?.trim() || '';
+  const monogram = (name || '?').charAt(0);
 
   return (
-    <section id="hero" className="flex items-center justify-between gap-4">
-      <div className="min-w-0 flex-1 space-y-3">
-        <BlurFadeText
-          delay={delay + 0.04}
-          className="text-lg font-bold tracking-tighter sm:text-2xl xl:text-3xl/none"
-          text={`${greeting} ${profile.name ?? profile.fullName} 👋`}
-        />
-        {headline && (
-          <BlurFade delay={delay + 0.12}>
-            <p className="text-sm font-medium text-muted-foreground sm:text-base">{profile.jobTitle}</p>
+    <section id="hero">
+      <div className="flex flex-col-reverse items-start gap-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
+        <div className="min-w-0 flex-1">
+          <BlurFade delay={delay}>
+            <p className={eyebrowClass}>{greeting}</p>
           </BlurFade>
-        )}
-        {profile.summary && (
-          <BlurFade delay={delay + 0.2}>
-            <p className="max-w-[600px] text-xs leading-relaxed text-muted-foreground md:text-base">{profile.summary}</p>
-          </BlurFade>
-        )}
-      </div>
 
-      {profile.avatarUrl && (
-        <BlurFade delay={delay + 0.08}>
-          <Avatar className="size-24 border sm:size-32">
-            <AvatarImage src={profile.avatarUrl} alt={profile.fullName || profile.name} />
-            <AvatarFallback className="text-lg font-bold">{(profile.name || profile.fullName || '?').slice(0, 1)}</AvatarFallback>
-          </Avatar>
+          <BlurFadeText
+            delay={delay + 0.06}
+            containerClassName="mt-3"
+            className="text-3xl font-bold leading-[1.15] ltr:tracking-tight sm:text-4xl xl:text-5xl"
+            text={name}
+          />
+
+          {profile.jobTitle && (
+            <BlurFade delay={delay + 0.12}>
+              <p className="mt-4 flex items-center gap-3 text-sm font-medium sm:text-base">
+                <span aria-hidden className="h-px w-8 shrink-0 bg-foreground/30" />
+                {profile.jobTitle}
+              </p>
+            </BlurFade>
+          )}
+
+          {profile.summary && (
+            <BlurFade delay={delay + 0.18}>
+              <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
+                {profile.summary}
+              </p>
+            </BlurFade>
+          )}
+
+          {profile.email && emailLabel && (
+            <BlurFade delay={delay + 0.24}>
+              <div className="mt-7">
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <a href={`mailto:${profile.email}`}>
+                    <Mail className="me-2 size-4" />
+                    {emailLabel}
+                  </a>
+                </Button>
+              </div>
+            </BlurFade>
+          )}
+        </div>
+
+        <BlurFade delay={delay + 0.1} className="shrink-0">
+          <div className="group relative">
+            <Avatar className="size-24 border shadow-sm sm:size-28 lg:size-32">
+              {profile.avatarUrl && (
+                <AvatarImage
+                  src={profile.avatarUrl}
+                  alt={name}
+                  className="object-cover grayscale transition-[filter] duration-500 group-hover:grayscale-0"
+                />
+              )}
+              <AvatarFallback className="text-2xl font-bold">{monogram}</AvatarFallback>
+            </Avatar>
+          </div>
         </BlurFade>
-      )}
+      </div>
     </section>
   );
 }

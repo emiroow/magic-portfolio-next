@@ -2,11 +2,10 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { ChevronRight, PencilLine, Trash2 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { ChevronDown, PencilLine, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React from 'react';
 
@@ -17,8 +16,10 @@ interface ResumeCardProps {
   subtitle?: string;
   href?: string;
   badges?: readonly string[];
-  period: string;
-  /** Dashboard mode: expansion is controlled externally. */
+  period?: string;
+  /** `card` renders its own border; `row` sits inside a divided `Stack`. */
+  variant?: 'card' | 'row';
+  /** Dashboard mode: expansion is controlled by the parent. */
   isExpanded?: boolean;
   description?: string;
   onEdit?: () => void;
@@ -26,10 +27,14 @@ interface ResumeCardProps {
   onToggle?: () => void;
 }
 
+/** Absolute URLs open in a new tab; internal ones navigate in place. */
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
 /**
- * Timeline entry card shared by the public site (work/education) and
- * the dashboard list views. Expands to reveal the description when one
- * exists; direction-agnostic via CSS logical properties.
+ * Timeline entry shared by the public site (work / education) and the
+ * dashboard lists. The description is disclosed through an explicit toggle
+ * so an entry can link out *and* expand without the two gestures colliding.
+ * Direction-agnostic: every inset uses CSS logical properties.
  */
 export const ResumeCard = ({
   logoUrl,
@@ -39,6 +44,7 @@ export const ResumeCard = ({
   href,
   badges,
   period,
+  variant = 'card',
   description,
   onDelete,
   onEdit,
@@ -46,88 +52,115 @@ export const ResumeCard = ({
   onToggle,
 }: ResumeCardProps) => {
   const [isExpandedInner, setIsExpandedInner] = React.useState(false);
-  const isExpanded = isExpandedOuter || isExpandedInner;
-  const locale = useLocale();
+  const isExpanded = Boolean(isExpandedOuter) || isExpandedInner;
+  const panelId = React.useId();
   const t = useTranslations('dashboard');
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (description) {
-      e.preventDefault();
-      if (isExpandedOuter) onToggle?.();
-      else setIsExpandedInner(!isExpandedInner);
-    }
-  };
+  // The parent owns the state when it passes a toggle handler.
+  const toggle = () => (onToggle ? onToggle() : setIsExpandedInner(value => !value));
+
+  const iconButtonClass =
+    'flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground';
 
   return (
-    <Card className="flex w-full items-center gap-2 p-3 transition-colors hover:border-foreground/30 sm:p-4">
-      <Link href={href || '#'} className="flex w-full items-center" onClick={handleClick}>
-        {logoUrl && (
-          <div className="flex-none">
-            <Avatar className="size-10 border sm:size-12">
-              <AvatarImage src={logoUrl} alt={altText ?? ''} className="object-contain" />
-              <AvatarFallback>{altText?.[0]}</AvatarFallback>
-            </Avatar>
+    <article
+      className={cn(
+        'group flex w-full flex-col',
+        variant === 'row'
+          ? 'p-4 transition-colors hover:bg-muted/40 sm:px-5'
+          : 'rounded-xl border bg-card p-4 shadow-sm transition-colors hover:border-foreground/30 sm:px-5'
+      )}
+    >
+      <div className="flex items-start gap-3 sm:gap-4">
+        {/* The gutter is always reserved so rows stay aligned without a logo. */}
+        <Avatar className="size-9 shrink-0 border sm:size-11">
+          {logoUrl && (
+            <AvatarImage
+              src={logoUrl}
+              alt={altText ?? ''}
+              className="object-contain grayscale transition-[filter] duration-500 group-hover:grayscale-0"
+            />
+          )}
+          <AvatarFallback className="text-xs font-semibold">{(altText || title || '?').charAt(0)}</AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0 grow">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h3 className="min-w-0 text-sm font-semibold leading-snug sm:text-[15px]">
+              {href ? (
+                <Link
+                  href={href}
+                  {...(isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  className="transition-colors hover:underline"
+                >
+                  {title}
+                </Link>
+              ) : (
+                title
+              )}
+              {badges && badges.length > 0 && (
+                <span className="ms-2 inline-flex flex-wrap gap-1 align-middle">
+                  {badges.map((badge, index) => (
+                    <Badge variant="secondary" className="px-2 py-0 text-[10px] font-normal" key={index}>
+                      {badge}
+                    </Badge>
+                  ))}
+                </span>
+              )}
+            </h3>
+            {period && (
+              <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground sm:text-xs">{period}</span>
+            )}
+          </div>
+          {subtitle && <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>}
+        </div>
+
+        {(description || onEdit || onDelete) && (
+          <div className="-me-1.5 -mt-1 flex shrink-0 items-center gap-0.5">
+            {description && (
+              <button
+                type="button"
+                onClick={toggle}
+                aria-expanded={isExpanded}
+                aria-controls={panelId}
+                aria-label={t('details')}
+                className={iconButtonClass}
+              >
+                <ChevronDown className={cn('size-4 transition-transform duration-300', isExpanded && 'rotate-180')} />
+              </button>
+            )}
+            {onEdit && (
+              <button type="button" onClick={onEdit} aria-label={t('edit')} className={iconButtonClass}>
+                <PencilLine className="size-4" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={onDelete}
+                aria-label={t('delete')}
+                className={cn(iconButtonClass, 'hover:text-destructive')}
+              >
+                <Trash2 className="size-4" />
+              </button>
+            )}
           </div>
         )}
-        <div className="group ms-3 flex grow flex-col items-start">
-          <CardHeader className="p-0">
-            <div className="flex items-center justify-between gap-x-2 text-base">
-              <h3
-                className={cn(
-                  'inline-flex items-center justify-center gap-2 text-xs font-semibold leading-none sm:text-sm',
-                  !description && 'group-hover:underline'
-                )}
-              >
-                {title}
-                {badges && badges.length > 0 && (
-                  <span className="inline-flex gap-1">
-                    {badges.map((badge, index) => (
-                      <Badge variant="secondary" className="align-middle text-xs" key={index}>
-                        {badge}
-                      </Badge>
-                    ))}
-                  </span>
-                )}
-                {description && (
-                  <ChevronRight
-                    className={cn(
-                      'size-4 transform text-muted-foreground opacity-0 transition-all duration-300 ease-out group-hover:opacity-100',
-                      isExpanded ? 'rotate-90' : locale === 'fa' ? 'rotate-180' : 'rotate-0'
-                    )}
-                  />
-                )}
-              </h3>
-              <div className="ms-3 text-[11px] font-normal text-muted-foreground sm:text-xs">{period}</div>
-            </div>
-            {subtitle && <div className="mt-1 text-xs">{subtitle}</div>}
-          </CardHeader>
-          {description && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: isExpanded ? 1 : 0, height: isExpanded ? 'auto' : 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm"
-            >
-              {description}
-            </motion.div>
-          )}
-        </div>
-      </Link>
+      </div>
 
-      {(onEdit || onDelete) && (
-        <div className="z-50 flex flex-col gap-2">
-          {onEdit && (
-            <button type="button" className="rounded p-1 transition-colors hover:text-primary" onClick={onEdit} aria-label={t('edit')}>
-              <PencilLine className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-            </button>
-          )}
-          {onDelete && (
-            <button type="button" className="rounded p-1 transition-colors" onClick={onDelete} aria-label={t('delete')}>
-              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-            </button>
-          )}
-        </div>
+      {description && (
+        <motion.div
+          id={panelId}
+          initial={false}
+          animate={{ opacity: isExpanded ? 1 : 0, height: isExpanded ? 'auto' : 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="overflow-hidden"
+        >
+          <p className="whitespace-pre-line ps-12 pt-3 text-xs leading-relaxed text-muted-foreground sm:ps-[60px] sm:text-sm">
+            {description}
+          </p>
+        </motion.div>
       )}
-    </Card>
+    </article>
   );
 };
