@@ -1,24 +1,17 @@
-import { connectDB } from "@/config/dbConnection";
-import { blogModel } from "@/models/blog";
-import { NextRequest, NextResponse } from "next/server";
+import { apiError, apiJson } from '@/lib/api';
+import { getBlogList } from '@/lib/data';
+import { langSchema } from '@/lib/validations';
 
-// GET: Public list of blog posts for a given language
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ lang: string }> }
-) {
+/** Public blog list for a locale (content stripped). */
+export const dynamic = 'force-dynamic';
+
+export async function GET(_request: Request, { params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  try {
-    await connectDB();
-    const docs = await blogModel.find({ lang }).sort({ createdAt: -1 }).lean();
-
-    return NextResponse.json(docs, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+  const parsed = langSchema.safeParse(lang);
+  if (!parsed.success) {
+    return apiError('Unsupported language. Use "fa" or "en".', 400);
   }
-}
 
-// NOTE: Duplicate placeholder implementation removed. See the GET above.
+  const data = await getBlogList(parsed.data);
+  return apiJson({ data });
+}

@@ -1,33 +1,21 @@
-import { connectDB } from "@/config/dbConnection";
-import { educationModel } from "@/models/education";
-import { profileModel } from "@/models/profile";
-import { projectModel } from "@/models/project";
-import { skillModel } from "@/models/skill";
-import { socialModel } from "@/models/social";
-import { workModel } from "@/models/work";
-import { NextRequest, NextResponse } from "next/server";
+import { apiError, apiJson } from '@/lib/api';
+import { getPortfolioData } from '@/lib/data';
+import { langSchema } from '@/lib/validations';
 
-export const GET = async (
-  request: NextRequest,
-  { params }: { params: Promise<{ lang: string }> }
-) => {
-  const lang = (await params).lang;
-  await connectDB();
-  try {
-    const profile = await profileModel.findOne({ lang });
-    const educations = await educationModel.find({ lang });
-    const projects = await projectModel.find({ lang });
-    const works = await workModel.find({ lang });
-    const socials = await socialModel.find({ lang });
-    const skills = await skillModel.find({ lang });
-    return NextResponse.json(
-      { profile, educations, projects, works, socials, skills },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+/**
+ * Public aggregate endpoint: all home-page content for one locale.
+ * Read-only and database-safe (returns empty sections when the DB
+ * is unavailable).
+ */
+export const dynamic = 'force-dynamic';
+
+export const GET = async (_request: Request, { params }: { params: Promise<{ lang: string }> }) => {
+  const { lang } = await params;
+  const parsed = langSchema.safeParse(lang);
+  if (!parsed.success) {
+    return apiError('Unsupported language. Use "fa" or "en".', 400);
   }
+
+  const data = await getPortfolioData(parsed.data);
+  return apiJson({ data });
 };

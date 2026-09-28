@@ -1,165 +1,150 @@
+import { apiError, apiJson, requireAdmin } from '@/lib/api';
+import { connectDB } from '@/config/dbConnection';
 import { profileModel } from '@/models/profile';
+import { langSchema } from '@/lib/validations';
 import { del, put } from '@vercel/blob';
 import { constants } from 'fs';
 import { access, mkdir, unlink, writeFile } from 'fs/promises';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import path from 'path';
 
+/**
+ * Image upload endpoint (admin only).
+ *
+ * - Development: stores files under `/public/<folder>` and returns a
+ *   same-origin URL.
+ * - Production (Vercel): stores files in Vercel Blob storage, which
+ *   requires `BLOB_READ_WRITE_TOKEN`.
+ */
+
 const isDev = process.env.NODE_ENV === 'development';
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+/** 5 MB upload limit. */
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+/** Maps the `type` query param to a storage folder. */
+function folderForType(type: string | null): string {
+  switch (type) {
+    case 'avatar':
+      return 'avatar';
+    case 'project':
+      return 'projects';
+    case 'education':
+      return 'education';
+    case 'experience':
+      return 'experience';
+    case 'blog':
+      return 'blog';
+    default:
+      return 'others';
+  }
+}
+
+/** Extract and validate the `lang` query parameter. */
+function parseLang(value: string | null) {
+  return langSchema.safeParse(value);
+}
+
 export async function POST(req: NextRequest) {
-  // Prefer explicit `lang` query param, fall back to the dynamic route segment.
-  const langQuery = req.nextUrl.searchParams.get('lang');
-  const langFromPath = req.nextUrl.pathname.split('/')[2];
-  const lang = langQuery ?? langFromPath ?? null;
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
+  const langResult = parseLang(req.nextUrl.searchParams.get('lang'));
+  if (!langResult.success) return apiError('A valid "lang" query parameter is required');
 
   const type = req.nextUrl.searchParams.get('type');
+  const folder = folderForType(type);
 
   try {
     const formData = await req.formData();
-    const file = formData.get('image') as File;
+    const file = formData.get('image');
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    if (!(file instanceof File)) {
+      return apiError('No file uploaded');
     }
-
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Only PNG, JPEG, JPG files are allowed' }, { status: 400 });
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return apiError(`Only ${ALLOWED_TYPES.join(', ')} files are allowed`);
     }
-
-    let folder = 'others';
-    switch (type) {
-      case 'avatar':
-        folder = 'avatar';
-        break;
-      case 'project':
-        folder = 'projects';
-        break;
-      case 'education':
-        folder = 'education';
-        break;
-      case 'experience':
-        folder = 'experience';
-        break;
-      case 'blog':
-        folder = 'blog';
-        break;
+    if (file.size > MAX_FILE_SIZE) {
+      return apiError('File exceeds the 5 MB size limit');
     }
 
     const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
-    const fileName = type === 'avatar' ? `avatarImage.${ext}` : `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const fileName = type === 'avatar' ? `avatarImage.${ext}` : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    // ---------------------------------------
-    // 🔥 DEVELOPMENT MODE → save to /public
-    // ---------------------------------------
+    await connectDB();
+
+    let fileUrl: string;
+
     if (isDev) {
+      // Local development: persist under /public so hot reload serves it.
       const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
       const uploadDir = path.join(process.cwd(), 'public', folder);
 
-      // Ensure folder exists
       try {
         await access(uploadDir, constants.F_OK);
       } catch {
         await mkdir(uploadDir, { recursive: true });
       }
 
-      // If avatar → cleanup old versions
+      // Avatars keep a fixed name; remove stale variants first.
       if (type === 'avatar') {
-        const oldFiles = ['avatarImage.png', 'avatarImage.jpg', 'avatarImage.jpeg'];
-        for (const f of oldFiles) {
+        for (const stale of ['avatarImage.png', 'avatarImage.jpg', 'avatarImage.jpeg', 'avatarImage.webp']) {
           try {
-            await unlink(path.join(uploadDir, f));
-          } catch {}
+            await unlink(path.join(uploadDir, stale));
+          } catch {
+            /* file did not exist */
+          }
         }
       }
 
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-
-      const fileUrl = `${siteUrl}/${folder}/${fileName}`;
-
-      if (type === 'avatar') {
-        await profileModel.findOneAndUpdate({ lang }, { avatarUrl: fileUrl });
-      }
-
-      return NextResponse.json({
-        fileUrl,
-        message: 'Upload successful (DEV MODE)',
+      await writeFile(path.join(uploadDir, fileName), Buffer.from(bytes));
+      fileUrl = `/${folder}/${fileName}`;
+    } else {
+      // Production: Vercel Blob storage.
+      const blob = await put(`${folder}/${fileName}`, file, {
+        access: 'public',
+        addRandomSuffix: type !== 'avatar',
+        allowOverwrite: true,
       });
+      fileUrl = blob.url;
     }
 
-    // ---------------------------------------
-    // 🔥 PRODUCTION MODE → upload to BLOB
-    // ---------------------------------------
-    const { url } = await put(`${folder}/${fileName}`, file, {
-      access: 'public',
-      allowOverwrite: true,
-    });
-
+    // Avatar uploads also update the stored profile automatically.
     if (type === 'avatar') {
-      await profileModel.findOneAndUpdate({ lang }, { avatarUrl: url });
+      await profileModel.findOneAndUpdate({ lang: langResult.data }, { avatarUrl: fileUrl });
     }
 
-    return NextResponse.json({
-      fileUrl: url,
-      message: 'Upload successful',
-    });
-  } catch (err) {
-    console.error('AVATAR UPLOAD ERROR →', err);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    return apiJson({ data: { fileUrl } });
+  } catch (error) {
+    console.error('[api/admin/upload] failed:', error);
+    return apiError('Upload failed', 500);
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const fileName = req.nextUrl.searchParams.get('fileName');
   const type = req.nextUrl.searchParams.get('type');
 
-  if (!fileName) {
-    return NextResponse.json({ error: 'Filename required' }, { status: 400 });
+  if (!fileName || fileName.includes('/') || fileName.includes('..')) {
+    return apiError('A valid "fileName" query parameter is required');
   }
 
-  let folder = 'others';
-  switch (type) {
-    case 'avatar':
-      folder = 'avatar';
-      break;
-    case 'project':
-      folder = 'projects';
-      break;
-    case 'education':
-      folder = 'education';
-      break;
-    case 'experience':
-      folder = 'experience';
-      break;
-    case 'blog':
-      folder = 'blog';
-      break;
-  }
+  const folder = folderForType(type);
 
   try {
-    // ---------------------------------------
-    // 🔥 DEVELOPMENT MODE → delete from public
-    // ---------------------------------------
     if (isDev) {
-      const filePath = path.join(process.cwd(), 'public', folder, fileName);
-      await unlink(filePath);
-      return NextResponse.json({ message: 'Delete successful (DEV MODE)' });
+      await unlink(path.join(process.cwd(), 'public', folder, fileName));
+    } else {
+      await del(`${folder}/${fileName}`);
     }
-
-    // ---------------------------------------
-    // 🔥 PRODUCTION MODE → delete from Blob
-    // ---------------------------------------
-    await del(`${folder}/${fileName}`);
-
-    return NextResponse.json({
-      message: 'Delete successful',
-    });
-  } catch (err) {
-    console.error('Delete error:', err);
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+    return apiJson({ data: { message: 'Delete successful' } });
+  } catch (error) {
+    console.error('[api/admin/upload] delete failed:', error);
+    return apiError('Delete failed', 500);
   }
 }

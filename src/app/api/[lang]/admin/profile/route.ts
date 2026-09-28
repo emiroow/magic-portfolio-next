@@ -1,39 +1,57 @@
-import { profileModel } from "@/models/profile";
-import { NextRequest, NextResponse } from "next/server";
+import { apiError, apiJson, parseBody, requireAdmin } from '@/lib/api';
+import { connectDB } from '@/config/dbConnection';
+import { langSchema, profileSchema } from '@/lib/validations';
+import { profileModel } from '@/models/profile';
+import { revalidatePath } from 'next/cache';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ lang: string }> }
-) {
+type RouteContext = { params: Promise<{ lang: string }> };
+
+/** Resolve + validate the guarded locale shared by both handlers. */
+async function prepare(request: Request, context: RouteContext) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard;
+
+  const { lang } = await context.params;
+  const parsedLang = langSchema.safeParse(lang);
+  if (!parsedLang.success) {
+    return { ok: false as const, response: apiError('Unsupported language. Use "fa" or "en".', 400) };
+  }
+
+  await connectDB();
+  return { ok: true as const, lang: parsedLang.data };
+}
+
+/** Get the profile document for a locale. */
+export async function GET(_request: Request, context: RouteContext) {
+  const prepared = await prepare(_request, context);
+  if (!prepared.ok) return prepared.response;
+
   try {
-    const { lang } = await params;
-    const profile = await profileModel.findOne({ lang });
-    return NextResponse.json(profile, { status: 200 });
+    const profile = await profileModel.findOne({ lang: prepared.lang }).lean();
+    return apiJson({ data: profile ? JSON.parse(JSON.stringify(profile)) : null });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('[api/admin/profile] read failed:', error);
+    return apiError('Internal Server Error', 500);
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ lang: string }> }
-) {
+/** Create-or-update the profile document for a locale (upsert). */
+export async function PUT(request: Request, context: RouteContext) {
+  const prepared = await prepare(request, context);
+  if (!prepared.ok) return prepared.response;
+
+  const parsed = await parseBody(profileSchema, request);
+  if (!parsed.ok) return parsed.response;
+
   try {
-    const body = await request.json();
-    const { lang } = await params;
-    const profile = await profileModel.findOneAndUpdate(
-      { lang },
-      { ...body },
-      { new: true }
-    );
-    return NextResponse.json(profile, { status: 200 });
+    const profile = await profileModel
+      .findOneAndUpdate({ lang: prepared.lang }, parsed.data, { new: true, upsert: true, runValidators: true })
+      .lean();
+
+    revalidatePath(`/${prepared.lang}`, 'layout');
+    return apiJson({ data: JSON.parse(JSON.stringify(profile)) });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error('[api/admin/profile] update failed:', error);
+    return apiError('Internal Server Error', 500);
   }
 }
