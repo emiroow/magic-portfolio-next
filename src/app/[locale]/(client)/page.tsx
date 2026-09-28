@@ -8,7 +8,7 @@ import { Hero } from '@/components/sections/hero';
 import { Projects } from '@/components/sections/projects';
 import { Skills } from '@/components/sections/skills';
 import { getPortfolioData, getProfile } from '@/lib/data';
-import { OG_IMAGE_URL, TWITTER_HANDLE, languageAlternates, localeUrl, site } from '@/lib/seo';
+import { OG_IMAGE_URL, TWITTER_HANDLE, brandedTitle, languageAlternates, localeUrl, site } from '@/lib/seo';
 import type { AppLocale } from '@/types';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -25,17 +25,19 @@ function asLocale(locale: string): AppLocale {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const profile = await getProfile(asLocale(locale));
+  const lang = asLocale(locale);
+  const profile = await getProfile(lang);
   const t = await getTranslations({ locale, namespace: 'meta.home' });
 
-  const title = profile?.fullName || profile?.name || t('fallbackTitle');
+  const title = brandedTitle(profile, lang);
   const description = profile?.summary || profile?.description || t('description');
   const ogImage = profile?.avatarUrl?.startsWith('http') ? profile.avatarUrl : OG_IMAGE_URL;
 
   return {
-    title,
+    // Home shows the full brand as-is; the root template must not append to it.
+    title: { absolute: title },
     description,
-    keywords: [title, profile?.jobTitle, 'portfolio', 'developer', locale === 'fa' ? 'نمونه کار' : 'web developer'].filter(Boolean) as string[],
+    keywords: [profile?.fullName || profile?.name, profile?.jobTitle, 'portfolio', 'developer', locale === 'fa' ? 'نمونه کار' : 'web developer'].filter(Boolean) as string[],
     alternates: {
       canonical: localeUrl(locale),
       languages: languageAlternates(''),

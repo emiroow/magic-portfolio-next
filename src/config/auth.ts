@@ -5,13 +5,11 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 /**
  * Single-admin credentials authentication.
  *
- * Credentials live in server-only environment variables (never exposed to
- * the browser). Demo defaults keep a freshly cloned repository usable out
- * of the box; set ADMIN_EMAIL / ADMIN_PASSWORD in production.
+ * Credentials live in server-only environment variables and are REQUIRED:
+ * there are no demo/fallback accounts, so a misconfigured deployment can
+ * never be logged into with publicly known defaults. If ADMIN_EMAIL or
+ * ADMIN_PASSWORD is missing, every sign-in attempt is refused.
  */
-
-const DEMO_EMAIL = 'admin@example.com';
-const DEMO_PASSWORD = 'admin1234';
 
 /** Constant-time string comparison that tolerates different lengths. */
 function safeEqual(a: string, b: string): boolean {
@@ -39,11 +37,14 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        const expectedEmail = process.env.ADMIN_EMAIL;
+        const expectedPassword = process.env.ADMIN_PASSWORD;
+
+        // No configured admin => refuse every sign-in (no implicit defaults).
+        if (!expectedEmail || !expectedPassword) return null;
+
         const email = credentials?.email ?? '';
         const password = credentials?.password ?? '';
-
-        const expectedEmail = process.env.ADMIN_EMAIL || DEMO_EMAIL;
-        const expectedPassword = process.env.ADMIN_PASSWORD || DEMO_PASSWORD;
 
         if (safeEqual(email, expectedEmail) && safeEqual(password, expectedPassword)) {
           return { id: 'site-admin', name: 'Admin', email: expectedEmail };

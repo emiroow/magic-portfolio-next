@@ -1,6 +1,7 @@
 import { FlickeringGrid } from '@/components/magicui/flickering-grid';
+import { getProfile } from '@/lib/data';
 import { estedad, roboto } from '@/lib/fonts';
-import { site } from '@/lib/seo';
+import { brandedTitle, site, SITE_DESCRIPTION } from '@/lib/seo';
 import '@/app/globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
@@ -8,17 +9,29 @@ import { getLocale } from 'next-intl/server';
 import GoogleAnalytics from './analytics';
 
 /**
- * Root metadata. Page-level `generateMetadata` overrides these per locale.
+ * Root metadata. The brand (`Name | Job Title | <suffix>`) comes purely from
+ * the profile document (never env), so sub-pages inherit `%s | Brand`
+ * automatically and the home page overrides it with an absolute title.
  */
-export const metadata: Metadata = {
-  metadataBase: site ? new URL(site) : undefined,
-  title: {
-    default: 'Magic Portfolio',
-    template: '%s | Magic Portfolio',
-  },
-  description: 'Minimal, bilingual developer portfolio with blog and admin dashboard.',
-  applicationName: 'Magic Portfolio',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const lang = locale === 'fa' ? 'fa' : 'en';
+
+  // Localized profile first; fall back to the other locale (never env).
+  const profile = (await getProfile(lang)) ?? (await getProfile(lang === 'fa' ? 'en' : 'fa'));
+  const brand = brandedTitle(profile, lang);
+
+  return {
+    metadataBase: site ? new URL(site) : undefined,
+    title: {
+      default: brand,
+      // Sub-pages render as `Page | Name | Job Title | <suffix>`.
+      template: `%s | ${brand}`,
+    },
+    description: profile?.summary || profile?.description || SITE_DESCRIPTION[lang],
+    applicationName: brand,
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',

@@ -1,10 +1,10 @@
 import { ImageResponse } from 'next/og';
 import { getProfile } from '@/lib/data';
-import { site } from '@/lib/seo';
+import { brandedTitle, site } from '@/lib/seo';
 
 /**
  * Dynamic Open Graph image endpoint (`GET /api/og?title=...`).
- * Falls back to the owner name from the profile when no title is
+ * Falls back to the brand (`Name | Job Title | Portfolio`) when no title is
  * provided, so every share card looks intentional without extra config.
  */
 const SIZE = { width: 1200, height: 630 };
@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const profile = await getProfile('en');
 
-  const title = url.searchParams.get('title')?.slice(0, 120) || profile?.fullName || 'Magic Portfolio';
+  const title = url.searchParams.get('title')?.slice(0, 120) || profile?.fullName || brandedTitle(profile, 'en');
   const subtitle = profile?.jobTitle || (site ? site.replace(/^https?:\/\//, '') : '');
 
   return new ImageResponse(

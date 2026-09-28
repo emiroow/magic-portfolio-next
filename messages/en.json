@@ -2,7 +2,6 @@
   "present": "Present",
   "meta": {
     "home": {
-      "fallbackTitle": "Personal Portfolio",
       "description": "Personal developer portfolio: projects, experience, skills and blog."
     }
   },
@@ -114,7 +113,6 @@
       "sending": "Sending...",
       "emailSent": "If this email exists, we sent you a reset link.",
       "backToLogin": "Back to sign in",
-      "demoNote": "Demo: Default credentials are admin@example.com / admin1234",
       "successTitle": "Check your inbox",
       "successDesc": "We've sent a link to reset your password."
     }

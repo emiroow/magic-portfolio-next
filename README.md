@@ -42,7 +42,7 @@ npm install            # pnpm install works too
 
 # 2. Configure environment
 cp .env.example .env.local
-# then edit .env.local: set MONGODB_URI and NEXTAUTH_SECRET
+# then edit .env.local: set MONGODB_URI, NEXTAUTH_SECRET, ADMIN_EMAIL and ADMIN_PASSWORD
 
 # 3. Load demo content (optional but recommended)
 npm run seed
@@ -52,7 +52,7 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) — the site serves `/en` and `/fa` from there.
-The dashboard is at `/en/dashboard` (demo credentials: `admin@example.com` / `admin1234` — override with `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+The dashboard is at `/en/dashboard`. Sign in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env.local` — there are no demo or fallback accounts, and sign-in is refused entirely if those variables are missing.
 
 ## Scripts
 
@@ -75,11 +75,12 @@ The dashboard is at `/en/dashboard` (demo credentials: `admin@example.com` / `ad
 | `NEXT_PUBLIC_SITE_URL`        | Yes      | Canonical site origin (e.g. `https://portfolio.example.com`)       |
 | `NEXTAUTH_SECRET`             | Yes      | Session encryption key — `openssl rand -base64 32`                 |
 | `NEXTAUTH_URL`                | Prod     | Same origin as the app (NextAuth compatibility)                    |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | No   | Dashboard credentials (fall back to demo values)                   |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Yes  | Dashboard credentials — required; no demo/fallback accounts        |
 | `BLOB_READ_WRITE_TOKEN`       | Prod     | Vercel Blob token — required for image uploads in production       |
-| `NEXT_PUBLIC_SITE_TITLE`      | No       | PWA manifest / metadata title                                      |
 | `NEXT_PUBLIC_TWITTER_HANDLE`  | No       | `@handle` for Twitter cards                                        |
 | `NEXT_PUBLIC_GA_ID`           | No       | Optional Google Analytics 4 ID                                     |
+
+> The site title and meta description are **not** environment variables — they are built from the profile document you edit in the dashboard, as `Name | Job Title | Portfolio` (in Persian: `نام | عنوان شغلی | سایت شخصی`).
 
 ## Project structure
 

@@ -34,7 +34,7 @@ npm install
 
 # ۲. تنظیم متغیرهای محیطی
 cp .env.example .env.local
-# مقادیر MONGODB_URI و NEXTAUTH_SECRET را وارد کنید
+# مقادیر MONGODB_URI، NEXTAUTH_SECRET، ADMIN_EMAIL و ADMIN_PASSWORD را وارد کنید
 
 # ۳. بارگذاری محتوای نمونه (اختیاری، پیشنهاد می‌شود)
 npm run seed
@@ -44,7 +44,7 @@ npm run dev
 ```
 
 آدرس [http://localhost:3000](http://localhost:3000) را باز کنید. داشبورد در `/fa/dashboard` در دسترس است
-(اطلاعات ورود نمونه: `admin@example.com` / `admin1234` — با `ADMIN_EMAIL` و `ADMIN_PASSWORD` قابل تغییر).
+(با `ADMIN_EMAIL` و `ADMIN_PASSWORD` که در `.env.local` تنظیم کرده‌اید وارد شوید — هیچ حساب نمونه یا پیش‌فرضی وجود ندارد و در صورت نبود این مقادیر، ورود کاملاً مسدود می‌شود).
 
 ## اسکریپت‌ها
 

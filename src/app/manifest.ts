@@ -1,13 +1,21 @@
+import { getProfile } from '@/lib/data';
+import { brandedTitle, SITE_DESCRIPTION } from '@/lib/seo';
 import type { MetadataRoute } from 'next';
 
-/** PWA manifest; name/description configurable via env. */
-export default function manifest(): MetadataRoute.Manifest {
-  const name = process.env.NEXT_PUBLIC_SITE_TITLE || 'Magic Portfolio';
+/**
+ * PWA manifest. Name/description mirror the SEO brand and come from the
+ * profile document (never env). English is used as the manifest locale since
+ * the manifest itself is not localized.
+ */
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const profile = await getProfile('en');
+  const name = brandedTitle(profile, 'en');
+  const shortName = profile?.fullName || profile?.name || name;
 
   return {
     name,
-    short_name: name,
-    description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal developer portfolio, blog and dashboard.',
+    short_name: shortName,
+    description: profile?.summary || profile?.description || SITE_DESCRIPTION.en,
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

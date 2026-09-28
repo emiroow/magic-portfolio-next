@@ -6,13 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/useAuth';
 import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 /** Sign-in page for the single-admin dashboard. */
 const AuthPage = () => {
   const t = useTranslations('auth.login');
-  const locale = useLocale();
   const { handleSubmit, register, onSubmit, errors, isPending } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -84,10 +83,6 @@ const AuthPage = () => {
                 t('loginButton')
               )}
             </Button>
-
-            <p className="text-center text-[11px] text-muted-foreground">
-              {locale === 'fa' ? 'حساب نمایشی: admin@example.com / admin1234' : 'Demo credentials: admin@example.com / admin1234'}
-            </p>
           </form>
         </CardContent>
       </Card>
