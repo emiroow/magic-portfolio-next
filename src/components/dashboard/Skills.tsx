@@ -1,10 +1,11 @@
 'use client';
 
-import { EmptyState, ErrorState, LoadingRows, SectionShell } from '@/components/dashboard/shared';
+import { EmptyState, ErrorState, SectionShell } from '@/components/dashboard/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import useSkills from '@/hooks/dashboard/useSkills';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -29,16 +30,26 @@ const Skills = () => {
   return (
     <SectionShell title={t('title')}>
       <form onSubmit={submit} className="flex gap-2">
-        <Input value={name} onChange={e => setName(e.target.value)} placeholder={t('inputPlaceholder')} aria-label={t('inputPlaceholder')} className="max-w-sm" />
-        <Button type="submit" disabled={!name.trim() || adding} className="shrink-0">
-          <Plus className="me-1 h-4 w-4" />
+        <Input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder={t('inputPlaceholder')}
+          aria-label={t('inputPlaceholder')}
+          className="max-w-sm rounded-full"
+        />
+        <Button type="submit" disabled={!name.trim() || adding} className="shrink-0 rounded-full">
+          <Plus className="me-2 size-4" aria-hidden />
           {t('add')}
         </Button>
       </form>
 
       <div className="mt-6">
         {isPending ? (
-          <LoadingRows rows={1} />
+          <div className="flex flex-wrap gap-2" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-24 rounded-full" />
+            ))}
+          </div>
         ) : isError ? (
           <ErrorState message={error?.message} onRetry={() => refetchSkills()} />
         ) : skills && skills.length > 0 ? (
@@ -47,7 +58,7 @@ const Skills = () => {
               <Badge
                 key={skill._id}
                 variant="outline"
-                className="px-3 py-1 text-sm"
+                className="px-3 py-1 text-xs font-normal"
                 onDelete={() => skill._id && setPendingDelete(skill._id)}
               >
                 {skill.name}

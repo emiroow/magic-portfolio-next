@@ -1,14 +1,14 @@
 'use client';
 
 import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import MarkdownEditor from '@/components/ui/markdown-editor';
 import useBlog, { slugify } from '@/hooks/dashboard/useBlog';
 import type { IBlog } from '@/types';
-import { formatYearMonthLocal } from '@/lib/utils';
+import { cn, formatYearMonthLocal } from '@/lib/utils';
 import { ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -62,7 +62,7 @@ const Blog = () => {
       action={
         !formOpen && (
           <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createBlog')}>
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" aria-hidden />
           </Button>
         )
       }
@@ -108,32 +108,56 @@ const Blog = () => {
       ) : isError ? (
         <ErrorState message={error?.message} onRetry={() => refetchPosts()} />
       ) : posts && posts.length > 0 ? (
-        <div className="space-y-3">
-          <Input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} className="mb-1 max-w-sm" />
-          {filtered.map(post => (
-            <div key={post._id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-3 sm:p-4">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{post.title}</p>
-                <p className="text-xs text-muted-foreground" dir="ltr">
-                  /{post.slug} · {formatYearMonthLocal(post.createdAt, lang)}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <Link href={`/${locale}/blog/${post.slug}`} target="_blank">
-                  <Button size="icon" variant="ghost" className="size-8" aria-label={t('openPost')}>
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Button size="icon" variant="ghost" className="size-8" onClick={() => beginEdit(post)} aria-label={t('edit')}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="size-8" onClick={() => post._id && setPendingDelete(post._id)} disabled={deleting} aria-label={tDash('delete')}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+        <div className="space-y-4">
+          <Input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            aria-label={t('searchPlaceholder')}
+            className="max-w-sm rounded-full"
+          />
+
+          {filtered.length > 0 ? (
+            <div className="overflow-hidden rounded-xl border">
+              <ul className="divide-y divide-border">
+                {filtered.map(post => (
+                  <li key={post._id} className="flex items-center justify-between gap-3 p-3 transition-colors hover:bg-muted/40 sm:p-4">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{post.title}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        <bdi dir="ltr">/{post.slug}</bdi> · {formatYearMonthLocal(post.createdAt, lang)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      <Link
+                        href={`/${locale}/blog/${post.slug}`}
+                        target="_blank"
+                        aria-label={t('openPost')}
+                        className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'size-8')}
+                      >
+                        <ExternalLink className="size-4" aria-hidden />
+                      </Link>
+                      <Button size="icon" variant="ghost" className="size-8" onClick={() => beginEdit(post)} aria-label={t('edit')}>
+                        <Pencil className="size-4" aria-hidden />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="size-8 hover:text-destructive"
+                        onClick={() => post._id && setPendingDelete(post._id)}
+                        disabled={deleting}
+                        aria-label={tDash('delete')}
+                      >
+                        <Trash2 className="size-4" aria-hidden />
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-          {filtered.length === 0 && <EmptyState text={t('noBlogs')} />}
+          ) : (
+            <EmptyState text={t('noBlogs')} />
+          )}
         </div>
       ) : (
         !formOpen && <EmptyState text={t('noBlogs')} actionText={t('createBlog')} onAction={beginCreate} />

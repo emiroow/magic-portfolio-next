@@ -2,7 +2,6 @@
 
 import { iconDecider } from '@/components/icons';
 import { EmptyState, ErrorState, Field, LoadingRows, SectionShell } from '@/components/dashboard/shared';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
@@ -26,7 +25,7 @@ const Socials = () => {
   const editingId = watch('_id');
 
   const selectClass =
-    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
+    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40';
 
   return (
     <SectionShell title={t('title')}>
@@ -74,35 +73,51 @@ const Socials = () => {
           <>
             {selectedIcon && (
               <p className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="inline-flex size-6 items-center justify-center rounded bg-muted">{iconDecider(selectedIcon, 'size-4')}</span>
+                <span aria-hidden className="inline-flex size-7 items-center justify-center rounded-md border bg-background">
+                  {iconDecider(selectedIcon, 'size-4')}
+                </span>
                 {t('icon')}: {selectedIcon}
               </p>
             )}
-            <div className="flex flex-wrap gap-2">
-              {socials?.map(social => (
-                <Badge key={social._id} variant="outline" className="gap-2 px-3 py-1 text-sm">
-                  {iconDecider(social.icon, 'size-4')}
-                  {social.name}
-                  <button
-                    type="button"
-                    aria-label={tDash('edit')}
-                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
-                    onClick={() => edit(social)}
-                  >
-                    <Pencil className="size-3" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={tDash('delete')}
-                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
-                    onClick={() => social._id && setPendingDelete(social._id)}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            {(!socials || socials.length === 0) && <EmptyState text={t('noSocials')} />}
+
+            {socials && socials.length > 0 ? (
+              <div className="overflow-hidden rounded-xl border">
+                <ul className="divide-y divide-border">
+                  {socials.map(social => (
+                    <li key={social._id} className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/40 sm:p-4">
+                      <span
+                        aria-hidden
+                        className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background"
+                      >
+                        {iconDecider(social.icon, 'size-4')}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">{social.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          <bdi dir="ltr">{social.url}</bdi>
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-0.5">
+                        <Button size="icon" variant="ghost" className="size-8" onClick={() => edit(social)} aria-label={tDash('edit')}>
+                          <Pencil className="size-4" aria-hidden />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-8 hover:text-destructive"
+                          onClick={() => social._id && setPendingDelete(social._id)}
+                          aria-label={tDash('delete')}
+                        >
+                          <X className="size-4" aria-hidden />
+                        </Button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <EmptyState text={t('noSocials')} />
+            )}
           </>
         )}
       </div>

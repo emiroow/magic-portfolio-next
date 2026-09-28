@@ -25,35 +25,42 @@ const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="flex-row items-center justify-between space-y-0 p-3 sm:p-4">
+    <Card className="transition-colors hover:border-foreground/30">
+      <CardHeader className="flex-row items-center justify-between space-y-0 p-4 sm:p-5">
         <div className="min-w-0 space-y-0.5">
-          <h4 className="truncate text-base font-semibold">{project.title}</h4>
-          {project.dates && <p className="text-xs text-muted-foreground">{project.dates}</p>}
+          <h3 className="truncate text-sm font-semibold sm:text-base">{project.title}</h3>
+          {project.dates && <p className="text-[11px] tabular-nums text-muted-foreground">{project.dates}</p>}
         </div>
         <div className="flex shrink-0 gap-1">
           <Button size="icon" variant="ghost" className="size-8" onClick={() => onEdit(project)} aria-label={t('edit')}>
-            <Pencil className="h-4 w-4" />
+            <Pencil className="size-4" aria-hidden />
           </Button>
-          <Button size="icon" variant="ghost" className="size-8" onClick={() => setConfirmOpen(true)} disabled={isDeleting} aria-label={t('delete')}>
-            {isDeleting ? <Loading size="sm" /> : <Trash2 className="h-4 w-4" />}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8 hover:text-destructive"
+            onClick={() => setConfirmOpen(true)}
+            disabled={isDeleting}
+            aria-label={t('delete')}
+          >
+            {isDeleting ? <Loading size="sm" /> : <Trash2 className="size-4" aria-hidden />}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-        <div className="flex flex-col gap-3 sm:flex-row">
+      <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0">
+        <div className="flex flex-col gap-4 sm:flex-row">
           {project.image && (
-            <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border">
-              <Image src={project.image} alt={project.title} fill sizes="128px" className="object-cover" />
+            <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-lg border sm:h-20 sm:w-32 sm:aspect-auto">
+              <Image src={project.image} alt={project.title} fill sizes="(max-width: 640px) 100vw, 128px" className="object-cover" />
             </div>
           )}
-          <div className="min-w-0 flex-1 space-y-2">
-            <p className="line-clamp-2 text-sm text-muted-foreground">{project.description}</p>
+          <div className="min-w-0 flex-1 space-y-3">
+            <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">{project.description}</p>
 
             {project.technologies?.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {project.technologies.map((tech, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge key={index} variant="secondary" className="px-2 py-0 text-[10px] font-normal">
                     {tech}
                   </Badge>
                 ))}
@@ -61,17 +68,19 @@ const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps
             )}
 
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={project.active ? 'default' : 'outline'}>{project.active ? t('active') : t('disabled')}</Badge>
+              <Badge variant={project.active ? 'default' : 'outline'} className="text-[10px]">
+                {project.active ? t('active') : t('disabled')}
+              </Badge>
 
               {project.links?.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {project.links.map((link, index) => (
                     <a
                       key={index}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 rounded bg-muted px-2 py-1 text-xs transition-colors hover:bg-muted/70"
+                      className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors hover:bg-foreground hover:text-background"
                       title={link.type}
                     >
                       {iconDecider(link.icon, 'size-3')}

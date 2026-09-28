@@ -52,11 +52,11 @@ const Profile = () => {
   const openCropper = () => fileInputRef.current?.click();
 
   return (
-    <section className="mb-24">
-      <form onSubmit={handleSubmit(onsubmit)} className="mt-5 space-y-4">
+    <section className="mb-16">
+      <form onSubmit={handleSubmit(onsubmit)} className="mt-8 space-y-5">
         {/* Avatar */}
         <div className="flex items-center gap-4">
-          <div className={cn('relative flex size-24 items-center justify-center overflow-hidden rounded-full border-2')}>
+          <div className={cn('relative flex size-24 items-center justify-center overflow-hidden rounded-full border')}>
             {profile?.avatarUrl ? (
               <Avatar className="size-full">
                 <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
