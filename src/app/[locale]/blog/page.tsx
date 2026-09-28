@@ -2,122 +2,98 @@ import BlogListClient from '@/components/blog/BlogListClient';
 import { JsonLd } from '@/components/JsonLd';
 import BlurFade from '@/components/magicui/blur-fade';
 import Navbar from '@/components/navbar';
-import { routing } from '@/i18n/routing';
-import type { IBlog } from '@/interface/IBlog';
-import { absoluteUrl } from '@/lib/seo';
+import { getBlogList, getSocials } from '@/lib/data';
+import { OG_IMAGE_URL, languageAlternates, localeUrl } from '@/lib/seo';
+import type { AppLocale } from '@/types';
+import { Rss } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+/** Blog listing refreshes every 5 minutes. */
+export const revalidate = 300;
+
+type Props = { params: Promise<{ locale: string }> };
+
+function asLocale(locale: string): AppLocale {
+  return locale === 'fa' ? 'fa' : 'en';
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'blogPage' });
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL as string;
-  const url = `${site}/${locale}/blog`;
-
-  const title = locale === 'fa' ? 'وبلاگ | مقالات برنامه‌نویسی' : 'Blog | Programming Articles';
-
-  const description =
-    locale === 'fa'
-      ? 'لیست مقالات برنامه‌نویسی در حوزه فرانت‌اند، React، Next.js، تجربه‌های کاری و آموزش‌ها'
-      : 'List of programming articles about front-end, React, Next.js, case studies and tutorials.';
-
-  const ogImage = `${site}/og/blog-list.png`; // اگر تصویر پیش‌فرض داری
+  const title = t('title');
+  const description = t('description');
+  const url = localeUrl(locale, '/blog');
 
   return {
-    metadataBase: new URL(site),
     title,
     description,
-
     alternates: {
       canonical: url,
+      languages: languageAlternates('/blog'),
+      types: { 'application/rss+xml': localeUrl(locale, '/blog/rss.xml') },
     },
-
     openGraph: {
+      type: 'website',
       title,
       description,
       url,
-      locale,
-      type: 'website',
-      siteName: title,
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: [ogImage],
+      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
+      images: [{ url: `${OG_IMAGE_URL}?title=${encodeURIComponent(title)}`, width: 1200, height: 630, alt: title }],
     },
   };
 }
 
-const BLUR_FADE_DELAY = 0.04;
-
-export default async function BlogPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function BlogPage({ params }: Props) {
   const { locale } = await params;
-  if (!routing.locales.includes(locale as any)) notFound();
-  const base = absoluteUrl('') || '';
-  const res = await fetch(`${base}/api/${locale}/blog`, { cache: 'no-store' });
-  const posts = (await res.json()) as IBlog[];
+  const lang = asLocale(locale);
 
-  const t = await getTranslations({ locale, namespace: 'blogPage' });
+  const [t, posts, socials] = await Promise.all([
+    getTranslations({ locale, namespace: 'blogPage' }),
+    getBlogList(lang),
+    getSocials(lang),
+  ]);
+  const url = localeUrl(locale, '/blog');
 
   return (
-    <section>
+    <section aria-labelledby="blog-heading" className="pb-24">
+      {/* Structured data: blog + breadcrumbs */}
       <JsonLd
         item={{
           '@context': 'https://schema.org',
           '@type': 'Blog',
           name: t('title'),
-          url: `${SITE_URL}/${locale}/blog`,
+          description: t('description'),
+          url,
           inLanguage: locale,
-          headline: locale === 'fa' ? 'لیست مقالات برنامه‌نویسی' : 'Programming Blog Articles',
-          description:
-            locale === 'fa'
-              ? 'مجموعه‌ای از مقالات تخصصی در حوزه توسعه وب، فرانت‌اند و بک اند .'
-              : 'A collection of articles about front-end, back-end development.',
         }}
       />
-      <JsonLd
-        item={{
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: locale === 'fa' ? 'صفحه اصلی' : 'Home',
-              item: `${SITE_URL}/${locale}`,
-            },
-            {
-              '@type': 'ListItem',
-              position: 2,
-              name: locale === 'fa' ? 'بلاگ' : 'Blog',
-              item: `${SITE_URL}/${locale}/blog`,
-            },
-          ],
-        }}
-      />
-      <BlurFade delay={BLUR_FADE_DELAY}>
-        <div className="flex items-center justify-between">
-          <h1 className="font-medium text-2xl mb-8 tracking-tighter">{t('title')}</h1>
-          <Link href={`/${locale}/blog/rss.xml`} className="text-xs text-muted-foreground hover:underline" prefetch={false}>
-            RSS
+
+      <BlurFade delay={0.04}>
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">{t('eyebrow')}</p>
+            <h1 id="blog-heading" className="mt-1 text-2xl font-bold tracking-tighter sm:text-3xl">
+              {t('title')}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
+          </div>
+          <Link
+            href={`/${locale}/blog/rss.xml`}
+            className="shrink-0 rounded-full border p-2 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+            aria-label={t('rss')}
+            prefetch={false}
+          >
+            <Rss className="h-4 w-4" />
           </Link>
         </div>
       </BlurFade>
+
       <BlogListClient posts={posts} locale={locale} />
-      <Navbar socials={[]} />
+
+      <Navbar socials={socials} />
     </section>
   );
 }

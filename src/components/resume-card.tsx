@@ -1,16 +1,14 @@
-"use client";
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { ChevronRightIcon } from "@radix-ui/react-icons";
-import { motion } from "framer-motion";
-import { useLocale } from "next-intl";
-import Link from "next/link";
-import React from "react";
-import { FiEdit2 } from "react-icons/fi";
-import { MdOutlineDeleteOutline } from "react-icons/md";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { ChevronRight, PencilLine, Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
+import React from 'react';
 
 interface ResumeCardProps {
   logoUrl?: string;
@@ -20,6 +18,7 @@ interface ResumeCardProps {
   href?: string;
   badges?: readonly string[];
   period: string;
+  /** Dashboard mode: expansion is controlled externally. */
   isExpanded?: boolean;
   description?: string;
   onEdit?: () => void;
@@ -27,6 +26,11 @@ interface ResumeCardProps {
   onToggle?: () => void;
 }
 
+/**
+ * Timeline entry card shared by the public site (work/education) and
+ * the dashboard list views. Expands to reveal the description when one
+ * exists; direction-agnostic via CSS logical properties.
+ */
 export const ResumeCard = ({
   logoUrl,
   altText,
@@ -43,6 +47,8 @@ export const ResumeCard = ({
 }: ResumeCardProps) => {
   const [isExpandedInner, setIsExpandedInner] = React.useState(false);
   const isExpanded = isExpandedOuter || isExpandedInner;
+  const locale = useLocale();
+  const t = useTranslations('dashboard');
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (description) {
@@ -52,122 +58,76 @@ export const ResumeCard = ({
     }
   };
 
-  const locale = useLocale();
-
   return (
-    <div className="block cursor-pointer w-full">
-      <Card className="flex items-center w-full">
-        <Link
-          href={href || "#"}
-          className="flex items-center w-full"
-          onClick={handleClick}
-        >
-          {logoUrl && (
-            <div className="flex-none">
-              <Avatar className="border size-12 m-auto bg-muted-background dark:bg-foreground">
-                <AvatarImage
-                  src={logoUrl}
-                  alt={altText}
-                  className="object-contain"
-                />
-                <AvatarFallback>{altText && altText[0]}</AvatarFallback>
-              </Avatar>
-            </div>
-          )}
-          <div className="flex-grow ms-4 items-center flex-col group">
-            <CardHeader>
-              <div className="flex items-center justify-between gap-x-2 text-base">
-                <h3
-                  className={`${
-                    !description && "hover:underline"
-                  } inline-flex items-center justify-center font-semibold leading-none text-xs sm:text-sm`}
-                >
-                  {title}
-                  {badges && (
-                    <span className="inline-flex">
-                      {badges.map((badge, index) => (
-                        <Badge
-                          variant="secondary"
-                          className="align-middle text-xs"
-                          key={index}
-                        >
-                          {badge}
-                        </Badge>
-                      ))}
-                    </span>
-                  )}
-                  {description && (
-                    <ChevronRightIcon
-                      className={cn(
-                        "size-4 translate-x-0  mr-2 transform opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100",
-                        locale === "fa"
-                          ? isExpanded
-                            ? "rotate-90"
-                            : "rotate-180"
-                          : isExpanded
-                          ? "rotate-90"
-                          : "rotate-0"
-                      )}
-                    />
-                  )}
-                </h3>
-                <div
-                  className={`text-[11px] sm:text-xs font-normal text-muted-foreground mt-5 ${
-                    locale === "en" ? "mr-3" : "ml-3"
-                  } `}
-                >
-                  {period}
-                </div>
-              </div>
-              {subtitle && <div className="font-sans text-xs">{subtitle}</div>}
-            </CardHeader>
-            {description && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{
-                  opacity: isExpanded ? 1 : 0,
-                  height: isExpanded ? "auto" : 0,
-                }}
-                transition={{
-                  duration: 0.7,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className="mt-2 text-xs sm:text-sm"
-              >
-                {description}
-              </motion.div>
-            )}
+    <Card className="flex w-full items-center gap-2 p-3 transition-colors hover:border-foreground/30 sm:p-4">
+      <Link href={href || '#'} className="flex w-full items-center" onClick={handleClick}>
+        {logoUrl && (
+          <div className="flex-none">
+            <Avatar className="size-10 border sm:size-12">
+              <AvatarImage src={logoUrl} alt={altText ?? ''} className="object-contain" />
+              <AvatarFallback>{altText?.[0]}</AvatarFallback>
+            </Avatar>
           </div>
-        </Link>
-        <div
-          className={`flex flex-col ${
-            isExpanded ? "gap-4" : "gap-3"
-          } z-50 transition-discrete transition-all delay-150 duration-300`}
-        >
-          {!!onEdit && (
-            <button
-              type="button"
-              className=""
-              onClick={() => {
-                onEdit?.();
-              }}
+        )}
+        <div className="group ms-3 flex grow flex-col items-start">
+          <CardHeader className="p-0">
+            <div className="flex items-center justify-between gap-x-2 text-base">
+              <h3
+                className={cn(
+                  'inline-flex items-center justify-center gap-2 text-xs font-semibold leading-none sm:text-sm',
+                  !description && 'group-hover:underline'
+                )}
+              >
+                {title}
+                {badges && badges.length > 0 && (
+                  <span className="inline-flex gap-1">
+                    {badges.map((badge, index) => (
+                      <Badge variant="secondary" className="align-middle text-xs" key={index}>
+                        {badge}
+                      </Badge>
+                    ))}
+                  </span>
+                )}
+                {description && (
+                  <ChevronRight
+                    className={cn(
+                      'size-4 transform text-muted-foreground opacity-0 transition-all duration-300 ease-out group-hover:opacity-100',
+                      isExpanded ? 'rotate-90' : locale === 'fa' ? 'rotate-180' : 'rotate-0'
+                    )}
+                  />
+                )}
+              </h3>
+              <div className="ms-3 text-[11px] font-normal text-muted-foreground sm:text-xs">{period}</div>
+            </div>
+            {subtitle && <div className="mt-1 text-xs">{subtitle}</div>}
+          </CardHeader>
+          {description && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: isExpanded ? 1 : 0, height: isExpanded ? 'auto' : 0 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm"
             >
-              <FiEdit2 className="hover:text-green-600 text-sm" />
+              {description}
+            </motion.div>
+          )}
+        </div>
+      </Link>
+
+      {(onEdit || onDelete) && (
+        <div className="z-50 flex flex-col gap-2">
+          {onEdit && (
+            <button type="button" className="rounded p-1 transition-colors hover:text-primary" onClick={onEdit} aria-label={t('edit')}>
+              <PencilLine className="h-4 w-4 text-muted-foreground hover:text-foreground" />
             </button>
           )}
-          {!!onDelete && (
-            <button
-              type="button"
-              className=""
-              onClick={() => {
-                onDelete?.();
-              }}
-            >
-              <MdOutlineDeleteOutline className="hover:text-red-600 text-md" />
+          {onDelete && (
+            <button type="button" className="rounded p-1 transition-colors" onClick={onDelete} aria-label={t('delete')}>
+              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
             </button>
           )}
         </div>
-      </Card>
-    </div>
+      )}
+    </Card>
   );
 };

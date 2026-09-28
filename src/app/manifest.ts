@@ -1,23 +1,17 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
+/** PWA manifest; name/description configurable via env. */
 export default function manifest(): MetadataRoute.Manifest {
-  const NAME = process.env.NEXT_PUBLIC_SITE_TITLE || "Portfolio";
-  const DESCRIPTION =
-    process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "Personal portfolio website";
+  const name = process.env.NEXT_PUBLIC_SITE_TITLE || 'Magic Portfolio';
+
   return {
-    name: NAME,
-    short_name: NAME,
-    description: DESCRIPTION,
-    start_url: "/",
-    display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#0a0a0a",
-    icons: [
-      {
-        src: "/favicon.ico",
-        sizes: "any",
-        type: "image/x-icon",
-      },
-    ],
+    name,
+    short_name: name,
+    description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal developer portfolio, blog and dashboard.',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#0a0a0a',
+    icons: [{ src: '/favicon.ico', sizes: 'any', type: 'image/x-icon' }],
   };
 }

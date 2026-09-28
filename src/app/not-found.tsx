@@ -1,6 +1,6 @@
-import NotFoundPage from "./[locale]/not-found";
+import NotFoundPage from './[locale]/not-found';
 
+/** Fallback 404 for URLs that never enter the localized segment. */
 export default function RootNotFound() {
-  // provide a default locale so NotFoundPage receives the expected params
   return <NotFoundPage />;
 }

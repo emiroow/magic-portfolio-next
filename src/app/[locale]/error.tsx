@@ -1,44 +1,36 @@
-"use client"; // Error boundaries must be Client Components
+'use client'; // Error boundaries must be Client Components
 
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
+import { useEffect } from 'react';
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  const t = useTranslations?.("ErrorPage") || ((k: string) => k);
-  const router = useRouter();
-  const params = useParams();
-  const locale = (params as any)?.locale || "en";
+/**
+ * Locale-level error boundary: catches render/data failures for every
+ * page under `/{locale}` and offers retry + home actions.
+ */
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const t = useTranslations('ErrorPage');
+  const params = useParams<{ locale?: string }>();
+  const locale = params?.locale || 'en';
 
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error(error);
   }, [error]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl rounded-lg border bg-background/80 p-6 text-center">
-        <h1 className="text-2xl font-bold text-destructive">
-          {t("title") || "Something went wrong"}
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          {t("description") || "An unexpected error occurred."}
-        </p>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button onClick={() => router.push(`/${locale}`)}>
-            {t("goHome") || "Home"}
-          </Button>
-          <Button variant="outline" onClick={() => reset()}>
-            {t("tryAgain") || "Try again"}
-          </Button>
-        </div>
+    <main className="flex min-h-[70dvh] flex-col items-center justify-center gap-4 px-4 py-12 text-center">
+      <AlertTriangle className="h-8 w-8 text-muted-foreground" aria-hidden />
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <p className="max-w-md text-sm text-muted-foreground">{t('description')}</p>
+      <div className="mt-2 flex items-center gap-3">
+        <Button variant="outline" onClick={reset}>
+          {t('tryAgain')}
+        </Button>
+        <Button asChild>
+          <a href={`/${locale}`}>{t('goHome')}</a>
+        </Button>
       </div>
     </main>
   );

@@ -1,351 +1,144 @@
 ﻿import { JsonLd } from '@/components/JsonLd';
-import BlurFade from '@/components/magicui/blur-fade';
-import BlurFadeText from '@/components/magicui/blur-fade-text';
 import Navbar from '@/components/navbar';
-import { ProjectCard } from '@/components/project-card';
-import { ResumeCard } from '@/components/resume-card';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { apiEndPoint } from '@/constants/global';
-import { IClientResponse } from '@/interface/IGlobal';
-import { formatYearMonthLocal } from '@/lib/utils';
-import axios from 'axios';
-import { Metadata } from 'next';
+import { About } from '@/components/sections/about';
+import { Contact } from '@/components/sections/contact';
+import { Education } from '@/components/sections/education';
+import { Experience } from '@/components/sections/experience';
+import { Hero } from '@/components/sections/hero';
+import { Projects } from '@/components/sections/projects';
+import { Skills } from '@/components/sections/skills';
+import { getPortfolioData, getProfile } from '@/lib/data';
+import { OG_IMAGE_URL, TWITTER_HANDLE, languageAlternates, localeUrl, site } from '@/lib/seo';
+import type { AppLocale } from '@/types';
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import Markdown from 'react-markdown';
+import { AlertTriangle } from 'lucide-react';
 
-const BLUR_FADE_DELAY = 0.04;
+/** Revalidate the home page every hour; admin mutations revalidate sooner. */
+export const revalidate = 3600;
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
+type Props = { params: Promise<{ locale: string }> };
 
-export const generateMetadata = async ({ params }: Props) => {
+function asLocale(locale: string): AppLocale {
+  return locale === 'fa' ? 'fa' : 'en';
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
-  const t = await getTranslations();
-  const tHero = await getTranslations('hero');
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
-  const ogImage = data.profile?.avatarUrl || (site ? `${site}/og-image.png` : '/og-image.png');
+  const profile = await getProfile(asLocale(locale));
+  const t = await getTranslations({ locale, namespace: 'meta.home' });
 
-  const keywords = [
-    ...(data.skills?.map(s => s.name) || []),
-    ...(data.projects?.flatMap(p => p.technologies || []) || []),
-    data.profile?.fullName,
-    'portfolio',
-  ].filter(Boolean) as string[];
+  const title = profile?.fullName || profile?.name || t('fallbackTitle');
+  const description = profile?.summary || profile?.description || t('description');
+  const ogImage = profile?.avatarUrl?.startsWith('http') ? profile.avatarUrl : OG_IMAGE_URL;
 
   return {
-    metadataBase: site ? new URL(site) : undefined,
-    abstract: data.profile?.description,
-    archives: site ? [site] : undefined,
-    assets: site ? [`${site}/favicon.ico`] : undefined,
-    authors: data.profile?.fullName ? [{ name: data.profile?.fullName }] : undefined,
-    creator: data.profile?.fullName || undefined,
-    publisher: data.profile?.fullName || undefined,
-    manifest: site ? `${site}/site.webmanifest` : undefined,
-    referrer: 'no-referrer-when-downgrade',
-    bookmarks: site ? [site] : undefined,
-    icons: site ? { icon: `${site}/favicon.ico` } : undefined,
-    category: 'Personal Website',
-    // colorScheme moved to viewport export below to satisfy Next.js metadata rules
-    formatDetection: {
-      telephone: true,
-      address: false,
-      date: false,
-      email: false,
-    },
-    appleWebApp: {
-      title: data.profile?.fullName,
-      statusBarStyle: 'default',
-      capable: true,
-      // startupImages: [
-      //   {
-      //     href: site ? `${site}/apple-splash-2048-2732.png` : '/apple-splash-2048-2732.png',
-      //     media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)',
-      //   },
-      // ],
-    },
-    title: `${data.profile?.fullName} | ${data.profile?.jobTitle} | ${t('personalWebsite')}`,
+    title,
+    description,
+    keywords: [title, profile?.jobTitle, 'portfolio', 'developer', locale === 'fa' ? 'نمونه کار' : 'web developer'].filter(Boolean) as string[],
     alternates: {
-      types: {
-        'application/rss+xml': site ? `${site}/rss.xml` : undefined,
-      },
-      canonical: site ? `${site}/${locale}` : undefined,
-      languages: {
-        fa: site ? `${site}/fa` : undefined,
-        en: site ? `${site}/en` : undefined,
-        'x-default': site ? `${site}/${locale}` : undefined,
-      },
+      canonical: localeUrl(locale),
+      languages: languageAlternates(''),
     },
-    description: data.profile?.description,
-    keywords,
     openGraph: {
-      title: `${tHero('hi')} ${data.profile?.fullName} ${tHero('iam')}👋`,
-      determiner: 'auto',
-      alternateLocale: locale === 'fa' ? 'en_US' : 'fa_IR',
-      siteUrl: site ? `${site}/${locale}` : undefined,
-      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
-      phoneNumbers: data.profile?.tel ? [data.profile?.tel] : undefined,
-      emails: data.profile?.email ? [data.profile?.email] : undefined,
-      countryName: 'Iran',
-      description: data.profile?.description,
-      url: site ? `${site}/${locale}` : undefined,
-      images: [ogImage],
-      siteName: `${data.profile?.fullName}`,
       type: 'website',
+      url: localeUrl(locale),
+      title,
+      description,
+      siteName: title,
+      locale: locale === 'fa' ? 'fa_IR' : 'en_US',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
     },
-    appLinks: {
-      web: {
-        url: site ? `${site}/${locale}` : undefined,
-        should_fallback: true,
-      },
+    twitter: {
+      card: 'summary_large_image',
+      site: TWITTER_HANDLE || undefined,
+      creator: TWITTER_HANDLE || undefined,
+      title,
+      description,
+      images: [ogImage],
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
     },
-    twitter: {
-      creator: data.socials?.find(s => s.name.toLowerCase() === 'twitter')?.name || '',
-      title: `${data.profile?.fullName}`,
-      card: 'summary_large_image',
-      images: [ogImage],
-      site: site ? `${site}/${locale}` : undefined,
-      description: data.profile?.description,
-      creatorId: data.socials?.find(s => s.name.toLowerCase() === 'twitter')?.url
-        ? data.socials.find(s => s.name.toLowerCase() === 'twitter')?.url?.split('https://twitter.com/')[1]
-        : undefined,
-      siteId: site ? site.split('https://twitter.com/')[1] : undefined,
-    },
-    verification: {
-      meta: data.profile?.email,
-      google: 'google',
-      yandex: 'yandex',
-      yahoo: 'yahoo',
-      other: {
-        me: [data.profile?.email],
-      },
-    },
-  } as Metadata;
-};
-
-// Export viewport metadata (must be plain object) — includes color scheme settings
-export function generateViewport() {
-  return {
-    colorScheme: 'light dark',
-  } as const;
+  };
 }
-
-// Avoid build-time data fetching for this route
-export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: Props) {
   const { locale } = await params;
-  const t = await getTranslations();
-  const tHero = await getTranslations('hero');
-  const tProject = await getTranslations('project');
-  const tContact = await getTranslations('contact');
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '');
+  const lang = asLocale(locale);
 
-  const { data } = await axios.get<IClientResponse>(`${apiEndPoint}/${locale}`);
-  const presentLabel = locale === 'fa' ? 'تا کنون' : 'Present';
+  const [t, tHero, tProject, tContact, data] = await Promise.all([
+    getTranslations({ locale }),
+    getTranslations({ locale, namespace: 'hero' }),
+    getTranslations({ locale, namespace: 'project' }),
+    getTranslations({ locale, namespace: 'contact' }),
+    getPortfolioData(lang),
+  ]);
+
+  const { profile, projects, works, educations, skills, socials } = data;
+
+  // First-run experience: no database (or no content) yet.
+  if (!profile) {
+    return (
+      <main className="flex min-h-[70dvh] flex-col items-center justify-center gap-4 px-6 text-center">
+        <AlertTriangle className="h-8 w-8 text-muted-foreground" aria-hidden />
+        <h1 className="text-xl font-bold">{t('empty.title')}</h1>
+        <p className="max-w-md text-sm text-muted-foreground">{t('empty.description')}</p>
+        <Navbar socials={[]} />
+      </main>
+    );
+  }
+
+  const jsonLdBase = site ?? '';
 
   return (
-    <main className="flex flex-col min-h-[100dvh] space-y-10">
-      {/* Structured data for rich results */}
+    <main className="flex min-h-[100dvh] flex-col gap-12 sm:gap-16">
+      {/* Structured data: person + breadcrumbs for rich results */}
       <JsonLd
         item={{
           '@context': 'https://schema.org',
           '@type': 'Person',
-          name: data.profile?.fullName ?? data.profile?.name,
-          image: data.profile?.avatarUrl,
-          email: data.profile?.email,
-          description: data.profile?.description,
-          sameAs: data.socials?.map(s => s.url).filter(Boolean),
+          name: profile.fullName || profile.name,
+          url: localeUrl(locale),
+          image: profile.avatarUrl || undefined,
+          email: profile.email ? `mailto:${profile.email}` : undefined,
+          jobTitle: profile.jobTitle || undefined,
+          description: profile.summary || profile.description || undefined,
+          sameAs: socials.map(s => s.url).filter(Boolean),
         }}
       />
-
-      {/* Breadcrumb structured data */}
       <JsonLd
         item={{
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',
-          itemListElement: [
-            {
-              '@type': 'ListItem',
-              position: 1,
-              name: 'Home',
-              item: site ? `${site}/${locale}` : `/${locale}`,
-            },
-          ],
+          itemListElement: [{ '@type': 'ListItem', position: 1, name: t('navbar.home'), item: `${jsonLdBase}/${locale}` }],
         }}
       />
 
-      <section id="hero">
-        <div className="mx-auto w-full max-w-2xl space-y-8">
-          <div className="gap-3 flex justify-between max-md:items-center">
-            <div className="flex-col flex flex-1">
-              {!!data.profile?.name && (
-                <h1 className="text-lg font-bold tracking-tighter sm:text-2xl xl:text-3xl/none">
-                  <BlurFadeText
-                    delay={BLUR_FADE_DELAY}
-                    className="inline"
-                    yOffset={20}
-                    text={`${tHero('hi')} ${data.profile?.name} ${tHero('iam')}👋`}
-                  />
-                </h1>
-              )}
-              {!!data.profile?.summary && (
-                <BlurFadeText className="max-w-[600px] text-xs md:text-lg" delay={BLUR_FADE_DELAY} text={data.profile?.summary} />
-              )}
-            </div>
-            {!!data.profile?.avatarUrl && (
-              <BlurFade delay={BLUR_FADE_DELAY}>
-                <Avatar className="size-32 border">
-                  <AvatarImage alt={data.profile?.name} src={data.profile?.avatarUrl} />
-                </Avatar>
-              </BlurFade>
-            )}
-          </div>
-        </div>
-      </section>
-      <section id="about" aria-labelledby="about-heading">
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 id="about-heading" className="text-xl font-bold">
-            {t('about')}
-          </h2>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown
-            className="prose max-w-full text-pretty
-           font-sans text-sm text-muted-foreground dark:prose-invert"
-          >
-            {data.profile?.description}
-          </Markdown>
-        </BlurFade>
-      </section>
-      <section id="work">
-        {data.works?.length ? (
-          <div className="flex min-h-0 flex-col gap-y-3">
-            <BlurFade delay={BLUR_FADE_DELAY * 5}>
-              <h2 className="text-xl font-bold">{t('experience')}</h2>
-            </BlurFade>
-            {data.works?.map((work, id) => (
-              <BlurFade key={work.company} delay={BLUR_FADE_DELAY * 6 + id * 0.05}>
-                <ResumeCard
-                  key={work.company}
-                  logoUrl={work.logoUrl}
-                  altText={work.company}
-                  title={work.company}
-                  subtitle={work.title}
-                  href={work.href}
-                  period={`${formatYearMonthLocal(work.start || '', locale as unknown as 'fa' | 'en')} / ${
-                    work.end ? formatYearMonthLocal(work.end, locale as unknown as 'fa' | 'en') : presentLabel
-                  }`}
-                  description={work.description}
-                />
-              </BlurFade>
-            ))}
-          </div>
-        ) : null}
-      </section>
-      {/* educations */}
-      {data.educations?.length ? (
-        <section id="education">
-          <div className="flex min-h-0 flex-col gap-y-3">
-            <BlurFade delay={BLUR_FADE_DELAY * 7}>
-              <h2 className="text-xl font-bold">{t('education')}</h2>
-            </BlurFade>
-            {data.educations?.map((education, id) => (
-              <BlurFade key={education.school} delay={BLUR_FADE_DELAY * 8 + id * 0.05}>
-                <ResumeCard
-                  key={education.school}
-                  href={education.href}
-                  logoUrl={education.logoUrl}
-                  altText={education.school}
-                  title={education.school}
-                  subtitle={education.degree}
-                  period={`${formatYearMonthLocal(education.start || '', locale as unknown as 'fa' | 'en')} - ${formatYearMonthLocal(
-                    education.end || '',
-                    locale as unknown as 'fa' | 'en'
-                  )}`}
-                />
-              </BlurFade>
-            ))}
-          </div>
-        </section>
-      ) : null}
-      <section id="skills">
-        {data.skills?.length ? (
-          <div className="flex min-h-0 flex-col gap-y-3">
-            <BlurFade delay={BLUR_FADE_DELAY * 9}>
-              <h2 className="text-xl font-bold">{t('skills')}</h2>
-            </BlurFade>
-            <div className="flex flex-wrap gap-1">
-              {data.skills?.map((skill, id) => (
-                <BlurFade key={id} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-                  <Badge key={id}>{skill.name}</Badge>
-                </BlurFade>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </section>
-      <section id="projects">
-        {data.projects?.length ? (
-          <div className="space-y-12 w-full">
-            <BlurFade delay={BLUR_FADE_DELAY * 11}>
-              <div className="flex flex-col items-center justify-center space-y-5 text-center">
-                <div className="space-y-5">
-                  <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">{tProject('myProjects')}</div>
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">{tProject('title')}</h2>
-                  <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">{tProject('subTitle')}</p>
-                </div>
-              </div>
-            </BlurFade>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
-              {data.projects?.map(
-                (project, id) =>
-                  project.active && (
-                    <BlurFade key={project.title} delay={BLUR_FADE_DELAY * 12 + id * 0.05}>
-                      <ProjectCard
-                        href={project.href}
-                        key={project.title}
-                        title={project.title}
-                        description={project.description}
-                        dates={project.dates}
-                        tags={project.technologies}
-                        image={project.image}
-                        links={project.links}
-                      />
-                    </BlurFade>
-                  )
-              )}
-            </div>
-          </div>
-        ) : null}
-      </section>
-      <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full pb-16">
-          <BlurFade delay={BLUR_FADE_DELAY * 16}>
-            <div className="space-y-6">
-              <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">{tContact('contact')}</div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">{tContact('title')}</h2>
-              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                {tContact('subTitle')}
-              </p>
-            </div>
-          </BlurFade>
-        </div>
-      </section>
-      <Navbar socials={data.socials} />
+      <Hero profile={profile} greeting={tHero('hi')} />
+      <About title={t('about')} description={profile.description} delay={0.1} />
+      <Experience title={t('experience')} works={works} locale={lang} presentLabel={t('present')} delay={0.15} />
+      <Education title={t('education')} educations={educations} locale={lang} delay={0.2} />
+      <Skills title={t('skills')} skills={skills} delay={0.25} />
+      <Projects
+        label={tProject('myProjects')}
+        title={tProject('title')}
+        description={tProject('subTitle')}
+        projects={projects}
+        delay={0.3}
+      />
+      <Contact
+        title={tContact('title')}
+        description={tContact('subTitle')}
+        emailLabel={tContact('emailCta')}
+        profile={profile}
+        socials={socials}
+        delay={0.35}
+      />
+
+      <Navbar socials={socials} />
     </main>
   );
 }

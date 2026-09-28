@@ -1,104 +1,72 @@
-"use client";
-import BlurFade from "@/components/magicui/blur-fade";
-import { Input } from "@/components/ui/input";
-import type { IBlog } from "@/interface/IBlog";
-import { formatYearMonthLocal } from "@/lib/utils";
-import Link from "next/link";
-import { useMemo, useState } from "react";
+'use client';
 
-const BLUR_FADE_DELAY = 0.04;
+import BlurFade from '@/components/magicui/blur-fade';
+import { Input } from '@/components/ui/input';
+import type { IBlog } from '@/types';
+import { formatYearMonthLocal } from '@/lib/utils';
+import { FileText, Search } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 
-export default function BlogListClient({
-  posts,
-  locale,
-}: {
+interface BlogListClientProps {
   posts: IBlog[];
-  locale: "fa" | "en" | string;
-}) {
-  const [q, setQ] = useState("");
+  locale: string;
+}
+
+/**
+ * Client-side blog list: instant search filter over title/summary plus
+ * an empty state when nothing matches.
+ */
+export default function BlogListClient({ posts, locale }: BlogListClientProps) {
+  const t = useTranslations('blogPage');
+  const currentLocale = useLocale();
+  const lang: 'fa' | 'en' = currentLocale === 'fa' ? 'fa' : 'en';
+  const [query, setQuery] = useState('');
 
   const list = useMemo(() => {
-    const sorted = [...(posts || [])].sort((a, b) => {
-      const at = new Date(a.createdAt || 0).getTime();
-      const bt = new Date(b.createdAt || 0).getTime();
-      return bt - at;
-    });
-    if (!q) return sorted;
-    const needle = q.toLowerCase();
-    return sorted.filter(
-      (p) =>
-        (p.title || "").toLowerCase().includes(needle) ||
-        (p.slug || "").toLowerCase().includes(needle)
-    );
-  }, [posts, q]);
-
-  // simple reading time estimation (~200 wpm)
-  const readingTime = (text: string | undefined) => {
-    if (!text) return "";
-    const words = text.trim().split(/\s+/).length;
-    const minutes = Math.max(1, Math.ceil(words / 200));
-    return `${minutes} min`;
-  };
+    if (!query.trim()) return posts;
+    const needle = query.trim().toLowerCase();
+    return posts.filter(p => (p.title || '').toLowerCase().includes(needle) || (p.summary || '').toLowerCase().includes(needle));
+  }, [posts, query]);
 
   return (
     <div className="flex flex-col gap-4">
-      <BlurFade delay={BLUR_FADE_DELAY * 2} key="search-input">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-sm text-muted-foreground">
-            {locale === "fa" ? "تعداد" : "Total"}: {posts?.length || 0}
-          </div>
+      {posts.length > 0 && (
+        <div className="relative">
+          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={
-              locale === "fa" ? "جستجو عنوان یا اسلاگ" : "Search title or slug"
-            }
-            className="h-9 w-48 sm:w-64"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            aria-label={t('searchPlaceholder')}
+            className="h-10 ps-9"
           />
         </div>
-      </BlurFade>
+      )}
 
       {list.map((post, id) => (
-        <BlurFade delay={BLUR_FADE_DELAY * 2 + id * 0.05} key={post.slug}>
+        <BlurFade key={post.slug} delay={0.04 + id * 0.05} inView>
           <Link
-            className="block border rounded p-4 hover:bg-muted/30 transition-colors"
+            className="group block rounded-xl border bg-card p-5 transition-all hover:border-foreground/40 hover:shadow-sm"
             href={`/${locale}/blog/${post.slug}`}
           >
-            <div className="w-full flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <div className="flex items-start justify-between gap-3">
-                <p className="tracking-tight font-bold line-clamp-2">
-                  {post.title}
-                </p>
-
-                {post.content && (
-                  <span className="text-[11px] text-muted-foreground bg-muted/40 rounded px-1 py-0.5">
-                    {locale === "fa" ? "زمان مطالعه:" : "Read:"}
-                    {readingTime(post.content)}
-                  </span>
-                )}
+                <h2 className="font-semibold leading-snug tracking-tight group-hover:underline">{post.title}</h2>
+                <span className="shrink-0 text-xs text-muted-foreground">{formatYearMonthLocal(post.createdAt, lang)}</span>
               </div>
-              <div className="text-xs text-muted-foreground flex items-center justify-between gap-2">
-                <code className="text-[11px] break-all font-normal bg-muted/50 px-1 py-0.5 rounded">
-                  {post.slug}
-                </code>
-                <span>
-                  {formatYearMonthLocal(post.createdAt || "", locale as any)}
-                </span>
-              </div>
-              {post.summary && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {post.summary}
-                </p>
-              )}
+              {post.summary && <p className="line-clamp-2 text-sm text-muted-foreground">{post.summary}</p>}
             </div>
           </Link>
         </BlurFade>
       ))}
 
-      {(!list || list.length === 0) && (
-        <p className="text-sm text-muted-foreground">
-          {locale === "fa" ? "پستی یافت نشد." : "No posts found."}
-        </p>
+      {list.length === 0 && (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center">
+          <FileText className="h-8 w-8 text-muted-foreground" aria-hidden />
+          <p className="text-sm text-muted-foreground">{query ? t('noResults') : t('empty')}</p>
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 type JsonLdProps = {
-  item: Record<string, any>;
+  item: Record<string, unknown>;
 };
 
 /**

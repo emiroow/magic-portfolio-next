@@ -1,105 +1,77 @@
-import { iconDecider } from "@/components/icons";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import Markdown from "react-markdown";
+import { iconDecider } from '@/components/icons';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import Markdown from 'react-markdown';
 
-interface Props {
+interface ProjectCardProps {
   title: string;
   href?: string;
   description: string;
   dates: string;
   tags: readonly string[];
-  link?: string;
   image?: string;
-  links?: readonly {
-    icon: string;
-    type: string;
-    href: string;
-  }[];
+  links?: readonly { icon: string; type: string; href: string }[];
   className?: string;
 }
 
-export function ProjectCard({
-  title,
-  href,
-  description,
-  dates,
-  tags,
-  link,
-  image,
-  links,
-  className,
-}: Props) {
+/** Card for a single portfolio project on the home page. */
+export function ProjectCard({ title, href, description, dates, tags, image, links, className }: ProjectCardProps) {
   return (
-    <Card
-      className={
-        "flex flex-col overflow-hidden border hover:shadow-lg transition-all duration-300 ease-out h-full"
-      }
-    >
-      <Link
-        href={href || "#"}
-        className={cn("block cursor-pointer", className)}
-      >
-        {image && (
+    <Card className="flex h-full flex-col overflow-hidden p-0 transition-all duration-300 ease-out hover:shadow-lg">
+      <Link href={href || '#'} className={cn('block cursor-pointer', className)} aria-label={title}>
+        {image ? (
           <Image
             src={image}
             alt={title}
-            width={500}
-            height={300}
+            width={600}
+            height={314}
+            sizes="(max-width: 640px) 100vw, 50vw"
             className="h-40 w-full overflow-hidden object-cover object-top"
           />
+        ) : (
+          // Deterministic placeholder keeps the grid aligned without an image.
+          <div className="flex h-40 w-full items-center justify-center bg-muted">
+            <span className="text-2xl font-bold text-muted-foreground/50">{title.slice(0, 1).toUpperCase()}</span>
+          </div>
         )}
       </Link>
-      <CardHeader className="px-2">
-        <div className="space-y-1">
-          <CardTitle className="mt-1 text-base">{title}</CardTitle>
-          <time className="font-sans text-xs">{dates}</time>
-          <div className="hidden font-sans text-xs underline print:visible">
-            {link?.replace("https://", "").replace("www.", "").replace("/", "")}
-          </div>
-          <Markdown className="prose max-w-full text-pretty font-sans text-xs text-muted-foreground dark:prose-invert">
-            {description}
-          </Markdown>
-        </div>
+      <CardHeader className="gap-1 px-4 pb-2 pt-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+        {Boolean(dates) && (
+          <time className="text-xs text-muted-foreground">{dates}</time>
+        )}
+        <Markdown className="prose mt-1 max-w-full text-pretty text-xs text-muted-foreground dark:prose-invert prose-p:leading-relaxed">
+          {description}
+        </Markdown>
       </CardHeader>
-      <CardContent className="mt-auto flex flex-col px-2">
+      <CardContent className="mt-auto flex flex-col px-4">
         {tags && tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {tags?.map((tag) => (
-              <Badge
-                className="px-1 py-0 text-[10px]"
-                variant="secondary"
-                key={tag}
-              >
+          <div className="mb-3 flex flex-wrap gap-1">
+            {tags.map(tag => (
+              <Badge className="px-1.5 py-0 text-[10px]" variant="secondary" key={tag}>
                 {tag}
               </Badge>
             ))}
           </div>
         )}
       </CardContent>
-      <CardFooter className="px-2 pb-2">
-        {links && links.length > 0 && (
-          <div className="flex flex-row flex-wrap items-start gap-1">
-            {links?.map((link, idx) => (
-              <Link href={link?.href} key={idx} target="_blank">
-                <Badge key={idx} className="flex gap-2 px-2 py-1 text-[10px]">
-                  {iconDecider(link.icon)}
+      {links && links.length > 0 && (
+        <CardFooter className="border-t px-4 py-3">
+          <div className="flex flex-row flex-wrap items-center gap-2">
+            {links.map((link, idx) => (
+              <Link key={idx} href={link.href} target="_blank" rel="noopener noreferrer">
+                <Badge variant="outline" className="flex gap-2 px-2 py-1 text-[10px]">
+                  {iconDecider(link.icon, 'h-3 w-3')}
                   {link.type}
                 </Badge>
               </Link>
             ))}
           </div>
-        )}
-      </CardFooter>
+        </CardFooter>
+      )}
     </Card>
   );
 }
