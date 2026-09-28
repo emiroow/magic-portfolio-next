@@ -1,14 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-#ignore the contents of these folders, but keep the folders themselves
+# Keep the upload folders themselves, ignore uploaded content
 public/avatar/*
 !public/avatar/.gitkeep
 public/projects/*
 !public/projects/.gitkeep
-public/works/*
-!public/works/.gitkeep
+public/experience/*
+!public/experience/.gitkeep
 public/education/*
 !public/education/.gitkeep
+public/blog/*
+!public/blog/.gitkeep
 
 # dependencies
 /node_modules
