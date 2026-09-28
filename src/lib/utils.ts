@@ -57,3 +57,62 @@ export function readingTime(text: string | undefined): number {
   const words = text.trim().split(/\s+/).length;
   return Math.max(1, Math.ceil(words / 200));
 }
+
+/**
+ * Display handle for a profile URL: `@emiroow` when the path exposes one,
+ * otherwise the bare host (`example.com`). Path segments that only describe
+ * the platform's URL scheme (`/in/…`, `/channel/…`) are skipped so LinkedIn
+ * and YouTube resolve to the real account name.
+ *
+ * The result is capped to a tile-safe length and always rendered inside an
+ * LTR run, so it stays readable and never clips inside the Persian layout.
+ */
+export function formatSocialHandle(url: string | undefined, max = 18): string {
+  const raw = (url || '').trim();
+  if (!raw) return '';
+
+  const GENERIC_SEGMENTS = ['in', 'channel', 'channels', 'c', 'user', 'users', 'profile', 'me', 'p'];
+
+  let host = '';
+  let segment = '';
+
+  try {
+    const parsed = new URL(raw);
+    host = parsed.hostname.replace(/^www\./, '');
+    const segments = parsed.pathname.split('/').filter(Boolean);
+    segment = segments.find(part => !GENERIC_SEGMENTS.includes(part.toLowerCase())) ?? '';
+  } catch {
+    const stripped = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
+    const [first, ...rest] = stripped.split('/');
+    host = first || '';
+    segment = rest.find(part => !GENERIC_SEGMENTS.includes(part.toLowerCase())) ?? '';
+  }
+
+  // YouTube-style handles already carry the `@`; never double it.
+  const handle = segment ? (segment.startsWith('@') ? segment : `@${decodeURIComponent(segment)}`) : host;
+  return handle.length > max ? `${handle.slice(0, max - 1)}…` : handle;
+}
+
+/**
+ * Normalise a phone number into a `tel:` payload: Persian/Arabic digits are
+ * folded to ASCII and every separator except a leading `+` is dropped.
+ */
+export function toDialNumber(value: string | undefined): string {
+  const raw = (value || '').trim();
+  if (!raw) return '';
+
+  const ascii = raw.replace(/[\u06F0-\u06F9]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[\u0660-\u0669]/g, d =>
+    String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+  );
+
+  const plus = ascii.startsWith('+') ? '+' : '';
+  return plus + ascii.replace(/[^\d]/g, '');
+}
+
+/** Two-digit, locale-aware section ordinal (`01` / `۰۱`). */
+export function sectionIndex(n: number, locale: 'fa' | 'en' = 'en'): string {
+  return new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US', {
+    minimumIntegerDigits: 2,
+    useGrouping: false,
+  }).format(n);
+}
