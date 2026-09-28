@@ -1,4 +1,15 @@
 {
+  "present": "Present",
+  "meta": {
+    "home": {
+      "fallbackTitle": "Personal Portfolio",
+      "description": "Personal developer portfolio: projects, experience, skills and blog."
+    }
+  },
+  "empty": {
+    "title": "No content yet",
+    "description": "Connect a MongoDB database via MONGODB_URI in .env.local, then run npm run seed to load demo content (or add your own from the dashboard)."
+  },
   "hero": {
     "hi": "Hi, I'm",
     "iam": ""
@@ -22,25 +33,47 @@
     "goHome": "Go to homepage"
   },
   "navbar": {
+    "label": "Main navigation",
+    "home": "Home",
+    "blog": "Blog",
+    "language": "Switch language",
+    "theme": "Switch theme",
     "social": {
-      "linkedin": "linkedin",
-      "github": "github",
-      "instagram": "instagram",
-      "telegram": "telegram",
-      "youtube": "youtube",
-      "whatsapp": "whatsapp",
-      "x": "x"
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "instagram": "Instagram",
+      "telegram": "Telegram",
+      "youtube": "YouTube",
+      "whatsapp": "WhatsApp",
+      "x": "X (Twitter)",
+      "twitter": "X (Twitter)",
+      "email": "Email",
+      "website": "Website",
+      "figma": "Figma"
     }
   },
   "contact": {
     "contact": "Contact",
     "title": "Get in Touch",
+    "emailCta": "Send me an email",
     "subTitle": "If you have any questions, need guidance, or simply want to get in touch, I’d be happy to hear from you. Just choose one of the contact options below to start the conversation."
   },
   "blogPage": {
     "title": "Blog",
+    "eyebrow": "Writing",
     "description": "My thoughts on software development, life, and more.",
-    "empty": "No posts yet."
+    "empty": "No posts yet.",
+    "noResults": "No posts match your search.",
+    "searchPlaceholder": "Search posts...",
+    "rss": "RSS feed",
+    "readingTime": "{minutes} min read"
+  },
+  "blogPost": {
+    "notFound": "Article not found",
+    "defaultDescription": "Blog article.",
+    "backToBlog": "Back to blog",
+    "readingTime": "{minutes} min read",
+    "pagination": "Article pagination"
   },
   "NotFoundPage": {
     "title": "Page not found",
@@ -88,9 +121,16 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "logout": "Log out",
     "confirmTitle": "Are you sure?",
+    "confirmDescription": "This action cannot be undone.",
     "cancel": "Cancel",
     "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "loadError": "Failed to load data.",
+    "retry": "Try again",
+    "unauthorized": "Session expired. Please sign in again.",
     "successMessage": "Operation completed successfully.",
     "errorMessage": "An error occurred. Please try again.",
     "profile": {
@@ -181,6 +221,8 @@
       "loading": "Loading...",
       "save": "Save",
       "edit": "Edit",
+      "openPost": "Open post",
+      "searchPlaceholder": "Search posts...",
       "createBlog": "Create blog post",
       "noBlogs": "No blog posts yet.",
       "titlePlaceholder": "Post title",
@@ -205,7 +247,7 @@
       "title": "Skills",
       "add": "Add",
       "inputPlaceholder": "Skill name (e.g., Next.js)",
-      "addSkillBtn": "َAdd",
+      "addSkillBtn": "Add",
       "noSkills": "No skills added yet.",
       "createFirstSkill": "Add your first skill"
     },
@@ -231,6 +273,7 @@
       "active": "Active Project",
       "disabled": "Disabled Project",
       "noProjects": "No projects found.",
+      "noImage": "No image",
       "createFirstProject": "Create your first project",
       "projectUrlPlaceholder": "Project URL (https://example.com)",
       "projectTitlePlaceholder": "Project title",
