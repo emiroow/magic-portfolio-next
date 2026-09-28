@@ -1,39 +1,52 @@
-import NextAuth, { type NextAuthOptions, getServerSession } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+import crypto from 'crypto';
+import NextAuth, { type NextAuthOptions, getServerSession } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+
+/**
+ * Single-admin credentials authentication.
+ *
+ * Credentials live in server-only environment variables (never exposed to
+ * the browser). Demo defaults keep a freshly cloned repository usable out
+ * of the box; set ADMIN_EMAIL / ADMIN_PASSWORD in production.
+ */
+
+const DEMO_EMAIL = 'admin@example.com';
+const DEMO_PASSWORD = 'admin1234';
+
+/** Constant-time string comparison that tolerates different lengths. */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // Still perform a comparison to keep timing uniform.
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  session: { strategy: 'jwt' },
   pages: {
-    signIn: "/",
-    signOut: "/",
-    error: "/",
-    newUser: "/",
-    verifyRequest: "/",
+    signIn: '/auth',
+    error: '/auth',
   },
   providers: [
-    Credentials({
-      name: "Credentials",
+    CredentialsProvider({
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const email = credentials?.email as string | undefined;
-        const password = credentials?.password as string | undefined;
+        const email = credentials?.email ?? '';
+        const password = credentials?.password ?? '';
 
-        // Predefined demo credentials with safe fallbacks for clean clones
-        const DEFAULT_EMAIL =
-          process.env.NEXT_PUBLIC_DEMO_EMAIL ?? "admin@example.com";
-        const DEFAULT_PASSWORD =
-          process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? "admin1234";
+        const expectedEmail = process.env.ADMIN_EMAIL || DEMO_EMAIL;
+        const expectedPassword = process.env.ADMIN_PASSWORD || DEMO_PASSWORD;
 
-        // Accept only the predefined credential pair to keep behavior predictable
-        if (email === DEFAULT_EMAIL && password === DEFAULT_PASSWORD) {
-          return {
-            id: "demo-user",
-            name: "Admin",
-            email: DEFAULT_EMAIL,
-          };
+        if (safeEqual(email, expectedEmail) && safeEqual(password, expectedPassword)) {
+          return { id: 'site-admin', name: 'Admin', email: expectedEmail };
         }
         return null;
       },
@@ -42,21 +55,21 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.user = user as any;
+        token.user = user;
       }
       return token;
     },
     async session({ session, token }) {
       if (token?.user) {
-        session.user = token.user as any;
+        session.user = token.user as typeof session.user;
       }
       return session;
     },
   },
 };
 
-// App Router API route handler (used by /api/auth/[...nextauth])
+/** App Router handler used by `app/api/auth/[...nextauth]/route.ts`. */
 export const authHandler = NextAuth(authOptions);
 
-// Helper for server components/routes to read the session
+/** Read the current session from server components or route handlers. */
 export const getServerAuthSession = () => getServerSession(authOptions);

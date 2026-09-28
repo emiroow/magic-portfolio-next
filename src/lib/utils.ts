@@ -1,200 +1,64 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
+/** Merge Tailwind class names with conflict resolution. */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string, locale: "fa" | "en" = "en") {
-  let currentDate = new Date().getTime();
-  if (!date.includes("T")) {
-    date = `${date}T00:00:00`;
-  }
-  let targetDate = new Date(date).getTime();
-  let timeDifference = Math.abs(currentDate - targetDate);
-  let daysAgo = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+const PERSIAN_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
-  if (locale === "fa") {
-    // Use Persian (Jalaali) calendar formatting if available
-    try {
-      // Lazy require to avoid SSR bundling issues if not used
-      // dynamic require to optionally load moment-jalaali at runtime
-      const moment = require("moment-jalaali");
-      moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
-      const m = moment(date);
-      const fullDateFa = m.format("jD jMMMM jYYYY");
-
-      if (daysAgo < 1) return "امروز";
-      if (daysAgo < 7) return `${fullDateFa} (${daysAgo} روز پیش)`;
-      if (daysAgo < 30) {
-        const weeksAgo = Math.floor(daysAgo / 7);
-        return `${fullDateFa} (${weeksAgo} هفته پیش)`;
-      }
-      if (daysAgo < 365) {
-        const monthsAgo = Math.floor(daysAgo / 30);
-        return `${fullDateFa} (${monthsAgo} ماه پیش)`;
-      }
-      const yearsAgo = Math.floor(daysAgo / 365);
-      return `${fullDateFa} (${yearsAgo} سال پیش)`;
-    } catch (e) {
-      // Fallback to Intl if moment-jalaali is unavailable
-      const fullDateFa = new Date(date).toLocaleDateString("fa-IR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      return fullDateFa;
-    }
-  }
-
-  const fullDate = new Date(date).toLocaleString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  if (daysAgo < 1) return "Today";
-  if (daysAgo < 7) return `${fullDate} (${daysAgo}d ago)`;
-  if (daysAgo < 30) {
-    const weeksAgo = Math.floor(daysAgo / 7);
-    return `${fullDate} (${weeksAgo}w ago)`;
-  }
-  if (daysAgo < 365) {
-    const monthsAgo = Math.floor(daysAgo / 30);
-    return `${fullDate} (${monthsAgo}mo ago)`;
-  }
-  const yearsAgo = Math.floor(daysAgo / 365);
-  return `${fullDate} (${yearsAgo}y ago)`;
+/** Convert ASCII digits in a string to Persian digits. */
+function toPersianDigits(input: string) {
+  return input.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
 }
 
-// Format as Year Month with dual calendars, e.g.,
-// fa -> "مهر ۱۴۰۳ (October 2024)"
-// en -> "October 2024 (مهر ۱۴۰۳)"
-export function formatYearMonthDual(date: string, locale: "fa" | "en" = "en") {
-  if (!date) return "";
+/**
+ * Format a date-ish string as locale-appropriate "Month YYYY".
+ *
+ * Accepted inputs:
+ * - `YYYY/MM` (or `YYYY/M`) — Jalali when the locale is `fa`, Gregorian for `en`.
+ * - ISO date(‑time) strings (e.g. blog `createdAt`).
+ *
+ * Output examples: "مهر ۱۴۰۳" (fa), "October 2024" (en).
+ */
+export function formatYearMonthLocal(date: string | undefined, locale: 'fa' | 'en' = 'en'): string {
+  if (!date) return '';
 
-  // Robustly parse inputs like:
-  // - ISO strings
-  // - "YYYY/MM" where YYYY/MM is in Jalali when locale==='fa', Gregorian otherwise
-  const parseInput = (input: string, inputLocale: "fa" | "en"): Date | null => {
-    if (!input) return null;
-    const ym = input.match(/^(\d{3,4})\/(\d{1,2})(?:\/(\d{1,2}))?$/);
-    try {
-      if (ym) {
-        const year = parseInt(ym[1], 10);
-        const month = parseInt(ym[2], 10);
-        const day = ym[3] ? parseInt(ym[3], 10) : 1;
-        if (inputLocale === "fa") {
-          // Interpret as Jalali and convert to Gregorian Date
-          // dynamic require to optionally load moment-jalaali at runtime
-          const moment = require("moment-jalaali");
-          moment.loadPersian({
-            dialect: "persian-modern",
-            usePersianDigits: true,
-          });
-          const m = moment(
-            `${year}/${String(month).padStart(2, "0")}/${String(day).padStart(
-              2,
-              "0"
-            )}`,
-            "jYYYY/jMM/jDD"
-          );
-          if (m.isValid()) return m.toDate();
-        } else {
-          // Gregorian year/month[/day]
-          const iso = `${String(year).padStart(4, "0")}-${String(
-            month
-          ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          const d = new Date(iso);
-          if (!isNaN(d.getTime())) return d;
-        }
-      }
-      // Fallbacks: ISO or general parsing
-      const d = new Date(input);
-      if (!isNaN(d.getTime())) return d;
-    } catch {}
-    return null;
-  };
+  // Calendar-style "YYYY/M[M]" input.
+  const ym = date.match(/^(\d{3,4})\/(\d{1,2})$/);
+  if (ym) {
+    const year = Number(ym[1]);
+    const month = Number(ym[2]);
 
-  const d = parseInput(date, locale) ?? new Date();
+    if (locale === 'fa' && month >= 1 && month <= 12) {
+      return `${PERSIAN_MONTHS[month - 1]} ${toPersianDigits(String(year))}`;
+    }
 
-  // Gregorian part
-  const greg = d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-  });
-
-  // Jalaali part
-  let jalaali = "";
-  try {
-    // dynamic require to optionally load moment-jalaali at runtime
-    const moment = require("moment-jalaali");
-    moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
-    // Month then Year to match "مهر ۱۴۰۴"
-    jalaali = moment(d).format("jMMMM jYYYY");
-  } catch (e) {
-    // Fallback to fa-IR locale (not true Jalali on all runtimes, but acceptable fallback)
-    jalaali = d.toLocaleDateString("fa-IR", { year: "numeric", month: "long" });
+    const d = new Date(Date.UTC(year, Math.max(0, month - 1), 1));
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', timeZone: 'UTC' });
   }
 
-  return locale === "fa" ? `${jalaali} (${greg})` : `${greg} (${jalaali})`;
+  // Fall back to calendar-aware Intl formatting for anything Date accepts.
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  if (locale === 'fa') {
+    return new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year: 'numeric', month: 'long' }).format(parsed);
+  }
+  return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(parsed);
 }
 
-// Locale-only Year Month format
-export function formatYearMonthLocal(date: string, locale: "fa" | "en" = "en") {
-  if (!date) return "";
+/** Truncate a string on a word boundary and append an ellipsis. */
+export function truncate(text: string | undefined, max = 160): string {
+  if (!text) return '';
+  if (text.length <= max) return text;
+  return `${text.slice(0, text.lastIndexOf(' ', max))}…`;
+}
 
-  // Reuse the same parsing strategy as formatYearMonthDual
-  const parseInput = (input: string, inputLocale: "fa" | "en"): Date | null => {
-    if (!input) return null;
-    const ym = input.match(/^(\d{3,4})\/(\d{1,2})(?:\/(\d{1,2}))?$/);
-    try {
-      if (ym) {
-        const year = parseInt(ym[1], 10);
-        const month = parseInt(ym[2], 10);
-        const day = ym[3] ? parseInt(ym[3], 10) : 1;
-        if (inputLocale === "fa") {
-          // dynamic require to optionally load moment-jalaali at runtime
-          const moment = require("moment-jalaali");
-          moment.loadPersian({
-            dialect: "persian-modern",
-            usePersianDigits: true,
-          });
-          const m = moment(
-            `${year}/${String(month).padStart(2, "0")}/${String(day).padStart(
-              2,
-              "0"
-            )}`,
-            "jYYYY/jMM/jDD"
-          );
-          if (m.isValid()) return m.toDate();
-        } else {
-          const iso = `${String(year).padStart(4, "0")}-${String(
-            month
-          ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          const d = new Date(iso);
-          if (!isNaN(d.getTime())) return d;
-        }
-      }
-      const d = new Date(input);
-      if (!isNaN(d.getTime())) return d;
-    } catch {}
-    return null;
-  };
-
-  const d = parseInput(date, locale) ?? new Date();
-
-  if (locale === "fa") {
-    try {
-      // dynamic require to optionally load moment-jalaali at runtime
-      const moment = require("moment-jalaali");
-      moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
-      // Month then Year
-      return moment(d).format("jMMMM jYYYY");
-    } catch (e) {
-      return d.toLocaleDateString("fa-IR", { year: "numeric", month: "long" });
-    }
-  }
-
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "long" });
+/** Estimate reading time in minutes (~200 words per minute). */
+export function readingTime(text: string | undefined): number {
+  if (!text) return 0;
+  const words = text.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 200));
 }

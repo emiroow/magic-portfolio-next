@@ -1,10 +1,9 @@
-import { ISkill } from "@/interface/ISkills";
-import mongoose, { Schema } from "mongoose";
+import { ISkill } from '@/types';
+import mongoose, { Schema } from 'mongoose';
 
-export const skill = new Schema<ISkill>({
-  name: { type: String },
-  lang: { type: String },
+export const skillSchema = new Schema<ISkill>({
+  name: { type: String, required: true },
+  lang: { type: String, required: true },
 });
 
-export const skillModel =
-  mongoose.models.skill || mongoose.model<ISkill>("skill", skill);
+export const skillModel = mongoose.models.skill || mongoose.model<ISkill>('skill', skillSchema);

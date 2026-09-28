@@ -1,33 +1,57 @@
-import { SeedStatusModel } from '@/models/seedData';
-import { seedData } from '@/seed/seedData';
 import mongoose from 'mongoose';
 
-let cached = (global as any).mongoose || { conn: null, promise: null };
-(global as any).mongoose = cached;
+/**
+ * Cached MongoDB connection.
+ * Reuses an existing connection across hot reloads and serverless invocations.
+ * Throws a descriptive error when `MONGODB_URI` is missing or the connection fails.
+ */
 
-export async function connectDB() {
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+declare global {
+  var mongooseCache: MongooseCache | undefined;
+}
+
+const cached: MongooseCache = global.mongooseCache ?? { conn: null, promise: null };
+global.mongooseCache = cached;
+
+export async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) return cached.conn;
 
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error('❌ MONGODB_URI is missing!');
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(uri).then(mongoose => mongoose);
+  if (!uri) {
+    throw new Error('MONGODB_URI is not configured. Add it to .env.local (see .env.example).');
   }
 
-  cached.conn = await cached.promise;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri, { bufferCommands: false });
+  }
 
-  // --- AUTO SEED ONE TIME ---
-  const seedFlag = await SeedStatusModel.findOne();
-
-  if (!seedFlag) {
-    console.log('⏳ Seeding database first time...');
-    await seedData();
-    await SeedStatusModel.create({ seededStatus: true });
-    console.log('🎉 Seeding completed.');
-  } else {
-    console.log('✅ Database already have seed data.');
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    throw error;
   }
 
   return cached.conn;
+}
+
+/**
+ * Best-effort connection used by server components and public APIs.
+ * Returns `false` (instead of throwing) when the database is not
+ * configured or unreachable, so pages can render graceful empty states.
+ */
+export async function tryConnectDB(): Promise<boolean> {
+  if (!process.env.MONGODB_URI) return false;
+  try {
+    await connectDB();
+    return true;
+  } catch (error) {
+    console.error('[db] connection failed:', error instanceof Error ? error.message : error);
+    return false;
+  }
 }

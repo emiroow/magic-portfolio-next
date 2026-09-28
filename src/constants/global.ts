@@ -1,11 +1,7 @@
-export const apiEndPoint = process.env.NEXT_PUBLIC_API_BASE_URL;
-import { HiOutlineHome } from "react-icons/hi";
-import { LuNotebook } from "react-icons/lu";
+import { Home, NotebookText } from 'lucide-react';
 
-export const NavbarRoutes = (basePath: string = "") => {
-  const prefix = basePath ? `/${basePath.replace(/^\/+|\/+$/g, "")}` : "";
-  return [
-    { href: prefix || "/", icon: HiOutlineHome, label: "Home" },
-    { href: `${prefix}/blog`, icon: LuNotebook, label: "Blog" },
-  ];
-};
+/**
+ * Primary dock navigation. Hrefs are locale-relative; the localized
+ * `Link` wrapper prepends the active locale automatically.
+ */
+export const NavbarRoutes = () => [{ href: '/', icon: Home }, { href: '/blog', icon: NotebookText }] as const;

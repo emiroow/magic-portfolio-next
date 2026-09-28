@@ -1,5 +1,5 @@
-import { IEducation } from "@/interface/IEducation";
-import mongoose, { Schema } from "mongoose";
+import { IEducation } from '@/types';
+import mongoose, { Schema } from 'mongoose';
 
 export const educationSchema = new Schema<IEducation>({
   school: { type: String },
@@ -8,9 +8,7 @@ export const educationSchema = new Schema<IEducation>({
   logoUrl: { type: String },
   start: { type: String },
   end: { type: String },
-  lang: { type: String },
+  lang: { type: String, required: true },
 });
 
-export const educationModel =
-  mongoose.models.education ||
-  mongoose.model<IEducation>("education", educationSchema);
+export const educationModel = mongoose.models.education || mongoose.model<IEducation>('education', educationSchema);

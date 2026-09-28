@@ -1,7 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import { IWork } from '@/types';
+import mongoose, { Schema } from 'mongoose';
 
 export const workSchema = new Schema<IWork>({
-  company: { type: String },
+  company: { type: String, required: true },
   href: { type: String },
   location: { type: String },
   title: { type: String },
@@ -9,8 +10,7 @@ export const workSchema = new Schema<IWork>({
   start: { type: String },
   end: { type: String },
   description: { type: String },
-  lang: { type: String },
+  lang: { type: String, required: true },
 });
 
-export const workModel =
-  mongoose.models.work || mongoose.model<IWork>("work", workSchema);
+export const workModel = mongoose.models.work || mongoose.model<IWork>('work', workSchema);

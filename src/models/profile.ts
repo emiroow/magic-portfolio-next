@@ -1,3 +1,4 @@
+import { IProfile } from '@/types';
 import mongoose, { Schema } from 'mongoose';
 
 export const profileSchema = new Schema<IProfile>({
@@ -9,7 +10,7 @@ export const profileSchema = new Schema<IProfile>({
   avatarUrl: { type: String },
   tel: { type: String },
   email: { type: String },
-  lang: { type: String },
+  lang: { type: String, required: true },
 });
 
 export const profileModel = mongoose.models.profile || mongoose.model<IProfile>('profile', profileSchema);
