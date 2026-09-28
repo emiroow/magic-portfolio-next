@@ -1,4 +1,4 @@
-/** Blog layout: constrains content width for list and post pages. */
+/** Blog layout: narrower measure for long-form reading, same page rhythm. */
 export default function BlogLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <div className="mx-auto min-h-screen w-full max-w-3xl px-5 py-6 sm:px-6 sm:py-12">{children}</div>;
+  return <div className="site-shell max-w-3xl">{children}</div>;
 }

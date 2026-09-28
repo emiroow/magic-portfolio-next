@@ -1,11 +1,12 @@
 import { JsonLd } from '@/components/JsonLd';
 import BlurFade from '@/components/magicui/blur-fade';
 import Navbar from '@/components/navbar';
+import { eyebrowClass } from '@/components/sections/section-header';
 import { getBlogBySlug, getBlogList, getProfile, getSocials } from '@/lib/data';
 import { OG_IMAGE_URL, languageAlternates, localeUrl } from '@/lib/seo';
-import { formatYearMonthLocal, readingTime } from '@/lib/utils';
+import { cn, formatYearMonthLocal, readingTime } from '@/lib/utils';
 import type { AppLocale } from '@/types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -84,82 +85,104 @@ export default async function BlogPostPage({ params }: Props) {
   const minutes = readingTime(post.content);
 
   return (
-    <article className="pb-16">
-      <JsonLd
-        item={{
-          '@context': 'https://schema.org',
-          '@type': 'BlogPosting',
-          mainEntityOfPage: { '@type': 'WebPage', '@id': localeUrl(locale, `/blog/${post.slug}`) },
-          headline: post.title,
-          description: post.summary || undefined,
-          datePublished: post.createdAt,
-          dateModified: post.updatedAt || post.createdAt,
-          inLanguage: locale,
-          author: {
-            '@type': 'Person',
-            name: profile?.fullName || profile?.name || undefined,
-          },
-        }}
-      />
+    <main>
+      <article>
+        <JsonLd
+          item={{
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            mainEntityOfPage: { '@type': 'WebPage', '@id': localeUrl(locale, `/blog/${post.slug}`) },
+            headline: post.title,
+            description: post.summary || undefined,
+            datePublished: post.createdAt,
+            dateModified: post.updatedAt || post.createdAt,
+            inLanguage: locale,
+            author: {
+              '@type': 'Person',
+              name: profile?.fullName || profile?.name || undefined,
+            },
+          }}
+        />
 
-      <BlurFade delay={0.04}>
-        <Link
-          href={`/${locale}/blog`}
-          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {locale === 'fa' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          {t('backToBlog')}
-        </Link>
-      </BlurFade>
+        <BlurFade delay={0.04}>
+          <Link
+            href={`/${locale}/blog`}
+            className="-ms-1 mb-6 inline-flex items-center gap-1.5 rounded-full px-1 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-3.5 rtl:-scale-x-100" aria-hidden />
+            {t('backToBlog')}
+          </Link>
+        </BlurFade>
 
-      <header className="mb-8 space-y-3">
-        <h1 className="text-2xl font-bold tracking-tighter sm:text-3xl">{post.title}</h1>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <time dateTime={post.createdAt}>{formatYearMonthLocal(post.createdAt, asLocale(locale))}</time>
-          {minutes > 0 && (
-            <>
-              <span aria-hidden>·</span>
-              <span>
-                {t('readingTime', { minutes })}
-              </span>
-            </>
+        <header className="mb-10">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground">
+            <time dateTime={post.createdAt} className={eyebrowClass}>
+              {formatYearMonthLocal(post.createdAt, asLocale(locale))}
+            </time>
+            {minutes > 0 && (
+              <>
+                <span aria-hidden className="text-border">
+                  |
+                </span>
+                <span className="text-[11px] tabular-nums">{t('readingTime', { minutes })}</span>
+              </>
+            )}
+          </div>
+          <h1 className="mt-3 text-2xl font-bold leading-tight ltr:tracking-tight sm:text-3xl md:text-4xl">{post.title}</h1>
+          {post.summary && (
+            <p className="mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground rtl:leading-[1.9] sm:text-base">{post.summary}</p>
           )}
-        </div>
-        {post.summary && <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">{post.summary}</p>}
-      </header>
+          <div aria-hidden className="rule-fade mt-6" />
+        </header>
 
-      <BlurFade delay={0.1}>
-        <div className="prose-article">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]]}>
-            {post.content || ''}
-          </ReactMarkdown>
-        </div>
-      </BlurFade>
+        <BlurFade delay={0.1}>
+          <div className="prose-article">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]]}>
+              {post.content || ''}
+            </ReactMarkdown>
+          </div>
+        </BlurFade>
 
-      {(prev || next) && (
-        <nav aria-label={t('pagination')} className="mt-12 grid gap-3 border-t pt-6 sm:grid-cols-2">
-          {prev && (
-            <Link
-              href={`/${locale}/blog/${prev.slug}`}
-              className="group flex items-center gap-2 rounded-lg border p-3 text-sm transition-colors hover:border-foreground"
-            >
-              <ChevronLeft className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
-              <span className="line-clamp-1">{prev.title}</span>
-            </Link>
-          )}
-          {next && (
-            <Link
-              href={`/${locale}/blog/${next.slug}`}
-              className={`group flex items-center justify-end gap-2 rounded-lg border p-3 text-sm transition-colors hover:border-foreground ${prev ? '' : 'sm:col-start-2'}`}
-            >
-              <span className="line-clamp-1">{next.title}</span>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
-            </Link>
-          )}
-        </nav>
-      )}
+        {(prev || next) && (
+          <nav aria-label={t('pagination')} className="mt-12 grid gap-3 border-t pt-6 sm:grid-cols-2">
+            {prev && (
+              <Link
+                href={`/${locale}/blog/${prev.slug}`}
+                className="group flex items-center gap-3 rounded-xl border bg-card p-4 text-sm shadow-sm transition-colors hover:border-foreground/40"
+              >
+                <ArrowLeft
+                  className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground rtl:-scale-x-100"
+                  aria-hidden
+                />
+                <span className="min-w-0">
+                  <span className={cn(eyebrowClass, 'block')}>{t('previous')}</span>
+                  <span className="mt-1 line-clamp-1 block font-medium">{prev.title}</span>
+                </span>
+              </Link>
+            )}
+            {next && (
+              <Link
+                href={`/${locale}/blog/${next.slug}`}
+                className={cn(
+                  'group flex items-center justify-end gap-3 rounded-xl border bg-card p-4 text-end text-sm shadow-sm transition-colors hover:border-foreground/40',
+                  !prev && 'sm:col-start-2'
+                )}
+              >
+                <span className="min-w-0">
+                  <span className={cn(eyebrowClass, 'block')}>{t('next')}</span>
+                  <span className="mt-1 line-clamp-1 block font-medium">{next.title}</span>
+                </span>
+                <ArrowRight
+                  className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground rtl:-scale-x-100"
+                  aria-hidden
+                />
+              </Link>
+            )}
+          </nav>
+        )}
 
-      <Navbar socials={socials} />
-    </article>
+        <Navbar socials={socials} />
+      </article>
+    </main>
   );
 }

@@ -1,10 +1,11 @@
 'use client';
 
 import BlurFade from '@/components/magicui/blur-fade';
+import { Stack } from '@/components/sections/stack';
 import { Input } from '@/components/ui/input';
 import type { IBlog } from '@/types';
 import { formatYearMonthLocal } from '@/lib/utils';
-import { FileText, Search } from 'lucide-react';
+import { FileText, Search, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -15,8 +16,8 @@ interface BlogListClientProps {
 }
 
 /**
- * Client-side blog list: instant search filter over title/summary plus
- * an empty state when nothing matches.
+ * Client-side blog list: instant search over title/summary, rows sharing the
+ * divided-surface language of the home page timelines.
  */
 export default function BlogListClient({ posts, locale }: BlogListClientProps) {
   const t = useTranslations('blogPage');
@@ -34,38 +35,64 @@ export default function BlogListClient({ posts, locale }: BlogListClientProps) {
     <div className="flex flex-col gap-4">
       {posts.length > 0 && (
         <div className="relative">
-          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={t('searchPlaceholder')}
             aria-label={t('searchPlaceholder')}
-            className="h-10 ps-9"
+            className="h-10 rounded-full pe-10 ps-9"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label={t('clearSearch')}
+              className="absolute end-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          )}
         </div>
       )}
 
-      {list.map((post, id) => (
-        <BlurFade key={post.slug} delay={0.04 + id * 0.05} inView>
-          <Link
-            className="group block rounded-xl border bg-card p-5 transition-all hover:border-foreground/40 hover:shadow-sm"
-            href={`/${locale}/blog/${post.slug}`}
-          >
-            <div className="flex flex-col gap-2">
-              <div className="flex items-start justify-between gap-3">
-                <h2 className="font-semibold leading-snug tracking-tight group-hover:underline">{post.title}</h2>
-                <span className="shrink-0 text-xs text-muted-foreground">{formatYearMonthLocal(post.createdAt, lang)}</span>
-              </div>
-              {post.summary && <p className="line-clamp-2 text-sm text-muted-foreground">{post.summary}</p>}
-            </div>
-          </Link>
-        </BlurFade>
-      ))}
+      {list.length > 0 && (
+        <Stack>
+          {list.map((post, id) => (
+            <BlurFade key={post.slug} delay={0.04 + id * 0.04} inView>
+              <Link href={`/${locale}/blog/${post.slug}`} className="group block p-4 transition-colors hover:bg-muted/40 sm:px-5 sm:py-5">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <h2 className="min-w-0 text-sm font-semibold leading-snug transition-colors group-hover:underline sm:text-base">
+                    {post.title}
+                  </h2>
+                  <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                    {formatYearMonthLocal(post.createdAt, lang)}
+                  </span>
+                </div>
+                {post.summary && (
+                  <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">{post.summary}</p>
+                )}
+              </Link>
+            </BlurFade>
+          ))}
+        </Stack>
+      )}
 
       {list.length === 0 && (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center">
-          <FileText className="h-8 w-8 text-muted-foreground" aria-hidden />
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-16 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full border" aria-hidden>
+            <FileText className="size-5 text-muted-foreground" />
+          </span>
           <p className="text-sm text-muted-foreground">{query ? t('noResults') : t('empty')}</p>
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="text-xs font-medium text-foreground underline underline-offset-4 transition-opacity hover:opacity-70"
+            >
+              {t('clearSearch')}
+            </button>
+          )}
         </div>
       )}
     </div>
