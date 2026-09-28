@@ -11,10 +11,7 @@ interface SectionHeaderProps {
   delay?: number;
 }
 
-/**
- * Consistent monochrome section header used by every home-page section:
- * an uppercase eyebrow, a bold title and an optional description.
- */
+/** Monochrome section header: eyebrow label, bold title and optional description. */
 export function SectionHeader({ label, title, description, delay = 0 }: SectionHeaderProps) {
   return (
     <BlurFade delay={delay}>

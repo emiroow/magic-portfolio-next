@@ -1,10 +1,6 @@
 import localFont from 'next/font/local';
 
-/**
- * Self-hosted fonts (no external requests, works offline / on Vercel edge).
- * Applied per-locale so English and Persian pages always get the right face,
- * even during client-side locale switches.
- */
+/** Self-hosted fonts applied per-locale so each language always gets the right face. */
 export const estedad = localFont({
   src: '../../public/fonts/Estedad-Regular.ttf',
   variable: '--font-estedad',

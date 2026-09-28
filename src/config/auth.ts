@@ -3,12 +3,8 @@ import NextAuth, { type NextAuthOptions, getServerSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 /**
- * Single-admin credentials authentication.
- *
- * Credentials live in server-only environment variables and are REQUIRED:
- * there are no demo/fallback accounts, so a misconfigured deployment can
- * never be logged into with publicly known defaults. If ADMIN_EMAIL or
- * ADMIN_PASSWORD is missing, every sign-in attempt is refused.
+ * Single-admin credentials auth. Credentials live in server-only env vars and
+ * are REQUIRED — there are no demo/fallback accounts; missing vars refuse all sign-ins.
  */
 
 /** Constant-time string comparison that tolerates different lengths. */

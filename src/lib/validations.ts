@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-/**
- * Zod schemas shared by API route handlers (server) and, where useful,
- * mirrored by dashboard forms (client).
- */
+/** Zod schemas shared by API handlers and dashboard forms. */
 
 /** Locales accepted by the API (`/api/[lang]/...`). */
 export const langSchema = z.enum(['fa', 'en']);

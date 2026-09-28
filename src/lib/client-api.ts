@@ -1,11 +1,8 @@
 'use client';
 
 /**
- * Thin fetch wrapper for dashboard API calls.
- *
- * - Unwraps the server's `{ data } | { error }` envelope.
- * - Sends JSON by default; pass a `FormData` body to upload files.
- * - On 401 it redirects to the locale-aware sign-in page.
+ * Fetch wrapper for dashboard calls: unwraps `{ data } | { error }`, sends JSON
+ * (or FormData for uploads) and redirects to sign-in on 401.
  */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const isForm = init.body instanceof FormData;

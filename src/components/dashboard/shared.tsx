@@ -8,11 +8,7 @@ import { useTranslations } from 'next-intl';
 import { AlertTriangle, RotateCw, X } from 'lucide-react';
 import { ReactNode } from 'react';
 
-/**
- * Building blocks shared by every dashboard section so the admin UI
- * stays visually consistent: headers, empty/error/loading states and
- * the animated form panel.
- */
+/** Shared dashboard building blocks: headers, empty/error/loading states and the form panel. */
 
 /** Section heading row with title and trailing actions. */
 export function SectionShell({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {

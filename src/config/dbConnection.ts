@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
-/**
- * Cached MongoDB connection.
- * Reuses an existing connection across hot reloads and serverless invocations.
- * Throws a descriptive error when `MONGODB_URI` is missing or the connection fails.
- */
+/** Cached MongoDB connection, reused across hot reloads and serverless invocations. */
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -40,11 +36,7 @@ export async function connectDB(): Promise<typeof mongoose> {
   return cached.conn;
 }
 
-/**
- * Best-effort connection used by server components and public APIs.
- * Returns `false` (instead of throwing) when the database is not
- * configured or unreachable, so pages can render graceful empty states.
- */
+/** Best-effort connect for public pages: returns `false` instead of throwing when DB is down. */
 export async function tryConnectDB(): Promise<boolean> {
   if (!process.env.MONGODB_URI) return false;
   try {

@@ -14,13 +14,8 @@ function toPersianDigits(input: string) {
 }
 
 /**
- * Format a date-ish string as locale-appropriate "Month YYYY".
- *
- * Accepted inputs:
- * - `YYYY/MM` (or `YYYY/M`) — Jalali when the locale is `fa`, Gregorian for `en`.
- * - ISO date(‑time) strings (e.g. blog `createdAt`).
- *
- * Output examples: "مهر ۱۴۰۳" (fa), "October 2024" (en).
+ * Format a date-ish string as locale "Month YYYY" (Jalali for fa).
+ * Accepts `YYYY/MM` or ISO strings; e.g. "مهر ۱۴۰۳", "October 2024".
  */
 export function formatYearMonthLocal(date: string | undefined, locale: 'fa' | 'en' = 'en'): string {
   if (!date) return '';

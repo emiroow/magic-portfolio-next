@@ -1,10 +1,7 @@
 import { getServerAuthSession } from '@/config/auth';
 import type { z } from 'zod';
 
-/**
- * Small helpers shared by all route handlers:
- * consistent JSON envelopes, admin guard and body validation.
- */
+/** Shared route-handler helpers: JSON envelopes, admin guard and body validation. */
 
 /** Successful JSON response. */
 export function apiJson<T>(data: T, init?: ResponseInit) {
@@ -25,10 +22,7 @@ export async function requireAdmin() {
   return { ok: true as const, session };
 }
 
-/**
- * Parse and validate a JSON request body against a zod schema.
- * Returns either `{ data }` or a ready-to-return 400/422 response.
- */
+/** Parse/validate a JSON body against a zod schema; returns `{ data }` or a 400/422 response. */
 export async function parseBody<S extends z.ZodTypeAny>(
   schema: S,
   request: Request

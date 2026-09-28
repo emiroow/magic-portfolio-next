@@ -1,7 +1,4 @@
-/**
- * Shared domain types for the whole application.
- * These mirror the Mongoose schemas in `src/models` and the public API payloads.
- */
+/** Shared domain types mirroring `src/models` schemas and API payloads. */
 
 /** Locales supported by the site. */
 export type AppLocale = 'fa' | 'en';

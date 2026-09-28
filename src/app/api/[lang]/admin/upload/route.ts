@@ -9,12 +9,8 @@ import { NextRequest } from 'next/server';
 import path from 'path';
 
 /**
- * Image upload endpoint (admin only).
- *
- * - Development: stores files under `/public/<folder>` and returns a
- *   same-origin URL.
- * - Production (Vercel): stores files in Vercel Blob storage, which
- *   requires `BLOB_READ_WRITE_TOKEN`.
+ * Admin image upload. Dev stores files under `/public`; production uses
+ * Vercel Blob storage (requires `BLOB_READ_WRITE_TOKEN`).
  */
 
 const isDev = process.env.NODE_ENV === 'development';

@@ -7,14 +7,8 @@ import { revalidatePath } from 'next/cache';
 import type { z } from 'zod';
 
 /**
- * Factory that produces guarded, validated admin CRUD handlers for a
- * Mongoose model. Every generated handler:
- *   1. requires an authenticated admin session (401 otherwise),
- *   2. validates the `lang` route segment ('fa' | 'en'),
- *   3. validates the request body with the given zod schema (422 otherwise),
- *   4. revalidates the public pages after a successful mutation.
- *
- * Response contract: `{ data: ... }` on success, `{ error: ... }` on failure.
+ * Factory for guarded admin CRUD handlers: each handler checks the admin
+ * session, validates `lang` and the body (zod), then revalidates public pages.
  */
 
 type RouteContext = { params: Promise<{ lang: string }> };

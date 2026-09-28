@@ -9,11 +9,7 @@ import { ThemeProvider, useTheme } from 'next-themes';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
 
-/**
- * The single client provider tree mounted by `MainProvider`.
- * Everything (auth session, theme, react-query, tooltips, toasts) is
- * provided once here so route groups never nest duplicate providers.
- */
+/** The single client provider tree (session, theme, react-query, tooltips, toasts). */
 export default function AppProviders({
   children,
   locale,
@@ -48,10 +44,7 @@ function ThemedToaster() {
   return <Toaster theme={resolvedTheme as 'light' | 'dark' | undefined} dir={locale === 'fa' ? 'rtl' : 'ltr'} position="top-center" />;
 }
 
-/**
- * Keeps `<html lang>` and `<html dir>` in sync after client-side locale
- * switches (the root layout itself is not re-rendered during soft navigation).
- */
+/** Keeps `<html lang/dir>` in sync after client-side locale switches. */
 function HtmlDirection() {
   const locale = useLocale();
 

@@ -19,9 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/**
- * Auth layout: bounces already-authenticated admins to the dashboard.
- */
+/** Auth layout: bounces already-authenticated admins to the dashboard. */
 export default async function AuthLayout({ children, params }: Readonly<{ children: React.ReactNode } & Props>) {
   const { locale } = await params;
 

@@ -5,11 +5,8 @@ import MainProvider from '@/providers/mainProvider';
 import { notFound } from 'next/navigation';
 
 /**
- * Locale layout: validates the `[locale]` segment, mounts the single
- * client provider tree and — critically — applies direction and font on
- * a wrapper element. (The root layout's `<html dir>` only reflects the
- * first render; a wrapper updates correctly on client-side locale
- * switches too.)
+ * Locale layout: validates `[locale]` and applies direction/font on a wrapper
+ * (updates correctly on client-side locale switches, unlike `<html dir>`).
  */
 export default async function LocaleLayout({
   children,

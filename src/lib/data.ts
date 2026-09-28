@@ -8,15 +8,9 @@ import { socialModel } from '@/models/social';
 import { workModel } from '@/models/work';
 import type { AppLocale, IBlog, IEducation, IProfile, IProject, ISkill, ISocial, IWork } from '@/types';
 
-/**
- * Server-side data access layer.
- *
- * All functions are database-safe: when `MONGODB_URI` is missing or the
- * database is unreachable they return empty results instead of throwing,
- * which keeps builds and previews working without a live database.
- */
+/** Server-side data access layer. DB-safe: returns empty results when unreachable. */
 
-/** Convert BSON documents into plain JSON (ObjectIds -> string, dates -> ISO). */
+/** Convert BSON documents into plain JSON. */
 function serialize<T>(doc: Record<string, unknown> | null): T | null {
   if (!doc) return null;
   return JSON.parse(JSON.stringify(doc)) as T;
@@ -37,11 +31,7 @@ function normalizeProfile(profile: IProfile | null): IProfile | null {
   return { ...profile, avatarUrl: cleanUrl(profile.avatarUrl) };
 }
 
-/**
- * Remove leading YAML front-matter (`--- ... ---`) from Markdown content.
- * Implemented line-based so stored posts written by other tooling render
- * as prose instead of leaking raw metadata into the page.
- */
+/** Strip leading YAML front-matter (`--- ... ---`) from Markdown content. */
 function stripFrontMatter(markdown?: string) {
   if (!markdown) return markdown;
   const text = markdown.replace(/^\uFEFF/, '');
@@ -75,10 +65,7 @@ const EMPTY_PORTFOLIO: PortfolioData = {
   socials: [],
 };
 
-/**
- * Load every public section for the home page in one call.
- * Returns an empty payload when the database is unavailable.
- */
+/** Load every public home-page section in one call (empty when DB unavailable). */
 export async function getPortfolioData(locale: AppLocale): Promise<PortfolioData> {
   if (!(await tryConnectDB())) return EMPTY_PORTFOLIO;
 

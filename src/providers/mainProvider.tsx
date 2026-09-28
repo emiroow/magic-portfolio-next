@@ -6,11 +6,7 @@ interface Props {
   locale?: string;
 }
 
-/**
- * Server entry point for the client provider tree.
- * Resolves translation messages for the active locale once, then hands
- * everything to `AppProviders`.
- */
+/** Server entry for the client provider tree; resolves messages once, then defers to AppProviders. */
 const MainProvider = async ({ children, locale }: Props) => {
   const messages = await getMessages({ locale });
 

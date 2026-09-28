@@ -13,11 +13,7 @@ import {
   Youtube,
 } from 'lucide-react';
 
-/**
- * Icon registry for the whole app.
- * UI icons come from lucide-react; brand marks that lucide doesn't ship
- * (X, Telegram, WhatsApp, Figma) are inlined as SVG paths.
- */
+/** Icon registry: lucide icons plus inlined brand SVGs lucide doesn't ship. */
 
 export type IconProps = React.SVGProps<SVGSVGElement>;
 
@@ -66,10 +62,7 @@ export const FigmaIcon = (props: IconProps) => (
   />
 );
 
-/**
- * Resolve an icon by the string key stored in the database for
- * socials and project links. Unknown keys render nothing.
- */
+/** Resolve an icon from a DB string key; unknown keys render a fallback. */
 export function iconDecider(name?: string, className?: string) {
   switch ((name || '').toLowerCase()) {
     case 'github':

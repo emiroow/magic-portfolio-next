@@ -8,11 +8,7 @@ import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
 import GoogleAnalytics from './analytics';
 
-/**
- * Root metadata. The brand (`Name | Job Title | <suffix>`) comes purely from
- * the profile document (never env), so sub-pages inherit `%s | Brand`
- * automatically and the home page overrides it with an absolute title.
- */
+/** Root metadata: brand comes from the profile (never env); sub-pages inherit `%s | Brand`. */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const lang = locale === 'fa' ? 'fa' : 'en';

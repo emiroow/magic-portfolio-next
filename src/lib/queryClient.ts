@@ -2,9 +2,7 @@
 
 import { QueryClient } from '@tanstack/react-query';
 
-/**
- * Shared react-query client (module singleton so it survives re-renders).
- */
+/** Shared react-query client (module singleton so it survives re-renders). */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
