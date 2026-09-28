@@ -1,15 +1,10 @@
-"use client";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { useTranslations } from "next-intl";
-import { ReactNode } from "react";
-import { Button } from "./button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+'use client';
+
+import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { ReactNode } from 'react';
+import { Button } from './button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './dialog';
 
 export type ConfirmDialogProps = {
   open: boolean;
@@ -18,71 +13,31 @@ export type ConfirmDialogProps = {
   confirmText?: ReactNode;
   cancelText?: ReactNode;
   danger?: boolean;
-  dir?: "rtl" | "ltr";
-  locale?: string;
+  /** Name of the item being deleted, shown for context. */
   itemName?: string;
   onConfirm: () => void;
 };
 
-export function ConfirmDialog({
-  open,
-  onOpenChange,
-  title,
-  confirmText,
-  cancelText,
-  danger = true,
-  dir = "ltr",
-  locale,
-  itemName,
-  onConfirm,
-}: ConfirmDialogProps) {
-  const t = useTranslations("dashboard");
+/** Direction-aware delete/confirmation dialog used across the dashboard. */
+export function ConfirmDialog({ open, onOpenChange, title, confirmText, cancelText, danger = true, itemName, onConfirm }: ConfirmDialogProps) {
+  const t = useTranslations('dashboard');
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        dir={dir}
-        className={`w-[95%] sm:w-full sm:max-w-[420px] left-[2.5%] translate-x-0 sm:left-1/2 sm:-translate-x-1/2 ${
-          locale === "en" ? "font-robotRegular" : "font-estedadRegular"
-        }`}
-      >
-        <DialogHeader
-          className={`${locale === "fa" ? "text-right" : "text-left"}`}
-        >
-          <DialogTitle
-            className={`flex items-center gap-2 ${
-              locale === "fa" ? "float-right" : "float-left"
-            }`}
-          >
-            <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-            <span>
-              {title ?? t("confirmTitle", { defaultValue: "Are you sure?" })}
-            </span>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className={danger ? 'h-5 w-5 text-destructive' : 'h-5 w-5'} />
+            <span>{title ?? t('confirmTitle')}</span>
           </DialogTitle>
+          <DialogDescription>{itemName ? <span className="font-semibold break-words text-foreground">{itemName}</span> : t('confirmDescription')}</DialogDescription>
         </DialogHeader>
-        {itemName && (
-          <div
-            className={`space-y-2 ${
-              locale === "fa" ? "text-right" : "text-left"
-            }`}
-          >
-            <p className="text-sm">
-              <span className="font-semibold break-words">{itemName}</span>
-            </p>
-          </div>
-        )}
-        <DialogFooter
-          className={`flex gap-2 ${
-            locale === "fa" ? "flex-row-reverse" : "flex-row justify-end"
-          }`}
-        >
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {cancelText ?? t("cancel", { defaultValue: "Cancel" })}
+            {cancelText ?? t('cancel')}
           </Button>
-          <Button
-            variant={danger ? "destructive" : "default"}
-            onClick={onConfirm}
-          >
-            {confirmText ?? t("delete", { defaultValue: "Delete" })}
+          <Button variant={danger ? 'destructive' : 'default'} onClick={onConfirm}>
+            {confirmText ?? t('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

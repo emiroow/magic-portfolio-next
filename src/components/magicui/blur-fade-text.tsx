@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, Variants } from "framer-motion";
 import { useMemo } from "react";
 
 interface BlurFadeTextProps {
@@ -34,6 +34,12 @@ const BlurFadeText = ({
   };
   const combinedVariants = variant || defaultVariants;
   const characters = useMemo(() => Array.from(text || ""), [text]);
+  const prefersReducedMotion = useReducedMotion();
+
+  // Respect the user's motion preference: render plain text.
+  if (prefersReducedMotion) {
+    return <span className={cn(className, containerClassName)}>{text}</span>;
+  }
 
   if (animateByCharacter) {
     return (

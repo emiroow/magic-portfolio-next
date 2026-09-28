@@ -10,7 +10,16 @@ import "@uiw/react-markdown-preview/markdown.css";
 import "@uiw/react-md-editor/markdown-editor.css";
 
 // Load editor on client only to avoid SSR issues
-const MDEditor = dynamic<any>(() => import("@uiw/react-md-editor"), {
+type MDEditorProps = {
+  value: string;
+  onChange: (val?: string) => void;
+  height?: number;
+  hideToolbar?: boolean;
+  preview?: 'edit' | 'preview' | 'live';
+  textareaProps?: { placeholder?: string; dir?: string };
+};
+
+const MDEditor = dynamic<MDEditorProps>(() => import("@uiw/react-md-editor"), {
   ssr: false,
 });
 

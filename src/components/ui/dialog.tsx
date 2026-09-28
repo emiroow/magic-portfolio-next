@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
 
 const Dialog = DialogPrimitive.Root;
@@ -32,7 +32,7 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  const isRtl = (props as any)?.dir === "rtl";
+  const isRtl = props.dir === 'rtl';
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -52,7 +52,7 @@ const DialogContent = React.forwardRef<
             isRtl ? "left-4 right-auto" : "right-4"
           )}
         >
-          <Cross2Icon className="h-4 w-4" />
+          <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
