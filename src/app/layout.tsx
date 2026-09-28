@@ -1,4 +1,3 @@
-import { FlickeringGrid } from '@/components/magicui/flickering-grid';
 import { getProfile } from '@/lib/data';
 import { estedad, roboto } from '@/lib/fonts';
 import { brandedTitle, site, SITE_DESCRIPTION } from '@/lib/seo';
@@ -46,19 +45,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} dir={dir} data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body className={`${locale === 'fa' ? estedad.className : roboto.className} bg-background text-foreground antialiased`}>
-        {/* Subtle decorative grid at the top of every localized page */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[100px] overflow-hidden">
-          <FlickeringGrid
-            className="h-full w-full"
-            squareSize={2}
-            gridGap={2}
-            style={{
-              maskImage: 'linear-gradient(to bottom, black, transparent)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)',
-            }}
-          />
-        </div>
+      <body
+        className={`relative ${locale === 'fa' ? estedad.className : roboto.className} bg-background text-foreground antialiased`}
+      >
+        {/* Static hairline grid backdrop; content is layered above it. */}
+        <div aria-hidden className="surface-grid pointer-events-none absolute inset-x-0 top-0 -z-10 h-64" />
         {children}
         <GoogleAnalytics />
         <Analytics />
