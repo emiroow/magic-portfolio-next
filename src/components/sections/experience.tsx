@@ -41,6 +41,7 @@ export function Experience({ index, label, title, description, meta, works, loca
               period={`${formatYearMonthLocal(work.start, locale)}${work.start && work.end ? ' – ' : ''}${
                 work.end ? formatYearMonthLocal(work.end, locale) : work.start ? presentLabel : ''
               }`}
+              meta={work.location}
               description={work.description}
             />
           </BlurFade>
