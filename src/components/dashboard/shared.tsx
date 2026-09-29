@@ -72,7 +72,11 @@ export function LoadingRows({ rows = 3 }: { rows?: number }) {
   );
 }
 
-/** Slide-in form panel with enter/exit animation and a close affordance. */
+/**
+ * Slide-in form panel with enter/exit animation and a close affordance.
+ * Carries its own bottom margin so the list under it never sits flush
+ * against an open panel; the margin unmounts with the panel.
+ */
 export function FormPanel({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) {
   const t = useTranslations('dashboard');
 
@@ -85,7 +89,7 @@ export function FormPanel({ open, title, onClose, children }: { open: boolean; t
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="rounded-xl border bg-card shadow-sm"
+          className="mb-6 rounded-xl border bg-card shadow-sm"
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5">
             <h3 className="text-sm font-bold ltr:tracking-tight sm:text-base">{title}</h3>
