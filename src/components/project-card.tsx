@@ -1,30 +1,57 @@
 import { iconDecider } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, isOptimizableImage } from '@/lib/utils';
+import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Markdown from 'react-markdown';
 
 interface ProjectCardProps {
   title: string;
+  /** External product URL (demo, live site, repository home). */
   href?: string;
+  /** In-app project page; when present the whole card links to it. */
+  detailHref?: string;
   description: string;
   dates: string;
   tags: readonly string[];
   image?: string;
   links?: readonly { icon: string; type: string; href: string }[];
+  /** Label for the external-visit chip. */
+  liveLabel?: string;
   className?: string;
+  /** Cover is the LCP element of the first card on the page. */
+  priority?: boolean;
+  /** Heading level of the title; the archive uses `h2` under its own `h1`. */
+  headingLevel?: 'h2' | 'h3';
 }
 
 /**
- * Portfolio project card. The title carries a stretched link so the whole
- * surface is clickable, while the resource chips stay independently
- * focusable above it. Cover images render in grayscale to protect the
- * monochrome palette and regain colour on hover.
+ * Portfolio project card. The title carries a stretched link to the project
+ * page so the whole surface is clickable, while the resource chips stay
+ * independently focusable above it. Cover images render in grayscale to
+ * protect the monochrome palette and regain colour on hover.
  */
-export function ProjectCard({ title, href, description, dates, tags, image, links, className }: ProjectCardProps) {
-  const isExternal = Boolean(href && /^https?:\/\//i.test(href));
+export function ProjectCard({
+  title,
+  href,
+  detailHref,
+  description,
+  dates,
+  tags,
+  image,
+  links,
+  liveLabel,
+  className,
+  priority = false,
+  headingLevel: Heading = 'h3',
+}: ProjectCardProps) {
+  const cover = image && isOptimizableImage(image) ? image : undefined;
+  const chips = [...(links ?? [])];
+  if (href && !chips.some(link => link.href === href)) {
+    chips.unshift({ type: liveLabel || 'Live', href, icon: 'website' });
+  }
 
   return (
     <Card
@@ -33,32 +60,42 @@ export function ProjectCard({ title, href, description, dates, tags, image, link
         className
       )}
     >
-      {image ? (
-        <div className="relative aspect-[16/9] w-full overflow-hidden border-b bg-muted">
+      <div className="relative aspect-[16/9] w-full overflow-hidden border-b bg-muted">
+        {cover ? (
           <Image
-            src={image}
+            src={cover}
             alt={title}
             fill
+            priority={priority}
             sizes="(max-width: 640px) 100vw, 50vw"
             className="object-cover object-top grayscale transition-[filter] duration-500 group-hover:grayscale-0"
           />
-        </div>
-      ) : (
-        // Deterministic monogram keeps the grid aligned without an image.
-        <div className="flex aspect-[16/9] w-full items-center justify-center border-b bg-muted/40">
-          <span aria-hidden className="text-3xl font-bold text-muted-foreground/40">
+        ) : image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt={title} loading="lazy" decoding="async" className="size-full object-cover grayscale" />
+        ) : (
+          // Deterministic monogram keeps the grid aligned without an image.
+          <span aria-hidden className="flex size-full items-center justify-center text-3xl font-bold text-muted-foreground/40">
             {title.slice(0, 1).toUpperCase()}
           </span>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="flex grow flex-col p-4 sm:p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <h3 className="min-w-0 text-sm font-semibold leading-snug sm:text-base">
-            {href ? (
+          <Heading className="min-w-0 text-sm font-semibold leading-snug sm:text-base">
+            {detailHref ? (
+              <Link
+                href={detailHref}
+                className="decoration-muted-foreground/50 underline-offset-2 transition-colors after:absolute after:inset-0 after:content-[''] hover:underline"
+              >
+                {title}
+              </Link>
+            ) : href ? (
               <Link
                 href={href}
-                {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="transition-colors after:absolute after:inset-0 after:content-[''] hover:underline"
               >
                 {title}
@@ -66,7 +103,7 @@ export function ProjectCard({ title, href, description, dates, tags, image, link
             ) : (
               title
             )}
-          </h3>
+          </Heading>
           {Boolean(dates) && <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{dates}</span>}
         </div>
 
@@ -86,11 +123,11 @@ export function ProjectCard({ title, href, description, dates, tags, image, link
           </ul>
         )}
 
-        {links && links.length > 0 && (
+        {chips.length > 0 && (
           <div className="relative z-10 mt-4 flex flex-wrap items-center gap-1.5 border-t pt-3">
-            {links.map((link, idx) => (
+            {chips.map((link, idx) => (
               <Link
-                key={idx}
+                key={`${link.type}-${idx}`}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -98,6 +135,7 @@ export function ProjectCard({ title, href, description, dates, tags, image, link
               >
                 {iconDecider(link.icon, 'size-3')}
                 {link.type}
+                <ArrowUpRight className="size-2.5 opacity-60" aria-hidden />
               </Link>
             ))}
           </div>

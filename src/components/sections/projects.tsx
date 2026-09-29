@@ -1,16 +1,20 @@
 import BlurFade from '@/components/magicui/blur-fade';
 import { SectionHeader, type SectionHeadingProps } from '@/components/sections/section-header';
 import { ProjectCard } from '@/components/project-card';
-import { cn } from '@/lib/utils';
+import { cn, projectKey } from '@/lib/utils';
 import type { IProject } from '@/types';
 
 interface ProjectsProps extends SectionHeadingProps {
   projects: IProject[];
+  /** Active locale, used to build the localized project-page links. */
+  locale: string;
+  /** Label for the external-visit chip on each card. */
+  liveLabel: string;
   delay?: number;
 }
 
 /** Grid of the active portfolio projects. */
-export function Projects({ index, label, title, description, meta, projects, delay = 0 }: ProjectsProps) {
+export function Projects({ index, label, title, description, meta, projects, locale, liveLabel, delay = 0 }: ProjectsProps) {
   const active = projects.filter(project => project.active);
   if (!active.length) return null;
 
@@ -31,12 +35,15 @@ export function Projects({ index, label, title, description, meta, projects, del
           <BlurFade key={project._id ?? `${project.title}-${id}`} delay={delay + 0.06 + id * 0.05} inView className="h-full">
             <ProjectCard
               href={project.href}
+              detailHref={projectKey(project) ? `/${locale}/projects/${projectKey(project)}` : undefined}
               title={project.title}
               description={project.description}
               dates={project.dates}
               tags={project.technologies}
               image={project.image}
               links={project.links}
+              liveLabel={liveLabel}
+              priority={id === 0}
               className="h-full"
             />
           </BlurFade>

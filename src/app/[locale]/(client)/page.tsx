@@ -9,7 +9,7 @@ import { Projects } from '@/components/sections/projects';
 import { Skills } from '@/components/sections/skills';
 import { getPortfolioData, getProfile } from '@/lib/data';
 import { OG_IMAGE_URL, TWITTER_HANDLE, brandedTitle, languageAlternates, localeUrl, site } from '@/lib/seo';
-import { sectionIndex } from '@/lib/utils';
+import { sectionIndex, localizedCount } from '@/lib/utils';
 import type { AppLocale } from '@/types';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -155,7 +155,7 @@ export default async function Page({ params }: Props) {
         label={tSections('experience.label')}
         title={tSections('experience.title')}
         description={tSections('experience.description')}
-        meta={tSections('experience.count', { count: works.length })}
+        meta={tSections('experience.count', { count: localizedCount(works.length, lang) })}
         works={works}
         locale={lang}
         presentLabel={t('present')}
@@ -165,7 +165,7 @@ export default async function Page({ params }: Props) {
         index={ordinal('education')}
         label={tSections('education.label')}
         title={tSections('education.title')}
-        meta={tSections('education.count', { count: educations.length })}
+        meta={tSections('education.count', { count: localizedCount(educations.length, lang) })}
         educations={educations}
         locale={lang}
         delay={0.2}
@@ -175,7 +175,7 @@ export default async function Page({ params }: Props) {
         label={tSections('skills.label')}
         title={tSections('skills.title')}
         description={tSections('skills.description')}
-        meta={tSections('skills.count', { count: skills.length })}
+        meta={tSections('skills.count', { count: localizedCount(skills.length, lang) })}
         skills={skills}
         delay={0.25}
       />
@@ -184,8 +184,10 @@ export default async function Page({ params }: Props) {
         label={tSections('projects.label')}
         title={tSections('projects.title')}
         description={tSections('projects.description')}
-        meta={tSections('projects.count', { count: projects.filter(project => project.active).length })}
+        meta={tSections('projects.count', { count: localizedCount(projects.filter(project => project.active).length, lang) })}
         projects={projects}
+        locale={locale}
+        liveLabel={tSections('projects.visit')}
         delay={0.3}
       />
       <Contact

@@ -1,4 +1,5 @@
-import { getBlogList } from '@/lib/data';
+import { getBlogList, getProjects } from '@/lib/data';
+import { projectKey } from '@/lib/utils';
 import { routing } from '@/i18n/routing';
 import type { AppLocale } from '@/types';
 import type { MetadataRoute } from 'next';
@@ -64,6 +65,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'monthly',
         priority: 0.6,
         ...(localizedIn.length > 1 ? { alternates: alternates(`/blog/${slug}`, localizedIn) } : {}),
+      });
+    }
+  }
+
+  // Project archive.
+  for (const locale of routing.locales) {
+    entries.push({
+      url: url(locale, '/projects'),
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+      alternates: alternates('/projects', routing.locales),
+    });
+  }
+
+  // Project pages, keyed by slug (or id when a record has no slug).
+  const projectsByLocale = new Map<string, Map<string, string | undefined>>();
+  for (const locale of routing.locales) {
+    const projects = await getProjects(locale as AppLocale);
+    projectsByLocale.set(
+      locale,
+      new Map(projects.map(p => [projectKey(p), undefined as string | undefined]))
+    );
+  }
+
+  for (const locale of routing.locales) {
+    const projects = projectsByLocale.get(locale);
+    if (!projects) continue;
+
+    for (const key of projects.keys()) {
+      if (!key) continue;
+      const localizedIn = routing.locales.filter(l => projectsByLocale.get(l)?.has(key));
+      entries.push({
+        url: url(locale, `/projects/${key}`),
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: 0.5,
+        ...(localizedIn.length > 1 ? { alternates: alternates(`/projects/${key}`, localizedIn) } : {}),
       });
     }
   }

@@ -22,7 +22,7 @@ const Footer = () => {
   const pathname = usePathname();
 
   const itemClass = (active = false) =>
-    cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'size-8 sm:size-9', active && 'bg-accent text-accent-foreground');
+    cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'size-9 sm:size-10', active && 'bg-accent text-accent-foreground');
 
   const divider = <span aria-hidden className="mx-0.5 h-5 w-px shrink-0 bg-border sm:mx-1" />;
 
@@ -32,8 +32,8 @@ const Footer = () => {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
     >
       <div className="pointer-events-auto flex max-w-full items-center gap-0.5 rounded-full border bg-background/85 p-1 shadow-sm backdrop-blur-md sm:gap-1">
-        {NavbarRoutes().map(({ href, icon: Icon }) => {
-          const label = href === '/' ? t('home') : t('blog');
+        {NavbarRoutes().map(({ href, icon: Icon, label: key }) => {
+          const label = t(key);
           const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
 
           return (
