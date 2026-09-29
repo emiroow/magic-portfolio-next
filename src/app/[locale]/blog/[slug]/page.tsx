@@ -150,13 +150,15 @@ export default async function BlogPostPage({ params }: Props) {
               {formatYearMonthLocal(post.createdAt, lang)}
             </time>
             {rawMinutes > 0 && (
-              <span className="inline-flex items-center gap-1 text-[11px] tabular-nums">
+              <>
                 <span aria-hidden className="text-border">
-                  |
+                  ·
                 </span>
-                <Clock className="size-3" aria-hidden />
-                {t('readingTime', { minutes })}
-              </span>
+                <span className="inline-flex items-center gap-1 text-[11px] tabular-nums">
+                  <Clock className="size-3" aria-hidden />
+                  {t('readingTime', { minutes })}
+                </span>
+              </>
             )}
           </div>
 

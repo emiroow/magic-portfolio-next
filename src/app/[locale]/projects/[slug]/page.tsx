@@ -3,15 +3,16 @@ import PostShare from '@/components/blog/post-share';
 import { ProjectCard } from '@/components/project-card';
 import { MarkdownBody } from '@/components/markdown-body';
 import { JsonLd } from '@/components/JsonLd';
+import { iconDecider } from '@/components/icons';
 import BlurFade from '@/components/magicui/blur-fade';
 import { eyebrowClass } from '@/components/sections/section-header';
+import { Stack } from '@/components/sections/stack';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
 import { getProfile, getProjectByKey, getProjects, getSocials } from '@/lib/data';
 import { languageAlternates, localeUrl, ogImageFor } from '@/lib/seo';
-import { cn, isOptimizableImage, projectKey } from '@/lib/utils';
+import { cn, isOptimizableImage, linkHost, projectKey } from '@/lib/utils';
 import type { AppLocale, IProject } from '@/types';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -89,6 +90,13 @@ export default async function ProjectPage({ params }: Props) {
   const cover = project.image;
   const author = profile?.fullName || profile?.name;
 
+  // The product URL leads the list; a stored link pointing at the same
+  // address would only duplicate the row.
+  const resources = [
+    ...(project.href ? [{ label: t('visit'), href: project.href, icon: 'website' }] : []),
+    ...project.links.filter(link => link.href !== project.href).map(link => ({ label: link.type, href: link.href, icon: link.icon })),
+  ];
+
   return (
     <main>
       <article>
@@ -134,7 +142,7 @@ export default async function ProjectPage({ params }: Props) {
             {project.dates && (
               <>
                 <span aria-hidden className="text-border">
-                  |
+                  ·
                 </span>
                 <span className="text-[11px] tabular-nums">{project.dates}</span>
               </>
@@ -165,7 +173,7 @@ export default async function ProjectPage({ params }: Props) {
         </header>
 
         {cover && (
-          <BlurFade delay={0.08} className="mb-9">
+          <BlurFade delay={0.08} className="mb-10">
             <figure className="overflow-hidden rounded-xl border bg-card shadow-sm">
               {isOptimizableImage(cover) ? (
                 <Image
@@ -174,7 +182,7 @@ export default async function ProjectPage({ params }: Props) {
                   width={1600}
                   height={900}
                   priority
-                  sizes="(max-width: 896px) 100vw, 896px"
+                  sizes="(max-width: 640px) 100vw, 848px"
                   className="aspect-[16/9] w-full object-cover object-top"
                 />
               ) : (
@@ -191,30 +199,40 @@ export default async function ProjectPage({ params }: Props) {
           </BlurFade>
         )}
 
-        {(project.href || project.links.length > 0) && (
-          <BlurFade delay={0.12}>
-            <section aria-labelledby="project-links-heading" className="mt-10 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-              <h2 id="project-links-heading" className={cn(eyebrowClass, 'mb-3')}>
+        {resources.length > 0 && (
+          <BlurFade delay={0.12} inView>
+            <section aria-labelledby="project-links-heading" className="mt-10">
+              <h2 id="project-links-heading" className={cn(eyebrowClass, 'mb-4')}>
                 {t('resources')}
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {project.href && (
-                  <Link href={project.href} target="_blank" rel="noopener noreferrer" className={cn(buttonVariants({ size: 'sm' }), 'rounded-full')}>
-                    {t('visit')}
-                  </Link>
-                )}
-                {project.links.map((link, i) => (
-                  <Link
-                    key={`${link.type}-${i}`}
-                    href={link.href}
+              <Stack>
+                {resources.map(resource => (
+                  <a
+                    key={`${resource.label}-${resource.href}`}
+                    href={resource.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'rounded-full')}
+                    className="group flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/40 sm:px-5"
                   >
-                    {link.type}
-                  </Link>
+                    <span
+                      aria-hidden
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full border text-muted-foreground transition-colors group-hover:border-foreground group-hover:bg-foreground group-hover:text-background"
+                    >
+                      {iconDecider(resource.icon, 'size-4')}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium leading-snug">{resource.label}</span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        <bdi dir="ltr">{linkHost(resource.href)}</bdi>
+                      </span>
+                    </span>
+                    <ArrowUpRight
+                      className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground rtl:-scale-x-100"
+                      aria-hidden
+                    />
+                  </a>
                 ))}
-              </div>
+              </Stack>
             </section>
           </BlurFade>
         )}
