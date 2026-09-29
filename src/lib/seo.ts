@@ -36,6 +36,11 @@ export const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || '';
 /** Dynamic Open Graph image endpoint. */
 export const OG_IMAGE_URL = site ? `${site}/api/og` : '/api/og';
 
+/** Generated social card for a page title, rendered with the right profile. */
+export function ogImageFor(title: string, locale: string) {
+  return `${OG_IMAGE_URL}?title=${encodeURIComponent(title)}&lang=${locale === 'fa' ? 'fa' : 'en'}`;
+}
+
 /** Turn a relative path into an absolute site URL. */
 export function absoluteUrl(path = '/') {
   const p = path.startsWith('/') ? path : `/${path}`;

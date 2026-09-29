@@ -2,8 +2,9 @@ import BlogListClient from '@/components/blog/BlogListClient';
 import { JsonLd } from '@/components/JsonLd';
 import Navbar from '@/components/navbar';
 import { SectionHeader } from '@/components/sections/section-header';
-import { getBlogList, getSocials } from '@/lib/data';
-import { OG_IMAGE_URL, languageAlternates, localeUrl } from '@/lib/seo';
+import { getBlogList, getBlogTags, getSocials } from '@/lib/data';
+import { languageAlternates, localeUrl, ogImageFor } from '@/lib/seo';
+import { localizedCount } from '@/lib/utils';
 import type { AppLocale } from '@/types';
 import { Rss } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -13,7 +14,7 @@ import Link from 'next/link';
 /** Blog listing refreshes every 5 minutes. */
 export const revalidate = 300;
 
-type Props = { params: Promise<{ locale: string }> };
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ tag?: string }> };
 
 function asLocale(locale: string): AppLocale {
   return locale === 'fa' ? 'fa' : 'en';
@@ -41,18 +42,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       locale: locale === 'fa' ? 'fa_IR' : 'en_US',
-      images: [{ url: `${OG_IMAGE_URL}?title=${encodeURIComponent(title)}`, width: 1200, height: 630, alt: title }],
+      images: [{ url: ogImageFor(title, locale), width: 1200, height: 630, alt: title }],
     },
   };
 }
 
-export default async function BlogPage({ params }: Props) {
+export default async function BlogPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { tag } = await searchParams;
   const lang = asLocale(locale);
 
-  const [t, posts, socials] = await Promise.all([
+  const [t, posts, tags, socials] = await Promise.all([
     getTranslations({ locale, namespace: 'blogPage' }),
     getBlogList(lang),
+    getBlogTags(lang),
     getSocials(lang),
   ]);
   const url = localeUrl(locale, '/blog');
@@ -78,7 +81,7 @@ export default async function BlogPage({ params }: Props) {
           label={t('eyebrow')}
           title={t('title')}
           description={t('description')}
-          meta={posts.length ? t('count', { count: posts.length }) : undefined}
+          meta={posts.length ? t('count', { count: localizedCount(posts.length, lang) }) : undefined}
           action={
             <Link
               href={`/${locale}/blog/rss.xml`}
@@ -92,7 +95,7 @@ export default async function BlogPage({ params }: Props) {
           delay={0.04}
         />
 
-        <BlogListClient posts={posts} locale={locale} />
+        <BlogListClient posts={posts} tags={tags} initialTag={tag} />
 
         <Navbar socials={socials} />
       </section>
