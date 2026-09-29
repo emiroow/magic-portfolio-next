@@ -1,9 +1,12 @@
 'use client';
 
+import { EmptyPanel } from '@/components/empty-panel';
 import BlurFade from '@/components/magicui/blur-fade';
+import { eyebrowClass } from '@/components/sections/section-header';
 import { Stack } from '@/components/sections/stack';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FilterChip } from '@/components/ui/filter-chip';
 import { Input } from '@/components/ui/input';
 import { cn, formatYearMonthLocal, isOptimizableImage, localizedCount } from '@/lib/utils';
 import type { AppLocale, IBlog } from '@/types';
@@ -123,15 +126,13 @@ export default function BlogListClient({ posts, tags, initialTag }: BlogListClie
     setVisible(PAGE_SIZE);
   };
 
+  const clearAll = () => {
+    resetPaging('');
+    pickTag(null);
+  };
+
   if (!posts.length) {
-    return (
-      <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-16 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full border" aria-hidden>
-          <FileText className="size-5 text-muted-foreground" />
-        </span>
-        <p className="text-sm text-muted-foreground">{t('empty')}</p>
-      </div>
-    );
+    return <EmptyPanel icon={<FileText className="size-5 text-muted-foreground" />} text={t('empty')} />;
   }
 
   return (
@@ -173,22 +174,12 @@ export default function BlogListClient({ posts, tags, initialTag }: BlogListClie
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed py-16 text-center">
-          <span className="flex size-12 items-center justify-center rounded-full border" aria-hidden>
-            <Search className="size-5 text-muted-foreground" />
-          </span>
-          <p className="text-sm text-muted-foreground">{t('noResults')}</p>
-          <button
-            type="button"
-            onClick={() => {
-              resetPaging('');
-              pickTag(null);
-            }}
-            className="text-xs font-medium text-foreground underline underline-offset-4 transition-opacity hover:opacity-70"
-          >
-            {t('clearFilters')}
-          </button>
-        </div>
+        <EmptyPanel
+          icon={<Search className="size-5 text-muted-foreground" />}
+          text={t('noResults')}
+          actionLabel={t('clearFilters')}
+          onAction={clearAll}
+        />
       ) : (
         <div className="flex flex-col gap-5">
           {/* Featured post: only on the unfiltered listing. */}
@@ -198,11 +189,9 @@ export default function BlogListClient({ posts, tags, initialTag }: BlogListClie
                 href={`/${currentLocale}/blog/${featured.slug}`}
                 className="group grid overflow-hidden rounded-xl border bg-card shadow-sm transition-colors hover:border-foreground/30 sm:grid-cols-2"
               >
-                <Cover post={featured} className="aspect-[16/9] sm:aspect-auto sm:min-h-[220px]" sizes="(max-width: 640px) 100vw, 40vw" />
+                <Cover post={featured} className="aspect-[16/9] sm:aspect-auto sm:min-h-[220px]" sizes="(max-width: 640px) 100vw, 376px" />
                 <div className="flex flex-col p-5 sm:p-6">
-                  <p className={cn('text-[11px] font-medium uppercase text-muted-foreground', 'ltr:font-mono ltr:tracking-[0.18em]')}>
-                    {t('featured')}
-                  </p>
+                  <p className={eyebrowClass}>{t('featured')}</p>
                   <h2 className="mt-2 text-lg font-bold leading-snug ltr:tracking-tight sm:text-xl">{featured.title}</h2>
                   {featured.summary && (
                     <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{featured.summary}</p>
@@ -260,33 +249,5 @@ export default function BlogListClient({ posts, tags, initialTag }: BlogListClie
         </div>
       )}
     </div>
-  );
-}
-
-/** Compact tag filter pill. */
-function FilterChip({
-  active,
-  onClick,
-  children,
-  icon,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-        active ? 'border-foreground bg-foreground text-background' : 'text-muted-foreground hover:border-foreground/40 hover:text-foreground'
-      )}
-    >
-      {icon}
-      {children}
-    </button>
   );
 }

@@ -11,7 +11,7 @@ interface ProjectCardProps {
   title: string;
   /** External product URL (demo, live site, repository home). */
   href?: string;
-  /** In-app project page; when present the whole card links to it. */
+  /** In-app project page; when present the whole card is clickable. */
   detailHref?: string;
   description: string;
   dates: string;
@@ -23,6 +23,9 @@ interface ProjectCardProps {
   className?: string;
   /** Cover is the LCP element of the first card on the page. */
   priority?: boolean;
+  /** Layout width of one card, so the browser never downloads a wider
+   * variant than the grid can show. */
+  sizes?: string;
   /** Heading level of the title; the archive uses `h2` under its own `h1`. */
   headingLevel?: 'h2' | 'h3';
 }
@@ -45,6 +48,7 @@ export function ProjectCard({
   liveLabel,
   className,
   priority = false,
+  sizes = '(max-width: 640px) 100vw, 414px',
   headingLevel: Heading = 'h3',
 }: ProjectCardProps) {
   const cover = image && isOptimizableImage(image) ? image : undefined;
@@ -52,6 +56,7 @@ export function ProjectCard({
   if (href && !chips.some(link => link.href === href)) {
     chips.unshift({ type: liveLabel || 'Live', href, icon: 'website' });
   }
+  const hasTags = Boolean(tags && tags.length > 0);
 
   return (
     <Card
@@ -67,7 +72,7 @@ export function ProjectCard({
             alt={title}
             fill
             priority={priority}
-            sizes="(max-width: 640px) 100vw, 50vw"
+            sizes={sizes}
             className="object-cover object-top grayscale transition-[filter] duration-500 group-hover:grayscale-0"
           />
         ) : image ? (
@@ -96,7 +101,7 @@ export function ProjectCard({
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors after:absolute after:inset-0 after:content-[''] hover:underline"
+                className="decoration-muted-foreground/50 underline-offset-2 transition-colors after:absolute after:inset-0 after:content-[''] hover:underline"
               >
                 {title}
               </Link>
@@ -111,33 +116,39 @@ export function ProjectCard({
           {description}
         </Markdown>
 
-        {tags && tags.length > 0 && (
-          <ul className="mt-auto flex flex-wrap gap-1.5 pt-4">
-            {tags.map(tag => (
-              <li key={tag}>
-                <Badge variant="secondary" className="px-2 py-0 text-[10px] font-normal">
-                  {tag}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* One block pinned to the bottom, so cards of different text length
+            still land their chips on the same line. */}
+        {(hasTags || chips.length > 0) && (
+          <div className="mt-auto flex flex-col gap-3 pt-4">
+            {hasTags && (
+              <ul className="flex flex-wrap gap-1.5">
+                {tags.map(tag => (
+                  <li key={tag}>
+                    <Badge variant="secondary" className="px-2 py-0 text-[10px] font-normal">
+                      {tag}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-        {chips.length > 0 && (
-          <div className="relative z-10 mt-4 flex flex-wrap items-center gap-1.5 border-t pt-3">
-            {chips.map((link, idx) => (
-              <Link
-                key={`${link.type}-${idx}`}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors hover:bg-foreground hover:text-background"
-              >
-                {iconDecider(link.icon, 'size-3')}
-                {link.type}
-                <ArrowUpRight className="size-2.5 opacity-60" aria-hidden />
-              </Link>
-            ))}
+            {chips.length > 0 && (
+              <div className="relative z-10 flex flex-wrap items-center gap-1.5 border-t pt-3">
+                {chips.map((link, idx) => (
+                  <Link
+                    key={`${link.type}-${idx}`}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors hover:bg-foreground hover:text-background"
+                  >
+                    {iconDecider(link.icon, 'size-3')}
+                    {link.type}
+                    <ArrowUpRight className="size-2.5 opacity-60 rtl:-scale-x-100" aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

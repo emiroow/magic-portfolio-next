@@ -102,6 +102,21 @@ export function formatSocialHandle(url: string | undefined, max = 18): string {
 }
 
 /**
+ * Host label for a link row: `example.com` without the `www.` prefix.
+ * Falls back to the raw value when the stored URL cannot be parsed.
+ */
+export function linkHost(href: string | undefined): string {
+  const raw = (href || '').trim();
+  if (!raw) return '';
+
+  try {
+    return new URL(raw).hostname.replace(/^www\./, '');
+  } catch {
+    return raw.replace(/^https?:\/\//i, '').split('/')[0] ?? raw;
+  }
+}
+
+/**
  * Normalise a phone number into a `tel:` payload: Persian/Arabic digits are
  * folded to ASCII and every separator except a leading `+` is dropped.
  */
