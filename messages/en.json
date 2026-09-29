@@ -41,7 +41,8 @@
       "title": "Projects",
       "description": "A few things I’ve designed, built and shipped — from small libraries to production applications.",
       "count": "{count, plural, one {# project} other {# projects}}",
-      "visit": "Live"
+      "visit": "Live",
+      "viewAll": "View all projects"
     },
     "contact": {
       "label": "Contact",
@@ -64,7 +65,6 @@
   "navbar": {
     "label": "Main navigation",
     "home": "Home",
-    "projects": "Projects",
     "blog": "Blog",
     "language": "Switch language",
     "theme": "Switch theme",
@@ -125,6 +125,8 @@
     "noResults": "No projects match your filters.",
     "searchPlaceholder": "Search titles and technologies",
     "clearSearch": "Clear search",
+    "allTags": "All",
+    "clearFilters": "Clear all filters",
     "loadMore": "Show {count} more",
     "visit": "Live"
   },

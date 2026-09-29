@@ -188,6 +188,7 @@ export default async function Page({ params }: Props) {
         projects={projects}
         locale={locale}
         liveLabel={tSections('projects.visit')}
+        viewAllLabel={tSections('projects.viewAll')}
         delay={0.3}
       />
       <Contact
