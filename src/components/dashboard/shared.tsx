@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, RotateCw, X } from 'lucide-react';
 import { ReactNode } from 'react';
+import { useValidationMessage } from '@/hooks/useValidationMessage';
 
 /** Shared dashboard building blocks: headers, empty/error/loading states and the form panel. */
 
@@ -84,15 +85,17 @@ export function FormPanel({ open, title, onClose, children }: { open: boolean; t
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+          className="rounded-xl border bg-card shadow-sm"
         >
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-base font-bold ltr:tracking-tight">{title}</h3>
-            <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label={t('cancel')}>
+          <div className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5">
+            <h3 className="text-sm font-bold ltr:tracking-tight sm:text-base">{title}</h3>
+            <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label={t('cancel')} className="size-8 shrink-0">
               <X className="size-4" aria-hidden />
             </Button>
           </div>
-          <div className="mt-5">{children}</div>
+          {/* Hairline keeps the header separate from the field rhythm below. */}
+          <div aria-hidden className="h-px w-full bg-border" />
+          <div className="px-4 py-5 sm:px-5">{children}</div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -102,24 +105,60 @@ export function FormPanel({ open, title, onClose, children }: { open: boolean; t
 /** Label + control + inline error text. */
 export function Field({
   label,
-  htmlFor,
+  id,
   error,
+  hint,
   children,
   className,
 }: {
   label: string;
-  htmlFor?: string;
+  /** `id` of the control, so the label is programmatically attached. */
+  id?: string;
   error?: string;
+  /** Muted helper line under the control. */
+  hint?: string;
   children: ReactNode;
   className?: string;
 }) {
+  const tv = useValidationMessage();
+
   return (
-    <div className={cn('space-y-1.5', className)}>
-      <label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground">
+    <div className={cn('flex flex-col gap-2', className)}>
+      <label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {label}
       </label>
       {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {hint && !error && <p className="text-xs text-muted-foreground/80">{hint}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-destructive">
+          {tv(error)}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Checkbox rendered as a control surface, so it keeps the same height and
+ * alignment as the inputs sitting next to it in a form grid.
+ */
+export function CheckboxField({
+  label,
+  id,
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; id: string }) {
+  return (
+    <div
+      className={cn(
+        'flex min-h-10 items-center gap-2.5 rounded-lg border border-input px-3 py-2 shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring/40',
+        className
+      )}
+    >
+      <input id={id} type="checkbox" className="size-4 shrink-0 rounded border-input accent-primary" {...props} />
+      <label htmlFor={id} className="cursor-pointer text-sm leading-none">
+        {label}
+      </label>
     </div>
   );
 }

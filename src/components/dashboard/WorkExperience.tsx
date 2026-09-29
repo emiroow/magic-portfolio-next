@@ -2,6 +2,7 @@
 
 import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
 import { ResumeCard } from '@/components/resume-card';
+import { Stack } from '@/components/sections/stack';
 import ImageCropperDialog from '@/components/ui/image-cropper';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -80,10 +81,10 @@ const WorkExperience = () => {
       }
     >
       <FormPanel open={formOpen} title={getValues('_id') ? t('editWork') : t('createWork')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Logo */}
           <Field label={t('logoImage')}>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20">
                 {logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -92,14 +93,14 @@ const WorkExperience = () => {
                   <span className="text-[10px] text-muted-foreground">{t('noImage')}</span>
                 )}
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col items-start gap-1">
                 <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadLogo.isPending}>
                   {uploadLogo.isPending ? <Loading size="sm" className="me-2" /> : null}
                   {t('uploadImage')}
                 </Button>
                 {logoUrl && (
                   <Button type="button" variant="ghost" size="sm" onClick={() => deleteLogo.mutate()} disabled={deleteLogo.isPending}>
-                    {t('noImage')}
+                    {t('removeImage')}
                   </Button>
                 )}
                 <input
@@ -141,17 +142,17 @@ const WorkExperience = () => {
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t('company')} error={errors.company?.message}>
-              <Input {...register('company')} placeholder={t('companyPlaceholder')} />
+            <Field label={t('company')} id="work-company" error={errors.company?.message}>
+              <Input id="work-company" {...register('company')} placeholder={t('companyPlaceholder')} />
             </Field>
-            <Field label={t('title')} error={errors.title?.message}>
-              <Input {...register('title')} placeholder={t('titlePlaceholder')} />
+            <Field label={t('title')} id="work-title" error={errors.title?.message}>
+              <Input id="work-title" {...register('title')} placeholder={t('titlePlaceholder')} />
             </Field>
-            <Field label={t('href')} error={errors.href?.message}>
-              <Input {...register('href')} placeholder={t('hrefPlaceholder')} type="url" />
+            <Field label={t('href')} id="work-href" error={errors.href?.message}>
+              <Input id="work-href" {...register('href')} placeholder={t('hrefPlaceholder')} type="url" dir="ltr" />
             </Field>
-            <Field label={t('location')} error={errors.location?.message}>
-              <Input {...register('location')} placeholder={t('locationPlaceholder')} />
+            <Field label={t('location')} id="work-location" error={errors.location?.message}>
+              <Input id="work-location" {...register('location')} placeholder={t('locationPlaceholder')} />
             </Field>
           </div>
 
@@ -162,12 +163,14 @@ const WorkExperience = () => {
             onEndChange={value => setValue('end', value, { shouldValidate: true, shouldDirty: true })}
             startLabel={t('start')}
             endLabel={t('end')}
+            startId="work-start"
+            endId="work-end"
             locale={lang}
             error={{ start: errors.start?.message, end: errors.end?.message }}
           />
 
-          <Field label={t('description')} error={errors.description?.message}>
-            <Textarea rows={3} {...register('description')} placeholder={t('descriptionPlaceholder')} />
+          <Field label={t('description')} id="work-description" error={errors.description?.message}>
+            <Textarea id="work-description" rows={4} {...register('description')} placeholder={t('descriptionPlaceholder')} />
           </Field>
 
           <div className="flex gap-2 max-sm:flex-col">
@@ -187,16 +190,18 @@ const WorkExperience = () => {
       ) : isError ? (
         <ErrorState message={error?.message} onRetry={() => refetchWorks()} />
       ) : works && works.length > 0 ? (
-        <div className="space-y-3">
+        <Stack>
           {works.map(work => (
             <ResumeCard
               key={work._id}
+              variant="row"
               logoUrl={work.logoUrl}
               altText={work.company}
               title={work.company}
               subtitle={work.title}
               href={work.href}
               description={work.description}
+              meta={work.location}
               period={`${formatYearMonthLocal(work.start, lang)}${work.start && work.end ? ' – ' : ''}${
                 work.end ? formatYearMonthLocal(work.end, lang) : work.start ? tRoot('present') : ''
               }`}
@@ -206,7 +211,7 @@ const WorkExperience = () => {
               onDelete={() => work._id && setPendingDelete(work._id)}
             />
           ))}
-        </div>
+        </Stack>
       ) : (
         !formOpen && <EmptyState text={t('noWorkExperiences')} actionText={t('createFirstWorkExperience')} onAction={beginCreate} />
       )}

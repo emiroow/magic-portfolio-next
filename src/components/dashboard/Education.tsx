@@ -2,6 +2,7 @@
 
 import { EmptyState, ErrorState, Field, FormPanel, LoadingRows, SectionShell } from '@/components/dashboard/shared';
 import { ResumeCard } from '@/components/resume-card';
+import { Stack } from '@/components/sections/stack';
 import ImageCropperDialog from '@/components/ui/image-cropper';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -77,10 +78,10 @@ const EducationExperience = () => {
       }
     >
       <FormPanel open={formOpen} title={getValues('_id') ? t('editTitle') : t('createEducation')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Logo */}
           <Field label={t('logoImage')}>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex size-20 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20">
                 {logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -89,14 +90,14 @@ const EducationExperience = () => {
                   <span className="text-[10px] text-muted-foreground">{t('noImage')}</span>
                 )}
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col items-start gap-1">
                 <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadLogo.isPending}>
                   {uploadLogo.isPending ? <Loading size="sm" className="me-2" /> : null}
                   {t('uploadImage')}
                 </Button>
                 {logoUrl && (
                   <Button type="button" variant="ghost" size="sm" onClick={() => deleteLogo.mutate()} disabled={deleteLogo.isPending}>
-                    {t('noImage')}
+                    {t('removeImage')}
                   </Button>
                 )}
                 <input
@@ -138,14 +139,14 @@ const EducationExperience = () => {
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t('school')} error={errors.school?.message}>
-              <Input {...register('school')} placeholder={t('schoolPlaceholder')} />
+            <Field label={t('school')} id="education-school" error={errors.school?.message}>
+              <Input id="education-school" {...register('school')} placeholder={t('schoolPlaceholder')} />
             </Field>
-            <Field label={t('degree')} error={errors.degree?.message}>
-              <Input {...register('degree')} placeholder={t('degreePlaceholder')} />
+            <Field label={t('degree')} id="education-degree" error={errors.degree?.message}>
+              <Input id="education-degree" {...register('degree')} placeholder={t('degreePlaceholder')} />
             </Field>
-            <Field label={t('href')} error={errors.href?.message} className="sm:col-span-2">
-              <Input {...register('href')} placeholder={t('hrefPlaceholder')} type="url" />
+            <Field label={t('href')} id="education-href" error={errors.href?.message} className="sm:col-span-2">
+              <Input id="education-href" {...register('href')} placeholder={t('hrefPlaceholder')} type="url" dir="ltr" />
             </Field>
           </div>
 
@@ -156,6 +157,8 @@ const EducationExperience = () => {
             onEndChange={value => setValue('end', value, { shouldValidate: true, shouldDirty: true })}
             startLabel={t('start')}
             endLabel={t('end')}
+            startId="education-start"
+            endId="education-end"
             locale={lang}
             error={{ start: errors.start?.message, end: errors.end?.message }}
           />
@@ -177,10 +180,11 @@ const EducationExperience = () => {
       ) : isError ? (
         <ErrorState message={error?.message} onRetry={() => refetchEducations()} />
       ) : educations && educations.length > 0 ? (
-        <div className="space-y-3">
+        <Stack>
           {educations.map(education => (
             <ResumeCard
               key={education._id}
+              variant="row"
               logoUrl={education.logoUrl}
               altText={education.school}
               title={education.school}
@@ -194,7 +198,7 @@ const EducationExperience = () => {
               onDelete={() => education._id && setPendingDelete(education._id)}
             />
           ))}
-        </div>
+        </Stack>
       ) : (
         !formOpen && <EmptyState text={t('noEducations')} actionText={t('createFirstEducation')} onAction={beginCreate} />
       )}

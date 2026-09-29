@@ -24,23 +24,20 @@ const Socials = () => {
   const selectedIcon = watch('icon');
   const editingId = watch('_id');
 
-  const selectClass =
-    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40';
-
   return (
     <SectionShell title={t('title')}>
       {/* Create / edit form */}
-      <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-3 md:grid-cols-12">
-        <Field label={t('name')} error={errors.name?.message} className="md:col-span-3">
-          <Input {...register('name')} placeholder={t('namePlaceholder')} autoComplete="off" />
+      <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-4 md:grid-cols-12">
+        <Field label={t('name')} id="social-name" error={errors.name?.message} className="md:col-span-3">
+          <Input id="social-name" {...register('name')} placeholder={t('namePlaceholder')} autoComplete="off" />
         </Field>
 
-        <Field label={t('url')} error={errors.url?.message} className="md:col-span-4">
-          <Input {...register('url')} placeholder={t('urlPlaceholder')} type="url" />
+        <Field label={t('url')} id="social-url" error={errors.url?.message} className="md:col-span-4">
+          <Input id="social-url" {...register('url')} placeholder={t('urlPlaceholder')} type="url" dir="ltr" />
         </Field>
 
-        <Field label={t('icon')} error={errors.icon?.message} className="md:col-span-3">
-          <select className={selectClass} {...register('icon')}>
+        <Field label={t('icon')} id="social-icon" error={errors.icon?.message} className="md:col-span-3">
+          <select id="social-icon" className="control" {...register('icon')}>
             <option value="">{t('selectIcon')}</option>
             {AVAILABLE_ICONS.map(icon => (
               <option key={icon} value={icon}>
@@ -50,7 +47,7 @@ const Socials = () => {
           </select>
         </Field>
 
-        <div className="flex gap-2 md:col-span-2">
+        <div className="flex h-10 items-center gap-2 md:col-span-2">
           <Button type="submit" disabled={save.isPending} className="w-full md:w-auto">
             {save.isPending ? <Loading size="sm" className="me-2" /> : null}
             {t('save')}
