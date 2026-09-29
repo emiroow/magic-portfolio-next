@@ -4,10 +4,12 @@ import mongoose, { Schema } from 'mongoose';
 export const projectSchema = new Schema<IProject>(
   {
     title: { type: String, required: true },
+    slug: { type: String, index: true },
     href: { type: String },
     dates: { type: String },
     active: { type: Boolean, default: true },
     description: { type: String },
+    details: { type: String },
     technologies: [String],
     links: [
       {

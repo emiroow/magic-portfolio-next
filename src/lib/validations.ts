@@ -13,6 +13,15 @@ const optional = () => z.string().optional();
 const optionalUrl = () => z.string().url().optional().or(z.literal(''));
 const optionalEmail = () => z.string().email().optional().or(z.literal(''));
 
+/** URL segment: Latin/Persian letters, digits and single dashes. */
+const slugSchema = z
+  .string()
+  .min(1, 'Slug is required')
+  .regex(/^[a-z0-9\u0600-\u06FF]+(?:-[a-z0-9\u0600-\u06FF]+)*$/, 'Slug may contain letters, digits and dashes');
+
+/** Tags/technologies: trimmed, de-duplicated, bounded. */
+const tagList = () => z.array(z.string().trim().min(1).max(32)).max(12);
+
 export const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   fullName: z.string().min(1, 'Full name is required'),
@@ -32,11 +41,13 @@ export const projectLinkSchema = z.object({
 
 export const projectSchema = z.object({
   title: z.string().min(1, 'Title is required'),
+  slug: slugSchema.optional().or(z.literal('')),
   href: optionalUrl(),
   dates: optional(),
   active: z.boolean(),
   description: z.string().min(1, 'Description is required'),
-  technologies: z.array(z.string().min(1)),
+  details: optional(),
+  technologies: tagList(),
   links: z.array(projectLinkSchema),
   image: optional(),
 });
@@ -71,16 +82,14 @@ export const educationSchema = z.object({
   end: optional(),
 });
 
-const slugSchema = z
-  .string()
-  .min(1, 'Slug is required')
-  .regex(/^[a-z0-9\u0600-\u06FF-]+$/, 'Slug may contain letters, digits and dashes');
-
 export const blogSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   slug: slugSchema,
   summary: optional(),
   content: optional(),
+  image: optionalUrl(),
+  tags: tagList().optional(),
+  published: z.boolean().optional(),
 });
 
 /** Wrap any create schema into an update schema keyed by `_id`. */

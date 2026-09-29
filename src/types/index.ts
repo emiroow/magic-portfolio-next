@@ -24,14 +24,18 @@ export interface IProfile {
   lang: AppLocale;
 }
 
-/** Portfolio project shown on the home page. */
+/** Portfolio project shown on the home page and its details page. */
 export interface IProject {
   _id?: string;
   title: string;
+  /** URL segment for `/projects/[slug]`; falls back to `_id` when absent. */
+  slug?: string;
   href: string;
   dates: string;
   active: boolean;
   description: string;
+  /** Long-form Markdown body rendered on the details page. */
+  details?: string;
   technologies: string[];
   links: IProjectLink[];
   image: string;
@@ -91,9 +95,17 @@ export interface IBlog {
   summary?: string;
   content?: string;
   slug: string;
+  /** Cover image shown on the list, the article header and social cards. */
+  image?: string;
+  /** Free-form labels used for filtering and related posts. */
+  tags?: string[];
+  /** `false` keeps a post out of every public surface (legacy docs: published). */
+  published?: boolean;
   lang: AppLocale;
   createdAt?: string;
   updatedAt?: string;
+  /** Derived from `content`; never stored. */
+  readingMinutes?: number;
 }
 
 /** Aggregated payload consumed by the public site and `/api/[lang]`. */
