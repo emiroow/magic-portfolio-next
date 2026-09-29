@@ -52,7 +52,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <div aria-hidden className="surface-grid pointer-events-none absolute inset-x-0 top-0 -z-10 h-64" />
         {children}
         <GoogleAnalytics />
-        <Analytics />
+        {/* Vercel only serves the insights script in production; elsewhere it
+            would just fail a request on every navigation. */}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );

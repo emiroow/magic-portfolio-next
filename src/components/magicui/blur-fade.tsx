@@ -1,71 +1,37 @@
-"use client";
-
-import { AnimatePresence, motion, useInView, useReducedMotion, type Variants } from "framer-motion";
-import { useRef } from "react";
+import { cn } from '@/lib/utils';
+import type { CSSProperties, ReactNode } from 'react';
 
 interface BlurFadeProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-  variant?: {
-    hidden: { y: number };
-    visible: { y: number };
-  };
-  duration?: number;
+  /** Stagger offset in seconds. */
   delay?: number;
+  /** Entrance duration in seconds. */
+  duration?: number;
+  /** Initial vertical offset in pixels. */
   yOffset?: number;
+  /** Tie the entrance to the element scrolling into view. */
   inView?: boolean;
-  inViewMargin?: string;
-  blur?: string;
 }
-const BlurFade = ({
-  children,
-  className,
-  variant,
-  duration = 0.4,
-  delay = 0,
-  yOffset = 6,
-  inView = false,
-  inViewMargin = "-50px",
-  blur = "6px",
-}: BlurFadeProps) => {
-  const ref = useRef(null);
-  const inViewResult = useInView(
-    ref,
-    // framer-motion's MarginType isn't exported; pass the plain string through.
-    { once: true, margin: inViewMargin } as NonNullable<Parameters<typeof useInView>[1]>
-  );
-  const isInView = !inView || inViewResult;
-  const prefersReducedMotion = useReducedMotion();
 
-  // Respect the user's motion preference: render static content.
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  const defaultVariants: Variants = {
-    hidden: { y: yOffset, opacity: 0, filter: `blur(${blur})` },
-    visible: { y: -yOffset, opacity: 1, filter: `blur(0px)` },
-  };
-  const combinedVariants = variant || defaultVariants;
+/**
+ * Entrance animation for a block. Purely declarative: opacity/transform only
+ * (composited, no blur filter) driven by CSS, so the public bundle ships no
+ * animation runtime and the LCP text is never blocked by hydration.
+ */
+export default function BlurFade({ children, className, delay = 0, duration = 0.5, yOffset = 8, inView = false }: BlurFadeProps) {
   return (
-    <AnimatePresence>
-      <motion.div
-        ref={ref}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        exit="hidden"
-        variants={combinedVariants}
-        transition={{
-          delay: 0.04 + delay,
-          duration,
-          ease: "easeOut",
-        }}
-        className={className}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      className={cn('reveal', inView && 'reveal-view', className)}
+      style={
+        {
+          '--reveal-delay': `${delay}s`,
+          '--reveal-duration': `${duration}s`,
+          '--reveal-y': `${yOffset}px`,
+        } as CSSProperties
+      }
+    >
+      {children}
+    </div>
   );
-};
-
-export default BlurFade;
+}

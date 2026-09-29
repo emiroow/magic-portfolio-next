@@ -1,11 +1,9 @@
-'use client';
-
 import BlurFade from '@/components/magicui/blur-fade';
-import BlurFadeText from '@/components/magicui/blur-fade-text';
 import { eyebrowClass } from '@/components/sections/section-header';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { isOptimizableImage } from '@/lib/utils';
 import { Mail } from 'lucide-react';
+import Image from 'next/image';
 import type { IProfile } from '@/types';
 
 interface HeroProps {
@@ -19,27 +17,29 @@ interface HeroProps {
 }
 
 /**
- * Intro block: eyebrow greeting, name, role, summary and portrait.
- * Stacks portrait-first on small screens and sits side by side from `sm`.
+ * Intro block: eyebrow greeting, name (`<h1>` — the only one on the page),
+ * role, summary and portrait. Stacks portrait-first on small screens and sits
+ * side by side from `sm`. The portrait is the LCP element, so it is preloaded
+ * and never waits on JavaScript.
  */
 export function Hero({ profile, greeting, emailLabel, delay = 0 }: HeroProps) {
   const name = profile.fullName?.trim() || profile.name?.trim() || '';
   const monogram = (name || '?').charAt(0);
+  const avatar = profile.avatarUrl;
 
   return (
-    <section id="hero">
+    <section id="hero" aria-labelledby="hero-heading">
       <div className="flex flex-col-reverse items-start gap-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
         <div className="min-w-0 flex-1">
           <BlurFade delay={delay}>
             <p className={eyebrowClass}>{greeting}</p>
           </BlurFade>
 
-          <BlurFadeText
-            delay={delay + 0.06}
-            containerClassName="mt-3"
-            className="text-3xl font-bold leading-[1.15] ltr:tracking-tight sm:text-4xl xl:text-5xl"
-            text={name}
-          />
+          <BlurFade delay={delay + 0.06}>
+            <h1 id="hero-heading" className="mt-3 text-3xl font-bold leading-[1.15] ltr:tracking-tight sm:text-4xl xl:text-5xl">
+              {name}
+            </h1>
+          </BlurFade>
 
           {profile.jobTitle && (
             <BlurFade delay={delay + 0.12}>
@@ -52,9 +52,7 @@ export function Hero({ profile, greeting, emailLabel, delay = 0 }: HeroProps) {
 
           {profile.summary && (
             <BlurFade delay={delay + 0.18}>
-              <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {profile.summary}
-              </p>
+              <p className="mt-4 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">{profile.summary}</p>
             </BlurFade>
           )}
 
@@ -63,7 +61,7 @@ export function Hero({ profile, greeting, emailLabel, delay = 0 }: HeroProps) {
               <div className="mt-7">
                 <Button asChild variant="outline" size="sm" className="rounded-full">
                   <a href={`mailto:${profile.email}`}>
-                    <Mail className="me-2 size-4" />
+                    <Mail className="me-2 size-4" aria-hidden />
                     {emailLabel}
                   </a>
                 </Button>
@@ -73,17 +71,32 @@ export function Hero({ profile, greeting, emailLabel, delay = 0 }: HeroProps) {
         </div>
 
         <BlurFade delay={delay + 0.1} className="shrink-0">
-          <div className="group relative">
-            <Avatar className="size-24 border shadow-sm sm:size-28 lg:size-32">
-              {profile.avatarUrl && (
-                <AvatarImage
-                  src={profile.avatarUrl}
+          <div className="group relative size-24 overflow-hidden rounded-full border shadow-sm sm:size-28 lg:size-32">
+            {avatar ? (
+              isOptimizableImage(avatar) ? (
+                <Image
+                  src={avatar}
                   alt={name}
-                  className="object-cover grayscale transition-[filter] duration-500 group-hover:grayscale-0"
+                  width={256}
+                  height={256}
+                  priority
+                  sizes="(max-width: 640px) 96px, (max-width: 1024px) 112px, 128px"
+                  className="size-full object-cover grayscale transition-[filter] duration-500 group-hover:grayscale-0"
                 />
-              )}
-              <AvatarFallback className="text-2xl font-bold">{monogram}</AvatarFallback>
-            </Avatar>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatar}
+                  alt={name}
+                  width={256}
+                  height={256}
+                  decoding="async"
+                  className="size-full object-cover grayscale transition-[filter] duration-500 group-hover:grayscale-0"
+                />
+              )
+            ) : (
+              <span className="flex size-full items-center justify-center bg-muted text-2xl font-bold text-muted-foreground">{monogram}</span>
+            )}
           </div>
         </BlurFade>
       </div>

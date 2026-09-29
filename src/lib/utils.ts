@@ -51,6 +51,14 @@ export function truncate(text: string | undefined, max = 160): string {
   return `${text.slice(0, text.lastIndexOf(' ', max))}…`;
 }
 
+/**
+ * URL key for a project page: its slug, or the document id for records
+ * created before slugs existed.
+ */
+export function projectKey(project: { slug?: string; _id?: string }): string {
+  return project.slug || project._id || '';
+}
+
 /** Estimate reading time in minutes (~200 words per minute). */
 export function readingTime(text: string | undefined): number {
   if (!text) return 0;
@@ -115,4 +123,44 @@ export function sectionIndex(n: number, locale: 'fa' | 'en' = 'en'): string {
     minimumIntegerDigits: 2,
     useGrouping: false,
   }).format(n);
+}
+
+/**
+ * Count rendered in the active locale's digits, so Persian copy never shows
+ * `2 مورد` next to `۰۳`. Safe to feed straight into a translation argument.
+ */
+export function localizedCount(n: number, locale: 'fa' | 'en' = 'en'): string {
+  return new Intl.NumberFormat(locale === 'fa' ? 'fa-IR' : 'en-US', { useGrouping: false }).format(n);
+}
+
+/**
+ * URL segment from a title: lower-cased, spaces folded to dashes, Latin and
+ * Persian letters plus digits kept, everything else dropped.
+ */
+export function slugify(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9\u0600-\u06FF-]/g, '')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+/**
+ * Whether `next/image` may optimize a stored URL: same-site uploads live under
+ * `/public`, Vercel Blob or the local dev origin (see `next.config.mjs`).
+ * Anything else is rendered as a plain `<img>` instead of failing the page.
+ */
+export function isOptimizableImage(src: string | undefined): boolean {
+  if (!src) return false;
+  if (src.startsWith('/')) return true;
+
+  try {
+    const { hostname } = new URL(src);
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.public.blob.vercel-storage.com');
+  } catch {
+    return false;
+  }
 }
