@@ -14,20 +14,9 @@ import { z } from 'zod';
 const formSchema = blogSchema.extend({ _id: z.string().optional() });
 type BlogForm = z.infer<typeof formSchema>;
 
-const EMPTY: BlogForm = { title: '', slug: '', summary: '', content: '' };
+const EMPTY: BlogForm = { title: '', slug: '', summary: '', content: '', image: '', tags: [], published: true };
 
-/** Slug from a title: ASCII transliteration-free, keeps letters/digits/dash. */
-export function slugify(input: string): string {
-  return input
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_]+/g, '-')
-    .replace(/[^a-z0-9\u0600-\u06FF-]/g, '')
-    .replace(/-{2,}/g, '-')
-    .slice(0, 80);
-}
-
-/** Blog post list + CRUD for the dashboard editor. */
+/** Blog post list + CRUD (drafts, tags, cover image) for the dashboard editor. */
 const useBlog = () => {
   const locale = useLocale();
   const { ok, fail } = useToastMessages();
@@ -38,6 +27,7 @@ const useBlog = () => {
     setValue,
     watch,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<BlogForm>({
     resolver: zodResolver(formSchema),
@@ -76,13 +66,62 @@ const useBlog = () => {
     onError: () => fail(),
   });
 
-  const startEdit = (post: IBlog) => reset({ ...EMPTY, ...post, _id: post._id });
+  // Publish/unpublish straight from the list row.
+  const togglePublished = useMutation({
+    mutationFn: (post: IBlog) => api.put<IBlog>(`/api/${locale}/admin/blog`, { _id: post._id, published: !post.published }),
+    onSuccess: () => {
+      ok();
+      refetchPosts();
+    },
+    onError: () => fail(),
+  });
+
+  const startEdit = (post: IBlog) =>
+    reset({ ...EMPTY, ...post, tags: post.tags ?? [], published: post.published ?? true, _id: post._id });
+
+  /** Cover image: upload returns a clean URL that goes straight into the form. */
+  const uploadCover = useMutation({
+    mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=blog`, formData),
+    onSuccess: ({ fileUrl }) => {
+      setValue('image', fileUrl.split('?')[0], { shouldDirty: true });
+      ok();
+    },
+    onError: () => fail(),
+  });
+
+  const deleteCover = useMutation({
+    mutationFn: () => {
+      const fileName = getValues('image')?.split('/').pop()?.split('?')[0];
+      return api.del(`/api/${locale}/admin/upload?lang=${locale}&type=blog&fileName=${encodeURIComponent(fileName ?? '')}`);
+    },
+    onSuccess: () => setValue('image', '', { shouldDirty: true }),
+    onError: () => fail(),
+  });
+
+  const addTag = (value: string) => {
+    const tag = value.trim();
+    if (!tag) return;
+    const current = getValues('tags') || [];
+    if (!current.some(item => item.toLowerCase() === tag.toLowerCase())) {
+      setValue('tags', [...current, tag], { shouldDirty: true });
+    }
+  };
+
+  const removeTag = (index: number) => {
+    const current = getValues('tags') || [];
+    setValue(
+      'tags',
+      current.filter((_, i) => i !== index),
+      { shouldDirty: true }
+    );
+  };
 
   return {
     register,
     handleSubmit,
     setValue,
     watch,
+    getValues,
     reset,
     errors,
     posts,
@@ -93,7 +132,12 @@ const useBlog = () => {
     save,
     deletePost,
     deleting,
+    togglePublished,
+    uploadCover,
+    deleteCover,
     startEdit,
+    addTag,
+    removeTag,
     onSubmit: (data: BlogForm) => save.mutate(data),
   };
 };
