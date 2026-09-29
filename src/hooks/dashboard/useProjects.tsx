@@ -16,10 +16,12 @@ type ProjectForm = z.infer<typeof formSchema>;
 
 const EMPTY: ProjectForm = {
   title: '',
+  slug: '',
   href: '',
   dates: '',
   active: true,
   description: '',
+  details: '',
   technologies: [],
   links: [],
   image: '',
@@ -34,6 +36,7 @@ const useProjects = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     getValues,
     trigger,
@@ -81,7 +84,8 @@ const useProjects = () => {
   const uploadImage = useMutation({
     mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=project`, formData),
     onSuccess: ({ fileUrl }) => {
-      setValue('image', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
+      // Clean URL in the form; the crop dialog preview is what needs busting.
+      setValue('image', fileUrl.split('?')[0], { shouldDirty: true });
       trigger('image');
     },
     onError: () => fail(),
@@ -136,13 +140,14 @@ const useProjects = () => {
   };
 
   const startEdit = (project: IProject) => {
-    reset({ ...project, _id: project._id });
+    reset({ ...EMPTY, ...project, _id: project._id });
   };
 
   return {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     getValues,
     errors,

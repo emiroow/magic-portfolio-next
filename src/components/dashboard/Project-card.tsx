@@ -2,13 +2,15 @@
 
 import { iconDecider } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Loading from '@/components/ui/loading';
 import type { IProject } from '@/types';
-import { Pencil, Trash2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { cn, projectKey } from '@/lib/utils';
+import { ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -22,7 +24,9 @@ interface ProjectItemProps {
 /** Dashboard list item for a single project. */
 const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps) => {
   const t = useTranslations('dashboard.projects');
+  const locale = useLocale();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const key = projectKey(project);
 
   return (
     <Card className="transition-colors hover:border-foreground/30">
@@ -32,6 +36,16 @@ const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps
           {project.dates && <p className="text-[11px] tabular-nums text-muted-foreground">{project.dates}</p>}
         </div>
         <div className="flex shrink-0 gap-1">
+          {project.active && key && (
+            <Link
+              href={`/${locale}/projects/${key}`}
+              target="_blank"
+              aria-label={t('viewProject')}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'size-8')}
+            >
+              <ExternalLink className="size-4" aria-hidden />
+            </Link>
+          )}
           <Button size="icon" variant="ghost" className="size-8" onClick={() => onEdit(project)} aria-label={t('edit')}>
             <Pencil className="size-4" aria-hidden />
           </Button>
