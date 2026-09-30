@@ -20,6 +20,7 @@ const EMPTY: ProjectForm = {
   href: '',
   dates: '',
   active: true,
+  featured: false,
   description: '',
   details: '',
   technologies: [],
@@ -74,6 +75,35 @@ const useProjects = () => {
 
   const { mutate: deleteProject, isPending: deleting } = useMutation({
     mutationFn: (id: string) => api.del(`/api/${locale}/admin/project?id=${encodeURIComponent(id)}`),
+    onSuccess: () => {
+      ok();
+      refetchProjects();
+    },
+    onError: () => fail(),
+  });
+
+  /**
+   * Home page flag from the list row, without the form's `reset()` — an open
+   * panel may hold unsaved edits that a row toggle must not throw away.
+   */
+  const toggleFeatured = useMutation({
+    mutationFn: (project: IProject) => {
+      const { _id, title, slug, href, dates, active, description, details, technologies, links, image } = project;
+      return api.put<IProject>(`/api/${locale}/admin/project`, {
+        _id,
+        title,
+        slug: slug ?? '',
+        href: href ?? '',
+        dates: dates ?? '',
+        active,
+        featured: !project.featured,
+        description,
+        details: details ?? '',
+        technologies: technologies ?? [],
+        links: links ?? [],
+        image: image ? image.split('?')[0] : '',
+      });
+    },
     onSuccess: () => {
       ok();
       refetchProjects();
@@ -140,7 +170,8 @@ const useProjects = () => {
   };
 
   const startEdit = (project: IProject) => {
-    reset({ ...EMPTY, ...project, _id: project._id });
+    // `.lean()` returns stored documents as-is, so an old record has no flag.
+    reset({ ...EMPTY, ...project, featured: Boolean(project.featured), _id: project._id });
   };
 
   return {
@@ -159,6 +190,7 @@ const useProjects = () => {
     save,
     deleteProject,
     deleting,
+    toggleFeatured,
     uploadImage,
     deleteImage,
     addTechnology,
@@ -166,7 +198,7 @@ const useProjects = () => {
     addLink,
     removeLink,
     startEdit,
-    onSubmit: (data: ProjectForm) => save.mutate(data),
+    onSubmit: (data: ProjectForm, onSaved?: () => void) => save.mutate(data, { onSuccess: onSaved }),
   };
 };
 

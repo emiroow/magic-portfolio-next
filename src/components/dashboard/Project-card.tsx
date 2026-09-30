@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Loading from '@/components/ui/loading';
 import type { IProject } from '@/types';
-import { cn, projectKey } from '@/lib/utils';
-import { ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import { cn, localizedCount, projectKey } from '@/lib/utils';
+import { ExternalLink, Pencil, Pin, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -19,14 +19,25 @@ interface ProjectItemProps {
   onEdit: (project: IProject) => void;
   onDelete: (id: string) => void;
   isDeleting: boolean;
+  /** 1-based position on the home page, or 0 when the project is not picked. */
+  homePosition: number;
+  /** Every slot is taken by another project, so this one cannot be picked. */
+  slotsFull: boolean;
+  onToggleHome: (project: IProject) => void;
+  togglingHome: boolean;
 }
 
 /** Dashboard list item for a single project. */
-const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps) => {
+const ProjectCard = ({ project, onEdit, onDelete, isDeleting, homePosition, slotsFull, onToggleHome, togglingHome }: ProjectItemProps) => {
   const t = useTranslations('dashboard.projects');
   const locale = useLocale();
+  const lang = locale === 'fa' ? 'fa' : 'en';
   const [confirmOpen, setConfirmOpen] = useState(false);
   const key = projectKey(project);
+  const featured = project.active && project.featured === true;
+
+  // A dead control is worse than no control: say why it is unavailable.
+  const homeBlock = !project.active ? t('featuredNeedsPublish') : slotsFull && !featured ? t('featuredFull') : '';
 
   return (
     <Card className="transition-colors hover:border-foreground/30">
@@ -36,6 +47,18 @@ const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps
           {project.dates && <p className="text-[11px] tabular-nums text-muted-foreground">{project.dates}</p>}
         </div>
         <div className="flex shrink-0 gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className={cn('size-8', featured && 'text-foreground')}
+            onClick={() => onToggleHome(project)}
+            disabled={Boolean(homeBlock) || togglingHome}
+            aria-pressed={featured}
+            aria-label={featured ? t('removeFromHome') : t('addToHome')}
+            title={homeBlock || (featured ? t('removeFromHome') : t('addToHome'))}
+          >
+            {togglingHome ? <Loading size="sm" /> : <Pin className={cn('size-4', featured && 'fill-current')} aria-hidden />}
+          </Button>
           {project.active && key && (
             <Link
               href={`/${locale}/projects/${key}`}
@@ -85,6 +108,20 @@ const ProjectCard = ({ project, onEdit, onDelete, isDeleting }: ProjectItemProps
               <Badge variant={project.active ? 'default' : 'outline'} className="text-[10px]">
                 {project.active ? t('active') : t('disabled')}
               </Badge>
+
+              {featured && (
+                <Badge variant="outline" className="text-[10px]">
+                  {t('featuredBadge')}
+                  {homePosition > 0 && (
+                    <>
+                      <span aria-hidden className="text-muted-foreground">
+                        ·
+                      </span>
+                      <span className="tabular-nums text-muted-foreground">{localizedCount(homePosition, lang)}</span>
+                    </>
+                  )}
+                </Badge>
+              )}
 
               {project.links?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">

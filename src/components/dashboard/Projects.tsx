@@ -9,9 +9,11 @@ import Loading from '@/components/ui/loading';
 import MarkdownEditor from '@/components/ui/markdown-editor';
 import { Textarea } from '@/components/ui/textarea';
 import useProjects from '@/hooks/dashboard/useProjects';
+import { useFormPanel } from '@/hooks/dashboard/useFormPanel';
+import { HOME_PROJECT_SLOTS } from '@/constants/global';
 import ProjectRow from './Project-card';
-import { cn, isOptimizableImage, slugify } from '@/lib/utils';
-import type { IProject } from '@/types';
+import { cn, isOptimizableImage, localizedCount, slugify } from '@/lib/utils';
+import type { AppLocale, IProject } from '@/types';
 import { Plus, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -32,6 +34,7 @@ const Projects = () => {
   const t = useTranslations('dashboard.projects');
   const tcrop = useTranslations('dashboard.crop');
   const locale = useLocale();
+  const lang: AppLocale = locale === 'fa' ? 'fa' : 'en';
 
   const {
     register,
@@ -47,6 +50,7 @@ const Projects = () => {
     save,
     deleteProject,
     deleting,
+    toggleFeatured,
     uploadImage,
     deleteImage,
     addTechnology,
@@ -58,7 +62,7 @@ const Projects = () => {
     refetchProjects,
   } = useProjects();
 
-  const [formOpen, setFormOpen] = useState(false);
+  const panel = useFormPanel();
   const [tech, setTech] = useState('');
   const [link, setLink] = useState({ type: '', href: '', icon: '' });
   const [cropOpen, setCropOpen] = useState(false);
@@ -71,38 +75,63 @@ const Projects = () => {
   const image = watch('image');
   const technologies = watch('technologies') ?? [];
   const links = watch('links') ?? [];
+  const published = watch('active');
+  const featured = watch('featured');
+
+  // Home page picks, in the order the site renders them (newest first).
+  const homePicks = (projects ?? []).filter(project => project.active && project.featured);
+  const homePosition = (id?: string) => {
+    const index = homePicks.findIndex(project => project._id === id);
+    return index === -1 ? 0 : index + 1;
+  };
+
+  // Slots: the project being edited must not count against itself.
+  const takenByOthers = homePicks.filter(project => project._id !== editingId).length;
+  const slotsFull = takenByOthers >= HOME_PROJECT_SLOTS;
+  const openSlots = Math.max(HOME_PROJECT_SLOTS - takenByOthers - (featured ? 1 : 0), 0);
+  const featuredHint = !published
+    ? t('featuredNeedsPublish')
+    : slotsFull && !featured
+      ? t('featuredFull')
+      : featured && openSlots === 0
+        ? t('featuredAllUsed')
+        : t('featuredHint', { count: localizedCount(openSlots, lang) });
 
   // Slug drives `/projects/[slug]`; it is auto-derived until edited by hand.
   const autoSlug = !editingId && title ? slugify(title) : watch('slug');
 
   const closeForm = () => {
-    setFormOpen(false);
+    panel.close();
     reset();
   };
 
   const beginCreate = () => {
     reset();
-    setFormOpen(true);
+    panel.open();
   };
 
   const beginEdit = (project: IProject) => {
     startEdit(project);
-    setFormOpen(true);
+    panel.open();
   };
 
   return (
     <SectionShell
       title={t('title')}
+      anchorRef={panel.anchorRef}
       action={
-        !formOpen && (
+        !panel.isOpen && (
           <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('addProject')}>
             <Plus className="size-4" aria-hidden />
           </Button>
         )
       }
     >
-      <FormPanel open={formOpen} title={editingId ? t('editProject') : t('createProject')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(data => onSubmit({ ...data, slug: autoSlug }))} className="space-y-5">
+      <FormPanel open={panel.isOpen} title={editingId ? t('editProject') : t('createProject')} onClose={closeForm}>
+        <form
+          onSubmit={handleSubmit(data => onSubmit({ ...data, slug: autoSlug, featured: data.active && Boolean(data.featured) }, panel.close))}
+          className="space-y-5"
+        >
           {/* Cover image */}
           <Field label={t('projectImage')} error={errors.image?.message} hint={t('uploadImageHint')}>
             <div className="flex flex-wrap items-center gap-3">
@@ -190,7 +219,23 @@ const Projects = () => {
             <Field label={t('projectDates')} id="project-dates" error={errors.dates?.message}>
               <Input id="project-dates" {...register('dates')} placeholder={t('projectDatesPlaceholder')} />
             </Field>
-            <CheckboxField id="project-active" label={t('active')} {...register('active')} className="sm:col-span-2" />
+            <CheckboxField
+              id="project-active"
+              label={t('active')}
+              {...register('active')}
+              onChange={event => {
+                setValue('active', event.target.checked, { shouldDirty: true, shouldValidate: true });
+                // An unpublished project cannot hold a home page slot.
+                if (!event.target.checked) setValue('featured', false, { shouldDirty: true });
+              }}
+            />
+            <CheckboxField
+              id="project-featured"
+              label={t('featured')}
+              hint={featuredHint}
+              {...register('featured')}
+              disabled={!published || (slotsFull && !featured)}
+            />
           </div>
 
           <Field label={t('projectDescription')} id="project-description" error={errors.description?.message} hint={t('projectDescriptionHint')}>
@@ -317,12 +362,28 @@ const Projects = () => {
         <ErrorState message={error?.message} onRetry={() => refetchProjects()} />
       ) : projects && projects.length > 0 ? (
         <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            {t('homeSlots', {
+              used: localizedCount(homePicks.length, lang),
+              total: localizedCount(HOME_PROJECT_SLOTS, lang),
+            })}
+          </p>
           {projects.map(project => (
-            <ProjectRow key={project._id} project={project} onEdit={beginEdit} onDelete={id => deleteProject(id)} isDeleting={deleting} />
+            <ProjectRow
+              key={project._id}
+              project={project}
+              onEdit={beginEdit}
+              onDelete={id => deleteProject(id)}
+              isDeleting={deleting}
+              homePosition={homePosition(project._id)}
+              slotsFull={homePicks.length >= HOME_PROJECT_SLOTS}
+              onToggleHome={project => toggleFeatured.mutate(project)}
+              togglingHome={toggleFeatured.isPending}
+            />
           ))}
         </div>
       ) : (
-        !formOpen && <EmptyState text={t('noProjects')} actionText={t('createFirstProject')} onAction={beginCreate} />
+        !panel.isOpen && <EmptyState text={t('noProjects')} actionText={t('createFirstProject')} onAction={beginCreate} />
       )}
     </SectionShell>
   );

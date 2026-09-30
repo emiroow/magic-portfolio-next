@@ -8,6 +8,8 @@ export const projectSchema = new Schema<IProject>(
     href: { type: String },
     dates: { type: String },
     active: { type: Boolean, default: true },
+    /** Chosen for the home page; when none are set the newest published stand in. */
+    featured: { type: Boolean, default: false },
     description: { type: String },
     details: { type: String },
     technologies: [String],

@@ -33,6 +33,8 @@ export interface IProject {
   href: string;
   dates: string;
   active: boolean;
+  /** Picked for the home page section; `active` still controls visibility. */
+  featured?: boolean;
   description: string;
   /** Long-form Markdown body rendered on the details page. */
   details?: string;

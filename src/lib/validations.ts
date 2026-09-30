@@ -45,6 +45,8 @@ export const projectSchema = z.object({
   href: optionalUrl(),
   dates: optional(),
   active: z.boolean(),
+  // Optional: documents stored before this field simply keep their current value.
+  featured: z.boolean().optional(),
   description: z.string().min(1, 'Description is required'),
   details: optional(),
   technologies: tagList(),
