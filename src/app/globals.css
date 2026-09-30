@@ -114,6 +114,16 @@
     @apply bg-foreground text-background;
   }
 
+  /*
+   * Toasts: Sonner hard-codes its own system font stack on the toaster, which
+   * would drop Estedad/Roboto from every dashboard message. The portal mounts
+   * under <body>, so inheriting keeps a toast in the same face as the page.
+   * The extra element selector lifts this above Sonner's own rule.
+   */
+  body [data-sonner-toaster] {
+    font-family: inherit;
+  }
+
   /* Thin, unobtrusive scrollbars that follow the palette. */
   * {
     scrollbar-width: thin;
