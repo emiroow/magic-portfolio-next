@@ -16,10 +16,13 @@ type ProjectForm = z.infer<typeof formSchema>;
 
 const EMPTY: ProjectForm = {
   title: '',
+  slug: '',
   href: '',
   dates: '',
   active: true,
+  featured: false,
   description: '',
+  details: '',
   technologies: [],
   links: [],
   image: '',
@@ -34,6 +37,7 @@ const useProjects = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     getValues,
     trigger,
@@ -78,10 +82,40 @@ const useProjects = () => {
     onError: () => fail(),
   });
 
+  /**
+   * Home page flag from the list row, without the form's `reset()` — an open
+   * panel may hold unsaved edits that a row toggle must not throw away.
+   */
+  const toggleFeatured = useMutation({
+    mutationFn: (project: IProject) => {
+      const { _id, title, slug, href, dates, active, description, details, technologies, links, image } = project;
+      return api.put<IProject>(`/api/${locale}/admin/project`, {
+        _id,
+        title,
+        slug: slug ?? '',
+        href: href ?? '',
+        dates: dates ?? '',
+        active,
+        featured: !project.featured,
+        description,
+        details: details ?? '',
+        technologies: technologies ?? [],
+        links: links ?? [],
+        image: image ? image.split('?')[0] : '',
+      });
+    },
+    onSuccess: () => {
+      ok();
+      refetchProjects();
+    },
+    onError: () => fail(),
+  });
+
   const uploadImage = useMutation({
     mutationFn: (formData: FormData) => api.upload<{ fileUrl: string }>(`/api/${locale}/admin/upload?lang=${locale}&type=project`, formData),
     onSuccess: ({ fileUrl }) => {
-      setValue('image', `${fileUrl.split('?')[0]}?cb=${Date.now()}`, { shouldDirty: true });
+      // Clean URL in the form; the crop dialog preview is what needs busting.
+      setValue('image', fileUrl.split('?')[0], { shouldDirty: true });
       trigger('image');
     },
     onError: () => fail(),
@@ -136,13 +170,15 @@ const useProjects = () => {
   };
 
   const startEdit = (project: IProject) => {
-    reset({ ...project, _id: project._id });
+    // `.lean()` returns stored documents as-is, so an old record has no flag.
+    reset({ ...EMPTY, ...project, featured: Boolean(project.featured), _id: project._id });
   };
 
   return {
     register,
     handleSubmit,
     setValue,
+    watch,
     reset,
     getValues,
     errors,
@@ -154,6 +190,7 @@ const useProjects = () => {
     save,
     deleteProject,
     deleting,
+    toggleFeatured,
     uploadImage,
     deleteImage,
     addTechnology,
@@ -161,7 +198,7 @@ const useProjects = () => {
     addLink,
     removeLink,
     startEdit,
-    onSubmit: (data: ProjectForm) => save.mutate(data),
+    onSubmit: (data: ProjectForm, onSaved?: () => void) => save.mutate(data, { onSuccess: onSaved }),
   };
 };
 

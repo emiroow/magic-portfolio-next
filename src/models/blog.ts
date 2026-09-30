@@ -7,6 +7,10 @@ const BlogSchema = new mongoose.Schema<IBlog>(
     summary: { type: String },
     content: { type: String, default: '' },
     slug: { type: String, required: true, index: true },
+    image: { type: String },
+    tags: { type: [String], default: [] },
+    // Drafts stay out of every public surface; legacy documents default to true.
+    published: { type: Boolean, default: true },
     lang: { type: String, required: true, index: true },
   },
   { timestamps: true }

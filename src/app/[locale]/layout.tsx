@@ -26,7 +26,7 @@ export default async function LocaleLayout({
   return (
     <div
       dir={direction}
-      className={cn('min-h-screen bg-background text-foreground antialiased', locale === 'fa' ? estedad.className : roboto.className)}
+      className={cn('relative min-h-screen text-foreground antialiased', locale === 'fa' ? estedad.className : roboto.className)}
     >
       <MainProvider locale={locale}>{children}</MainProvider>
     </div>

@@ -11,9 +11,11 @@ const SIZE = { width: 1200, height: 630 };
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const profile = await getProfile('en');
+  // `?lang=fa` renders the Persian profile; English is the default card.
+  const lang = url.searchParams.get('lang') === 'fa' ? 'fa' : 'en';
+  const profile = await getProfile(lang);
 
-  const title = url.searchParams.get('title')?.slice(0, 120) || profile?.fullName || brandedTitle(profile, 'en');
+  const title = url.searchParams.get('title')?.slice(0, 120) || profile?.fullName || brandedTitle(profile, lang);
   const subtitle = profile?.jobTitle || (site ? site.replace(/^https?:\/\//, '') : '');
 
   return new ImageResponse(

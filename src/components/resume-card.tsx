@@ -2,11 +2,9 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { ChevronRight, PencilLine, Trash2 } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { ChevronDown, ExternalLink, PencilLine, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React from 'react';
 
@@ -17,8 +15,12 @@ interface ResumeCardProps {
   subtitle?: string;
   href?: string;
   badges?: readonly string[];
-  period: string;
-  /** Dashboard mode: expansion is controlled externally. */
+  period?: string;
+  /** Extra trailing segment on the meta line (e.g. the work location). */
+  meta?: string;
+  /** `card` renders its own border; `row` sits inside a divided `Stack`. */
+  variant?: 'card' | 'row';
+  /** Dashboard mode: expansion is controlled by the parent. */
   isExpanded?: boolean;
   description?: string;
   onEdit?: () => void;
@@ -26,10 +28,22 @@ interface ResumeCardProps {
   onToggle?: () => void;
 }
 
+/** Absolute URLs open in a new tab; internal ones navigate in place. */
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
+/** Hairline dot separating segments of the meta line. */
+const Dot = () => (
+  <span aria-hidden className="text-border">
+    ·
+  </span>
+);
+
 /**
- * Timeline entry card shared by the public site (work/education) and
- * the dashboard list views. Expands to reveal the description when one
- * exists; direction-agnostic via CSS logical properties.
+ * Timeline entry shared by the public site (work / education) and the
+ * dashboard lists. Title on the first line, role · period · place on the
+ * second, so no element floats to the opposite edge of the row.
+ * The description is disclosed through an explicit toggle (CSS height
+ * transition, no animation runtime) so an entry can link out *and* expand.
  */
 export const ResumeCard = ({
   logoUrl,
@@ -39,6 +53,8 @@ export const ResumeCard = ({
   href,
   badges,
   period,
+  meta,
+  variant = 'card',
   description,
   onDelete,
   onEdit,
@@ -46,88 +62,114 @@ export const ResumeCard = ({
   onToggle,
 }: ResumeCardProps) => {
   const [isExpandedInner, setIsExpandedInner] = React.useState(false);
-  const isExpanded = isExpandedOuter || isExpandedInner;
-  const locale = useLocale();
+  const isExpanded = Boolean(isExpandedOuter) || isExpandedInner;
+  const headingId = React.useId();
   const t = useTranslations('dashboard');
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (description) {
-      e.preventDefault();
-      if (isExpandedOuter) onToggle?.();
-      else setIsExpandedInner(!isExpandedInner);
-    }
-  };
+  // The parent owns the state when it passes a toggle handler.
+  const toggle = () => (onToggle ? onToggle() : setIsExpandedInner(value => !value));
+
+  const iconButtonClass =
+    'flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground';
 
   return (
-    <Card className="flex w-full items-center gap-2 p-3 transition-colors hover:border-foreground/30 sm:p-4">
-      <Link href={href || '#'} className="flex w-full items-center" onClick={handleClick}>
-        {logoUrl && (
-          <div className="flex-none">
-            <Avatar className="size-10 border sm:size-12">
-              <AvatarImage src={logoUrl} alt={altText ?? ''} className="object-contain" />
-              <AvatarFallback>{altText?.[0]}</AvatarFallback>
-            </Avatar>
-          </div>
-        )}
-        <div className="group ms-3 flex grow flex-col items-start">
-          <CardHeader className="p-0">
-            <div className="flex items-center justify-between gap-x-2 text-base">
-              <h3
-                className={cn(
-                  'inline-flex items-center justify-center gap-2 text-xs font-semibold leading-none sm:text-sm',
-                  !description && 'group-hover:underline'
-                )}
+    <article
+      className={cn(
+        'group flex w-full flex-col',
+        variant === 'row'
+          ? 'px-4 py-4 transition-colors hover:bg-muted/40 focus-within:bg-muted/40 sm:px-5'
+          : 'rounded-xl border bg-card px-4 py-4 shadow-sm transition-colors hover:border-foreground/30 sm:px-5'
+      )}
+    >
+      <div className="flex items-start gap-3 sm:gap-4">
+        {/* The gutter is always reserved so rows stay aligned without a logo. */}
+        <Avatar className="size-9 shrink-0 border sm:size-11">
+          {logoUrl && (
+            <AvatarImage
+              src={logoUrl}
+              alt={altText ?? ''}
+              className="object-contain grayscale transition-[filter] duration-500 group-hover:grayscale-0"
+            />
+          )}
+          <AvatarFallback className="text-xs font-semibold">{(altText || title || '?').charAt(0)}</AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0 grow">
+          <h3 id={headingId} className="min-w-0 break-words text-sm font-semibold leading-snug sm:text-[15px]">
+            {href ? (
+              <Link
+                href={href}
+                {...(isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                className="decoration-muted-foreground/50 underline-offset-2 transition-colors hover:underline"
               >
                 {title}
-                {badges && badges.length > 0 && (
-                  <span className="inline-flex gap-1">
-                    {badges.map((badge, index) => (
-                      <Badge variant="secondary" className="align-middle text-xs" key={index}>
-                        {badge}
-                      </Badge>
-                    ))}
-                  </span>
-                )}
-                {description && (
-                  <ChevronRight
-                    className={cn(
-                      'size-4 transform text-muted-foreground opacity-0 transition-all duration-300 ease-out group-hover:opacity-100',
-                      isExpanded ? 'rotate-90' : locale === 'fa' ? 'rotate-180' : 'rotate-0'
-                    )}
-                  />
-                )}
-              </h3>
-              <div className="ms-3 text-[11px] font-normal text-muted-foreground sm:text-xs">{period}</div>
-            </div>
-            {subtitle && <div className="mt-1 text-xs">{subtitle}</div>}
-          </CardHeader>
-          {description && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: isExpanded ? 1 : 0, height: isExpanded ? 'auto' : 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm"
-            >
-              {description}
-            </motion.div>
+                {isExternal(href) && <ExternalLink className="ms-1 inline-block size-3 align-baseline text-muted-foreground" aria-hidden />}
+              </Link>
+            ) : (
+              title
+            )}
+            {badges && badges.length > 0 && (
+              <span className="ms-2 inline-flex flex-wrap gap-1 align-middle">
+                {badges.map(badge => (
+                  <Badge key={badge} variant="secondary" className="px-2 py-0 text-[10px] font-normal">
+                    {badge}
+                  </Badge>
+                ))}
+              </span>
+            )}
+          </h3>
+
+          {(subtitle || period || meta) && (
+            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground sm:text-[13px]">
+              {subtitle && <span className="min-w-0 break-words">{subtitle}</span>}
+              {subtitle && (period || meta) && <Dot />}
+              {period && <span className="shrink-0 tabular-nums whitespace-nowrap">{period}</span>}
+              {period && meta && <Dot />}
+              {meta && <span className="min-w-0 break-words">{meta}</span>}
+            </p>
           )}
         </div>
-      </Link>
 
-      {(onEdit || onDelete) && (
-        <div className="z-50 flex flex-col gap-2">
-          {onEdit && (
-            <button type="button" className="rounded p-1 transition-colors hover:text-primary" onClick={onEdit} aria-label={t('edit')}>
-              <PencilLine className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-            </button>
-          )}
-          {onDelete && (
-            <button type="button" className="rounded p-1 transition-colors" onClick={onDelete} aria-label={t('delete')}>
-              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-            </button>
-          )}
+        {(description || onEdit || onDelete) && (
+          <div className="-me-1 flex shrink-0 items-center gap-0.5">
+            {description && (
+              <button
+                type="button"
+                onClick={toggle}
+                aria-expanded={isExpanded}
+                aria-controls={`${headingId}-panel`}
+                aria-label={t('details')}
+                className={cn(
+                  'inline-flex h-8 items-center gap-1 rounded-full px-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground',
+                  isExpanded && 'text-foreground'
+                )}
+              >
+                {/* Icon-only on the narrowest rows, labelled from `sm` up. */}
+                <span className="hidden sm:inline">{t('details')}</span>
+                <ChevronDown className={cn('size-4 transition-transform duration-300', isExpanded && 'rotate-180')} aria-hidden />
+              </button>
+            )}
+            {onEdit && (
+              <button type="button" onClick={onEdit} aria-label={t('edit')} className={iconButtonClass}>
+                <PencilLine className="size-4" aria-hidden />
+              </button>
+            )}
+            {onDelete && (
+              <button type="button" onClick={onDelete} aria-label={t('delete')} className={cn(iconButtonClass, 'hover:text-destructive')}>
+                <Trash2 className="size-4" aria-hidden />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {description && (
+        <div id={`${headingId}-panel`} role="region" aria-labelledby={headingId} inert={!isExpanded} data-open={isExpanded} className="disclosure">
+          <div>
+            <p className="whitespace-pre-line ps-12 pt-3 text-xs leading-relaxed text-muted-foreground sm:ps-[60px] sm:text-sm">{description}</p>
+          </div>
         </div>
       )}
-    </Card>
+    </article>
   );
 };

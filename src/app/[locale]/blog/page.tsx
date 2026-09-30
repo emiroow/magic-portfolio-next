@@ -1,9 +1,10 @@
 import BlogListClient from '@/components/blog/BlogListClient';
 import { JsonLd } from '@/components/JsonLd';
-import BlurFade from '@/components/magicui/blur-fade';
 import Navbar from '@/components/navbar';
-import { getBlogList, getSocials } from '@/lib/data';
-import { OG_IMAGE_URL, languageAlternates, localeUrl } from '@/lib/seo';
+import { SectionHeader } from '@/components/sections/section-header';
+import { getBlogList, getBlogTags, getSocials } from '@/lib/data';
+import { languageAlternates, localeUrl, ogImageFor } from '@/lib/seo';
+import { localizedCount } from '@/lib/utils';
 import type { AppLocale } from '@/types';
 import { Rss } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -13,7 +14,7 @@ import Link from 'next/link';
 /** Blog listing refreshes every 5 minutes. */
 export const revalidate = 300;
 
-type Props = { params: Promise<{ locale: string }> };
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ tag?: string }> };
 
 function asLocale(locale: string): AppLocale {
   return locale === 'fa' ? 'fa' : 'en';
@@ -41,59 +42,63 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       locale: locale === 'fa' ? 'fa_IR' : 'en_US',
-      images: [{ url: `${OG_IMAGE_URL}?title=${encodeURIComponent(title)}`, width: 1200, height: 630, alt: title }],
+      images: [{ url: ogImageFor(title, locale), width: 1200, height: 630, alt: title }],
     },
   };
 }
 
-export default async function BlogPage({ params }: Props) {
+export default async function BlogPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { tag } = await searchParams;
   const lang = asLocale(locale);
 
-  const [t, posts, socials] = await Promise.all([
+  const [t, posts, tags, socials] = await Promise.all([
     getTranslations({ locale, namespace: 'blogPage' }),
     getBlogList(lang),
+    getBlogTags(lang),
     getSocials(lang),
   ]);
   const url = localeUrl(locale, '/blog');
 
   return (
-    <section aria-labelledby="blog-heading" className="pb-24">
-      {/* Structured data: blog + breadcrumbs */}
-      <JsonLd
-        item={{
-          '@context': 'https://schema.org',
-          '@type': 'Blog',
-          name: t('title'),
-          description: t('description'),
-          url,
-          inLanguage: locale,
-        }}
-      />
+    <main>
+      <section aria-labelledby="blog-heading">
+        {/* Structured data: blog + breadcrumbs */}
+        <JsonLd
+          item={{
+            '@context': 'https://schema.org',
+            '@type': 'Blog',
+            name: t('title'),
+            description: t('description'),
+            url,
+            inLanguage: locale,
+          }}
+        />
 
-      <BlurFade delay={0.04}>
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">{t('eyebrow')}</p>
-            <h1 id="blog-heading" className="mt-1 text-2xl font-bold tracking-tighter sm:text-3xl">
-              {t('title')}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
-          </div>
-          <Link
-            href={`/${locale}/blog/rss.xml`}
-            className="shrink-0 rounded-full border p-2 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
-            aria-label={t('rss')}
-            prefetch={false}
-          >
-            <Rss className="h-4 w-4" />
-          </Link>
-        </div>
-      </BlurFade>
+        <SectionHeader
+          as="h1"
+          id="blog-heading"
+          label={t('eyebrow')}
+          title={t('title')}
+          description={t('description')}
+          meta={posts.length ? t('count', { count: localizedCount(posts.length, lang) }) : undefined}
+          action={
+            <Link
+              href={`/${locale}/blog/rss.xml`}
+              prefetch={false}
+              aria-label={t('rss')}
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+            >
+              <Rss className="size-4" aria-hidden />
+            </Link>
+          }
+          delay={0.04}
+        />
 
-      <BlogListClient posts={posts} locale={locale} />
+        <BlogListClient posts={posts} tags={tags} initialTag={tag} />
 
-      <Navbar socials={socials} />
-    </section>
+        <Navbar socials={socials} />
+      </section>
+    </main>
   );
 }

@@ -1,11 +1,22 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import type { ComponentPropsWithoutRef } from 'react';
 
-/** Light/dark theme toggle following the system preference. */
-export function ModeToggle() {
+type ModeToggleProps = Omit<ComponentPropsWithoutRef<typeof Button>, 'variant' | 'size' | 'type'>;
+
+/**
+ * Light/dark switch. Both marks live in the DOM and are swapped by the `.dark`
+ * class, so there is no transition, no layout shift and no hydration flash.
+ *
+ * `onClick` is composed rather than overridden: Radix's tooltip trigger (used
+ * by the navigation bar) injects its own click handler through `asChild`, and
+ * dropping either one breaks the toggle or leaves the tooltip stuck open.
+ */
+export function ModeToggle({ className, onClick, ...props }: ModeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
@@ -13,12 +24,17 @@ export function ModeToggle() {
       variant="ghost"
       type="button"
       size="icon"
-      className="relative"
-      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       aria-label="Toggle theme"
+      {...props}
+      className={cn(className)}
+      onClick={event => {
+        onClick?.(event);
+        if (event.defaultPrevented) return;
+        setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+      }}
     >
-      <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+      <Sun className="size-[1.1rem] dark:hidden" aria-hidden />
+      <Moon className="hidden size-[1.1rem] dark:block" aria-hidden />
     </Button>
   );
 }

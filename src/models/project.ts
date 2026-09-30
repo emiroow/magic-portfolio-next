@@ -4,10 +4,14 @@ import mongoose, { Schema } from 'mongoose';
 export const projectSchema = new Schema<IProject>(
   {
     title: { type: String, required: true },
+    slug: { type: String, index: true },
     href: { type: String },
     dates: { type: String },
     active: { type: Boolean, default: true },
+    /** Chosen for the home page; when none are set the newest published stand in. */
+    featured: { type: Boolean, default: false },
     description: { type: String },
+    details: { type: String },
     technologies: [String],
     links: [
       {

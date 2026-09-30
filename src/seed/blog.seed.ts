@@ -7,6 +7,8 @@ export const seedBlogData = async () => {
       title: 'Hello, World — Building This Portfolio',
       slug: 'hello-world',
       summary: 'How this portfolio was built with Next.js, MongoDB and a minimal monochrome design system.',
+      tags: ['next.js', 'mongodb', 'design-system'],
+      published: true,
       lang: 'en',
       content: [
         '## Why a minimal portfolio?',
@@ -31,6 +33,8 @@ export const seedBlogData = async () => {
       title: 'سلام، دنیا — ساخت این نمونه‌کار',
       slug: 'hello-world',
       summary: 'این وب‌سایت با Next.js، MongoDB و یک سیستم‌طراحی مینیمال سیاه‌وسفید ساخته شده است.',
+      tags: ['next.js', 'mongodb', 'design-system'],
+      published: true,
       lang: 'fa',
       content: [
         '## چرا یک نمونه‌کار مینیمال؟',

@@ -2,15 +2,16 @@
 
 import { iconDecider } from '@/components/icons';
 import { EmptyState, ErrorState, Field, LoadingRows, SectionShell } from '@/components/dashboard/shared';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import useSocials from '@/hooks/dashboard/useSocials';
+import { useSectionScroll } from '@/hooks/dashboard/useFormPanel';
 import { Pencil, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import type { ISocial } from '@/types';
 
 const AVAILABLE_ICONS = ['github', 'linkedin', 'x', 'instagram', 'telegram', 'whatsapp', 'youtube', 'website', 'email'];
 
@@ -22,26 +23,30 @@ const Socials = () => {
     useSocials();
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const { anchorRef, scrollToSection } = useSectionScroll();
   const selectedIcon = watch('icon');
   const editingId = watch('_id');
 
-  const selectClass =
-    'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
+  // The form sits above the list, so an edit has to bring it back into view.
+  const beginEdit = (social: ISocial) => {
+    edit(social);
+    scrollToSection();
+  };
 
   return (
-    <SectionShell title={t('title')}>
+    <SectionShell title={t('title')} anchorRef={anchorRef}>
       {/* Create / edit form */}
-      <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-3 md:grid-cols-12">
-        <Field label={t('name')} error={errors.name?.message} className="md:col-span-3">
-          <Input {...register('name')} placeholder={t('namePlaceholder')} autoComplete="off" />
+      <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-4 md:grid-cols-12">
+        <Field label={t('name')} id="social-name" error={errors.name?.message} className="md:col-span-3">
+          <Input id="social-name" {...register('name')} placeholder={t('namePlaceholder')} autoComplete="off" />
         </Field>
 
-        <Field label={t('url')} error={errors.url?.message} className="md:col-span-4">
-          <Input {...register('url')} placeholder={t('urlPlaceholder')} type="url" />
+        <Field label={t('url')} id="social-url" error={errors.url?.message} className="md:col-span-4">
+          <Input id="social-url" {...register('url')} placeholder={t('urlPlaceholder')} type="url" dir="ltr" />
         </Field>
 
-        <Field label={t('icon')} error={errors.icon?.message} className="md:col-span-3">
-          <select className={selectClass} {...register('icon')}>
+        <Field label={t('icon')} id="social-icon" error={errors.icon?.message} className="md:col-span-3">
+          <select id="social-icon" className="control" {...register('icon')}>
             <option value="">{t('selectIcon')}</option>
             {AVAILABLE_ICONS.map(icon => (
               <option key={icon} value={icon}>
@@ -51,7 +56,7 @@ const Socials = () => {
           </select>
         </Field>
 
-        <div className="flex gap-2 md:col-span-2">
+        <div className="flex h-10 items-center gap-2 md:col-span-2">
           <Button type="submit" disabled={save.isPending} className="w-full md:w-auto">
             {save.isPending ? <Loading size="sm" className="me-2" /> : null}
             {t('save')}
@@ -74,35 +79,51 @@ const Socials = () => {
           <>
             {selectedIcon && (
               <p className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="inline-flex size-6 items-center justify-center rounded bg-muted">{iconDecider(selectedIcon, 'size-4')}</span>
+                <span aria-hidden className="inline-flex size-7 items-center justify-center rounded-md border bg-background">
+                  {iconDecider(selectedIcon, 'size-4')}
+                </span>
                 {t('icon')}: {selectedIcon}
               </p>
             )}
-            <div className="flex flex-wrap gap-2">
-              {socials?.map(social => (
-                <Badge key={social._id} variant="outline" className="gap-2 px-3 py-1 text-sm">
-                  {iconDecider(social.icon, 'size-4')}
-                  {social.name}
-                  <button
-                    type="button"
-                    aria-label={tDash('edit')}
-                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
-                    onClick={() => edit(social)}
-                  >
-                    <Pencil className="size-3" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={tDash('delete')}
-                    className="rounded-sm opacity-60 transition-opacity hover:opacity-100"
-                    onClick={() => social._id && setPendingDelete(social._id)}
-                  >
-                    <X className="size-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            {(!socials || socials.length === 0) && <EmptyState text={t('noSocials')} />}
+
+            {socials && socials.length > 0 ? (
+              <div className="overflow-hidden rounded-xl border">
+                <ul className="divide-y divide-border">
+                  {socials.map(social => (
+                    <li key={social._id} className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/40 sm:p-4">
+                      <span
+                        aria-hidden
+                        className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background"
+                      >
+                        {iconDecider(social.icon, 'size-4')}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">{social.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          <bdi dir="ltr">{social.url}</bdi>
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-0.5">
+                        <Button size="icon" variant="ghost" className="size-8" onClick={() => beginEdit(social)} aria-label={tDash('edit')}>
+                          <Pencil className="size-4" aria-hidden />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-8 hover:text-destructive"
+                          onClick={() => social._id && setPendingDelete(social._id)}
+                          aria-label={tDash('delete')}
+                        >
+                          <X className="size-4" aria-hidden />
+                        </Button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <EmptyState text={t('noSocials')} />
+            )}
           </>
         )}
       </div>

@@ -4,70 +4,72 @@
 
 /*
  * Magic Portfolio design tokens.
- * Minimal monochrome (black & white) palette in HSL, shadcn/ui style.
- * One light + one dark definition set; every surface derives from these.
+ * A strict monochrome (black & white) palette in HSL, shadcn/ui style.
+ * Emphasis never comes from hue: it comes from border weight, surface
+ * contrast between --background and --card, and inverted hover states.
  */
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 0 0% 5%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 0 0% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 0 0% 5%;
 
-    --primary: 0 0% 9%;
+    --primary: 0 0% 7%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 7%;
 
     --destructive: 0 72% 41%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --border: 0 0% 90%;
+    --input: 0 0% 86%;
+    --ring: 0 0% 7%;
 
     --radius: 0.625rem;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 97%;
 
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    /* Cards sit one step above the page so surfaces stay readable. */
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 97%;
 
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 97%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 0 0% 97%;
+    --primary-foreground: 0 0% 7%;
 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 97%;
 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 17%;
+    --accent-foreground: 0 0% 97%;
 
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 0 0% 17%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
   }
 }
 
@@ -78,11 +80,28 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /*
+   * Persian (RTL) typography: the script needs looser leading, and any
+   * letter-spacing breaks the joining of its glyphs — so tracking is
+   * neutralised here and only ever applied in LTR contexts.
+   */
+  [dir='rtl'] {
+    line-height: 1.8;
+    letter-spacing: normal !important;
+  }
+
+  [dir='rtl'] :is(h1, h2, h3, h4) {
+    line-height: 1.4;
   }
 
   /* Consistent, visible focus ring across the site (keyboard users). */
@@ -93,6 +112,41 @@
   /* Monochrome text selection. */
   ::selection {
     @apply bg-foreground text-background;
+  }
+
+  /*
+   * Toasts: Sonner hard-codes its own system font stack on the toaster, which
+   * would drop Estedad/Roboto from every dashboard message. The portal mounts
+   * under <body>, so inheriting keeps a toast in the same face as the page.
+   * The extra element selector lifts this above Sonner's own rule.
+   */
+  body [data-sonner-toaster] {
+    font-family: inherit;
+  }
+
+  /* Thin, unobtrusive scrollbars that follow the palette. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border: 3px solid hsl(var(--background));
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
   }
 
   /* Respect reduced-motion preferences (framer-motion + CSS animations). */
@@ -108,14 +162,84 @@
   }
 }
 
-/*
- * Blog article typography.
- * Uses @tailwindcss/typography, tuned to the monochrome theme.
- */
 @layer components {
+  /*
+   * Shared page rhythm for every localized route: a centered column with
+   * enough bottom clearance that the floating navbar never covers content.
+   */
+  .site-shell {
+    @apply mx-auto w-full min-h-screen px-5 pb-28 pt-10 sm:px-6 sm:pb-32 sm:pt-16;
+  }
+
+  /*
+   * Static hairline grid backdrop. Pure CSS (no canvas, no animation),
+   * masked so it dissolves before the first section.
+   */
+  .surface-grid {
+    background-image: linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+
+  /*
+   * Entrance reveal. Composited properties only (opacity + transform) and no
+   * animation runtime: `BlurFade` renders these classes server-side, so the
+   * public pages ship zero animation JavaScript.
+   */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-y, 8px), 0);
+    animation: reveal-in var(--reveal-duration, 0.5s) cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s) forwards;
+  }
+
+  /* Scroll-linked variant: plays as the block enters the viewport. */
+  @supports (animation-timeline: view()) {
+    .reveal-view {
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+      animation-delay: 0s;
+    }
+  }
+
+  /*
+   * Height transition for the timeline disclosure panels. `grid-template-rows`
+   * animates to the content height without measuring it in JavaScript.
+   */
+  .disclosure {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .disclosure[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  .disclosure > div {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Shared form-control surface: inputs, selects and the month pickers. */
+  .control {
+    @apply flex h-10 w-full items-center rounded-lg border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors
+      placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Hairline rule that fades out toward the end of the reading direction. */
+  .rule-fade {
+    @apply h-px w-full bg-gradient-to-r from-border via-border/70 to-transparent rtl:bg-gradient-to-l;
+  }
+
+  /*
+   * Blog article typography.
+   * Uses @tailwindcss/typography, tuned to the monochrome theme.
+   */
   .prose-article {
-    @apply prose prose-neutral max-w-full dark:prose-invert
-      prose-headings:font-bold prose-headings:tracking-tight
+    @apply prose prose-neutral max-w-full dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight
       prose-a:text-foreground prose-a:decoration-muted-foreground hover:prose-a:decoration-foreground
       prose-code:before:content-none prose-code:after:content-none
       prose-img:rounded-xl
@@ -128,5 +252,25 @@
 
   .prose-article pre code {
     @apply rounded-none bg-transparent p-0;
+  }
+}
+
+@keyframes reveal-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reduced motion: content is simply there — no reveal, no scroll-linked fade. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .disclosure {
+    transition: none;
   }
 }

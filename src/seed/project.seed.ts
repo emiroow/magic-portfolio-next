@@ -5,6 +5,7 @@ export const seedProductData = async () => {
   const projectData = [
     {
       title: 'DevBoard',
+      slug: 'devboard',
       href: 'https://example.com/devboard',
       dates: 'January 2024 - May 2024',
       active: true,
@@ -19,6 +20,7 @@ export const seedProductData = async () => {
     },
     {
       title: 'Persian Date Kit',
+      slug: 'persian-date-kit',
       href: 'https://example.com/persian-date-kit',
       dates: 'June 2023 - September 2023',
       active: true,
@@ -30,6 +32,7 @@ export const seedProductData = async () => {
     },
     {
       title: 'دِو‌بورد',
+      slug: 'devboard',
       href: 'https://example.com/devboard',
       dates: '1402/10 - 1403/02',
       active: true,
@@ -44,6 +47,7 @@ export const seedProductData = async () => {
     },
     {
       title: 'کیت تاریخ جلالی',
+      slug: 'persian-date-kit',
       href: 'https://example.com/persian-date-kit',
       dates: '1402/03 - 1402/07',
       active: true,

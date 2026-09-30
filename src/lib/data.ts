@@ -6,9 +6,14 @@ import { projectModel } from '@/models/project';
 import { skillModel } from '@/models/skill';
 import { socialModel } from '@/models/social';
 import { workModel } from '@/models/work';
+import { readingTime } from '@/lib/utils';
 import type { AppLocale, IBlog, IEducation, IProfile, IProject, ISkill, ISocial, IWork } from '@/types';
+import mongoose from 'mongoose';
 
 /** Server-side data access layer. DB-safe: returns empty results when unreachable. */
+
+/** Drafts are excluded from every public surface; legacy documents have no flag. */
+const PUBLISHED = { published: { $ne: false } };
 
 /** Convert BSON documents into plain JSON. */
 function serialize<T>(doc: Record<string, unknown> | null): T | null {
@@ -88,26 +93,87 @@ export async function getPortfolioData(locale: AppLocale): Promise<PortfolioData
   };
 }
 
-/** Public blog list (content stripped to keep the payload small). */
+/** Public blog list (content stripped, reading time derived). */
 export async function getBlogList(locale: AppLocale): Promise<IBlog[]> {
   if (!(await tryConnectDB())) return [];
 
-  const docs = await blogModel
-    .find({ lang: locale })
-    .select('-content')
-    .sort({ createdAt: -1 })
-    .lean();
+  const docs = await blogModel.find({ lang: locale, ...PUBLISHED }).sort({ createdAt: -1 }).lean();
 
-  return serializeList<IBlog>(docs as Record<string, unknown>[]);
+  return serializeList<IBlog>(docs as Record<string, unknown>[]).map(post => {
+    const { content, ...rest } = post;
+    return { ...rest, tags: post.tags ?? [], readingMinutes: readingTime(content) };
+  });
+}
+
+/** Every post for a locale, drafts included — the dashboard listing. */
+export async function getAllPosts(locale: AppLocale): Promise<IBlog[]> {
+  if (!(await tryConnectDB())) return [];
+
+  const docs = await blogModel.find({ lang: locale }).sort({ createdAt: -1 }).lean();
+
+  return serializeList<IBlog>(docs as Record<string, unknown>[]).map(post => ({
+    ...post,
+    tags: post.tags ?? [],
+    readingMinutes: readingTime(post.content),
+  }));
+}
+
+/** Distinct tags across the published posts, newest-first document order. */
+export async function getBlogTags(locale: AppLocale): Promise<string[]> {
+  if (!(await tryConnectDB())) return [];
+
+  const tags = await blogModel.distinct('tags', { lang: locale, ...PUBLISHED });
+  return (tags as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b, locale === 'fa' ? 'fa' : 'en'));
+}
+
+/** Posts sharing a tag with `post`, falling back to the newest ones. */
+export async function getRelatedPosts(locale: AppLocale, post: IBlog, limit = 3): Promise<IBlog[]> {
+  const list = await getBlogList(locale);
+  const others = list.filter(candidate => candidate.slug !== post.slug);
+  const tags = new Set(post.tags ?? []);
+
+  const shared = others.filter(candidate => (candidate.tags ?? []).some(tag => tags.has(tag)));
+  return (shared.length ? shared : others).slice(0, limit);
 }
 
 /** Single blog post with full content, or `null` when not found. */
 export async function getBlogBySlug(locale: AppLocale, slug: string): Promise<IBlog | null> {
   if (!(await tryConnectDB())) return null;
 
-  const doc = await blogModel.findOne({ lang: locale, slug }).lean();
+  const doc = await blogModel.findOne({ lang: locale, slug, ...PUBLISHED }).lean();
   const post = serialize<IBlog>(doc as Record<string, unknown> | null);
-  return post ? { ...post, content: stripFrontMatter(post.content) } : null;
+  return post ? { ...post, content: stripFrontMatter(post.content), tags: post.tags ?? [] } : null;
+}
+
+/** Active projects for a locale, newest first. */
+export async function getProjects(locale: AppLocale): Promise<IProject[]> {
+  if (!(await tryConnectDB())) return [];
+
+  const docs = await projectModel.find({ lang: locale, active: true }).sort({ createdAt: -1 }).lean();
+  return serializeList<IProject>(docs as Record<string, unknown>[]);
+}
+
+/**
+ * One project by its slug, or by id for records seeded before slugs existed.
+ * Only active projects are public.
+ */
+export async function getProjectByKey(locale: AppLocale, key: string): Promise<IProject | null> {
+  if (!(await tryConnectDB())) return null;
+
+  const byKey = key.trim();
+  const or: Record<string, unknown>[] = [{ slug: byKey }];
+  if (mongoose.isValidObjectId(byKey)) or.push({ _id: byKey });
+
+  const doc = await projectModel.findOne({ lang: locale, active: true, $or: or }).lean();
+  return serialize<IProject>(doc as Record<string, unknown> | null);
+}
+
+/** Distinct technologies across the active projects, for the archive filter. */
+export async function getProjectTechnologies(locale: AppLocale): Promise<string[]> {
+  if (!(await tryConnectDB())) return [];
+
+  const tags = await projectModel.distinct('technologies', { lang: locale, active: true });
+  return (tags as string[]).filter(Boolean).sort((a, b) => a.localeCompare(b, locale === 'fa' ? 'fa' : 'en'));
 }
 
 /** Profile document only (used by metadata/OG generation). */

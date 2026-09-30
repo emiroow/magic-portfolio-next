@@ -52,11 +52,11 @@ const Profile = () => {
   const openCropper = () => fileInputRef.current?.click();
 
   return (
-    <section className="mb-24">
-      <form onSubmit={handleSubmit(onsubmit)} className="mt-5 space-y-4">
+    <section className="mb-16">
+      <form onSubmit={handleSubmit(onsubmit)} className="mt-8 space-y-5">
         {/* Avatar */}
         <div className="flex items-center gap-4">
-          <div className={cn('relative flex size-24 items-center justify-center overflow-hidden rounded-full border-2')}>
+          <div className={cn('relative flex size-24 items-center justify-center overflow-hidden rounded-full border')}>
             {profile?.avatarUrl ? (
               <Avatar className="size-full">
                 <AvatarImage src={profile.avatarUrl} alt={profile.fullName} />
@@ -115,27 +115,27 @@ const Profile = () => {
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label={t('name')} error={errors.name?.message}>
+          <Field label={t('name')} id="profile-name" error={errors.name?.message}>
             <Input id="profile-name" {...register('name')} placeholder={t('namePlaceholder')} />
           </Field>
-          <Field label={t('fullName')} error={errors.fullName?.message}>
+          <Field label={t('fullName')} id="profile-fullName" error={errors.fullName?.message}>
             <Input id="profile-fullName" {...register('fullName')} placeholder={t('fullNamePlaceholder')} />
           </Field>
-          <Field label={t('jobTitle')} error={errors.jobTitle?.message}>
+          <Field label={t('jobTitle')} id="profile-jobTitle" error={errors.jobTitle?.message}>
             <Input id="profile-jobTitle" {...register('jobTitle')} placeholder={t('jobTitle')} />
           </Field>
-          <Field label={t('email')} error={errors.email?.message}>
-            <Input id="profile-email" type="email" {...register('email')} placeholder={t('emailPlaceholder')} />
+          <Field label={t('email')} id="profile-email" error={errors.email?.message}>
+            <Input id="profile-email" type="email" {...register('email')} placeholder={t('emailPlaceholder')} dir="ltr" />
           </Field>
-          <Field label={t('phoneNumber')} error={errors.tel?.message}>
-            <Input id="profile-tel" {...register('tel')} placeholder={t('telPlaceholder')} />
+          <Field label={t('phoneNumber')} id="profile-tel" error={errors.tel?.message}>
+            <Input id="profile-tel" {...register('tel')} placeholder={t('telPlaceholder')} dir="ltr" />
           </Field>
-          <Field label={t('summary')} error={errors.summary?.message}>
+          <Field label={t('summary')} id="profile-summary" error={errors.summary?.message}>
             <Input id="profile-summary" {...register('summary')} placeholder={t('summaryPlaceholder')} />
           </Field>
         </div>
 
-        <Field label={t('about')} error={errors.description?.message}>
+        <Field label={t('about')} id="profile-about" error={errors.description?.message}>
           <Textarea id="profile-about" rows={4} {...register('description')} placeholder={t('aboutPlaceholder')} />
         </Field>
 
