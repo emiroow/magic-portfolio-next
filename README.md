@@ -56,8 +56,8 @@ Prerequisites: **Node.js >= 20** and a MongoDB instance (local `mongod` or a fre
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/emiroow/magic-portfolio-next.git
-cd magic-portfolio-next
+git clone https://github.com/emiroow/magic-portfolio.git
+cd magic-portfolio
 npm install            # pnpm install works too
 
 # 2. Configure environment

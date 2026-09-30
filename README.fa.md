@@ -91,8 +91,8 @@
 
 ```bash
 # ۱. کلون و نصب وابستگی‌ها
-git clone https://github.com/emiroow/magic-portfolio-next.git
-cd magic-portfolio-next
+git clone https://github.com/emiroow/magic-portfolio.git
+cd magic-portfolio
 npm install
 
 # ۲. تنظیم متغیرهای محیطی
