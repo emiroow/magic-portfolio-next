@@ -3,16 +3,15 @@
 import { EmptyPanel } from '@/components/empty-panel';
 import BlurFade from '@/components/magicui/blur-fade';
 import { ProjectCard } from '@/components/project-card';
-import { FilterChip } from '@/components/ui/filter-chip';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { ListingToolbar } from '@/components/ui/listing-toolbar';
 import { localizedCount, projectKey } from '@/lib/utils';
 import type { AppLocale, IProject } from '@/types';
-import { FolderGit2, Search, X } from 'lucide-react';
+import { FolderGit2, Search } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 
-/** Projects rendered before the “load more” control appears. */
+/** Projects rendered before the “load more” control appears: two rows of three. */
 const PAGE_SIZE = 6;
 
 interface ProjectsGridProps {
@@ -21,8 +20,8 @@ interface ProjectsGridProps {
 }
 
 /**
- * Project archive: instant search plus a technology filter, on the same
- * card grid and with the same controls as the blog listing.
+ * Project archive: instant search plus a technology filter on the shared
+ * listing toolbar, over the same compact card grid as the home section.
  */
 export default function ProjectsGrid({ projects, technologies }: ProjectsGridProps) {
   const t = useTranslations('projectsPage');
@@ -50,6 +49,29 @@ export default function ProjectsGrid({ projects, technologies }: ProjectsGridPro
   const filtering = Boolean(query.trim() || tech);
   const shown = filtered.slice(0, visible);
 
+  // The incoming list is alphabetical; leading with the stacks that appear in
+  // most projects keeps the first row of chips the one worth pressing. Spelling
+  // variants share a chip, because the filter itself ignores case.
+  const facets = useMemo(() => {
+    const uses = new Map<string, number>();
+    projects.forEach(project =>
+      project.technologies.forEach(item => {
+        const key = item.toLowerCase();
+        uses.set(key, (uses.get(key) ?? 0) + 1);
+      })
+    );
+
+    const seen = new Set<string>();
+    return technologies
+      .filter(item => {
+        const key = item.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => (uses.get(b.toLowerCase()) ?? 0) - (uses.get(a.toLowerCase()) ?? 0));
+  }, [projects, technologies]);
+
   const pickTech = (value: string | null) => {
     setTech(value);
     setVisible(PAGE_SIZE);
@@ -65,56 +87,26 @@ export default function ProjectsGrid({ projects, technologies }: ProjectsGridPro
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative sm:max-w-xs sm:flex-1">
-          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input
-            value={query}
-            onChange={e => {
-              setQuery(e.target.value);
-              setVisible(PAGE_SIZE);
-            }}
-            placeholder={t('searchPlaceholder')}
-            aria-label={t('searchPlaceholder')}
-            className="ps-9 pe-10"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label={t('clearSearch')}
-              className="absolute end-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        {/* Only useful while it differs from the total in the page header. */}
-        {filtering && (
-          <p aria-live="polite" className="text-xs tabular-nums text-muted-foreground sm:ms-auto">
-            {t('count', { count: localizedCount(filtered.length, lang) })}
-          </p>
-        )}
-      </div>
-
-      {technologies.length > 0 && (
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-          <FilterChip active={!tech} onClick={() => pickTech(null)}>
-            {t('allTags')}
-          </FilterChip>
-          {technologies.map(item => (
-            <FilterChip key={item} active={tech === item} onClick={() => pickTech(tech === item ? null : item)}>
-              {item}
-            </FilterChip>
-          ))}
-        </div>
-      )}
+    <div className="flex flex-col gap-6">
+      <ListingToolbar
+        query={query}
+        onQueryChange={value => {
+          setQuery(value);
+          setVisible(PAGE_SIZE);
+        }}
+        searchLabel={t('searchPlaceholder')}
+        clearSearchLabel={t('clearSearch')}
+        options={facets}
+        active={tech}
+        onPick={pickTech}
+        meta={filtering ? t('count', { count: localizedCount(filtered.length, lang) }) : undefined}
+        clearLabel={t('clearFilters')}
+        onClear={clearAll}
+      />
 
       {shown.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shown.map((project, id) => {
               const key = projectKey(project);
               return (
@@ -130,7 +122,7 @@ export default function ProjectsGrid({ projects, technologies }: ProjectsGridPro
                     links={project.links}
                     liveLabel={t('visit')}
                     headingLevel="h2"
-                    priority={id < 2}
+                    priority={id < 3}
                     className="h-full"
                   />
                 </BlurFade>

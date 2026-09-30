@@ -5,20 +5,11 @@ import type { ReactNode } from 'react';
 
 /**
  * Pill that filters a listing in place. The active state inverts to solid
- * ink, which is the only emphasis the monochrome palette allows, and
- * `aria-pressed` carries the state for assistive technology.
+ * ink, which is the only emphasis the monochrome palette allows,
+ * `aria-pressed` carries the state for assistive technology and pressing the
+ * active chip clears the filter.
  */
-export function FilterChip({
-  active,
-  onClick,
-  children,
-  icon,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-  icon?: ReactNode;
-}) {
+export function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"
@@ -29,7 +20,6 @@ export function FilterChip({
         active ? 'border-foreground bg-foreground text-background' : 'text-muted-foreground hover:border-foreground/40 hover:text-foreground'
       )}
     >
-      {icon}
       {children}
     </button>
   );

@@ -6,11 +6,10 @@ import { eyebrowClass } from '@/components/sections/section-header';
 import { Stack } from '@/components/sections/stack';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FilterChip } from '@/components/ui/filter-chip';
-import { Input } from '@/components/ui/input';
+import { ListingToolbar } from '@/components/ui/listing-toolbar';
 import { cn, formatYearMonthLocal, isOptimizableImage, localizedCount } from '@/lib/utils';
 import type { AppLocale, IBlog } from '@/types';
-import { Clock, FileText, Search, Tag, X } from 'lucide-react';
+import { Clock, FileText, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -136,42 +135,19 @@ export default function BlogListClient({ posts, tags, initialTag }: BlogListClie
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative sm:max-w-xs sm:flex-1">
-          <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input
-            value={query}
-            onChange={e => resetPaging(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            aria-label={t('searchPlaceholder')}
-            className="ps-9 pe-10"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => resetPaging('')}
-              aria-label={t('clearSearch')}
-              className="absolute end-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        {tags.length > 0 && (
-          <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-            <FilterChip active={!activeTag} onClick={() => pickTag(null)} icon={<Tag className="size-3" aria-hidden />}>
-              {t('allTags')}
-            </FilterChip>
-            {tags.map(tag => (
-              <FilterChip key={tag} active={activeTag === tag} onClick={() => pickTag(activeTag === tag ? null : tag)}>
-                {tag}
-              </FilterChip>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col gap-6">
+      <ListingToolbar
+        query={query}
+        onQueryChange={resetPaging}
+        searchLabel={t('searchPlaceholder')}
+        clearSearchLabel={t('clearSearch')}
+        options={tags}
+        active={activeTag}
+        onPick={pickTag}
+        meta={filtering ? t('count', { count: localizedCount(filtered.length, lang) }) : undefined}
+        clearLabel={t('clearFilters')}
+        onClear={clearAll}
+      />
 
       {filtered.length === 0 ? (
         <EmptyPanel
