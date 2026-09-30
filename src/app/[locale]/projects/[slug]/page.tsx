@@ -84,7 +84,7 @@ export default async function ProjectPage({ params }: Props) {
   const index = all.findIndex(item => item._id === project._id);
   const prev = index > 0 ? all[index - 1] : undefined;
   const next = index >= 0 && index < all.length - 1 ? all[index + 1] : undefined;
-  const more = all.filter(item => item._id !== project._id).slice(0, 2);
+  const more = all.filter(item => item._id !== project._id).slice(0, 3);
 
   const url = projectUrl(locale, project);
   const cover = project.image;
@@ -286,7 +286,7 @@ export default async function ProjectPage({ params }: Props) {
             <h2 id="more-projects-heading" className={cn(eyebrowClass, 'mb-4')}>
               {t('more')}
             </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {more.map(item => (
                 <ProjectCard
                   key={item._id}

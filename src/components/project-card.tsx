@@ -35,6 +35,9 @@ interface ProjectCardProps {
  * page so the whole surface is clickable, while the resource chips stay
  * independently focusable above it. Cover images render in grayscale to
  * protect the monochrome palette and regain colour on hover.
+ *
+ * The measure is fixed: one cover, a three-line summary and the chips pinned to
+ * the bottom, so a three-column grid stays visually even.
  */
 export function ProjectCard({
   title,
@@ -48,7 +51,7 @@ export function ProjectCard({
   liveLabel,
   className,
   priority = false,
-  sizes = '(max-width: 640px) 100vw, 414px',
+  sizes = '(max-width: 640px) 100vw, (max-width: 1023px) 46vw, 272px',
   headingLevel: Heading = 'h3',
 }: ProjectCardProps) {
   const cover = image && isOptimizableImage(image) ? image : undefined;
@@ -86,9 +89,9 @@ export function ProjectCard({
         )}
       </div>
 
-      <div className="flex grow flex-col p-4 sm:p-5">
+      <div className="flex grow flex-col p-4">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <Heading className="min-w-0 text-sm font-semibold leading-snug sm:text-base">
+          <Heading className="min-w-0 text-sm font-semibold leading-snug">
             {detailHref ? (
               <Link
                 href={detailHref}
@@ -112,14 +115,14 @@ export function ProjectCard({
           {Boolean(dates) && <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{dates}</span>}
         </div>
 
-        <Markdown className="prose prose-neutral mt-2 max-w-full text-pretty text-xs leading-relaxed text-muted-foreground dark:prose-invert prose-p:my-0 sm:text-[13px]">
+        <Markdown className="prose prose-neutral mt-2 line-clamp-3 max-w-full text-pretty text-xs leading-relaxed text-muted-foreground dark:prose-invert prose-p:my-0">
           {description}
         </Markdown>
 
         {/* One block pinned to the bottom, so cards of different text length
             still land their chips on the same line. */}
         {(hasTags || chips.length > 0) && (
-          <div className="mt-auto flex flex-col gap-3 pt-4">
+          <div className="mt-auto flex flex-col gap-2.5 pt-4">
             {hasTags && (
               <ul className="flex flex-wrap gap-1.5">
                 {tags.map(tag => (
