@@ -50,41 +50,6 @@ A portfolio that reads like a printed page: one monochrome palette, one heading 
 | **SEO out of the box** | Per-page metadata, canonical + hreflang alternates, Open Graph / Twitter cards with a generated OG image, JSON-LD (`Person`, `CollectionPage`, `SoftwareApplication`, `Blog`, `BlogPosting`, `BreadcrumbList`), localized sitemap, robots, RSS and a web manifest. |
 | **Typed end to end** | Strict TypeScript, shared domain types, Mongoose models, ESLint (core-web-vitals) and one quality gate: `npm run verify`. |
 
-## Preview
-
-<table>
-  <tr>
-    <td width="50%">
-      <img src="docs/images/projects-fa.png" alt="Projects archive in Persian with search and technology filter chips" /><br />
-      <sub><b>Project archive</b> — instant search, technology chips, three cards per row.</sub>
-    </td>
-    <td width="50%">
-      <img src="docs/images/project-detail.png" alt="Project detail page with cover, Markdown body and resource list" /><br />
-      <sub><b>Project page</b> — its own URL, Markdown body, resource list and prev/next navigation.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="docs/images/blog-en-dark.png" alt="Blog listing in dark mode with featured post and tag filter" /><br />
-      <sub><b>Blog</b> — featured post, tag filter, reading time, drafts hidden from the public site.</sub>
-    </td>
-    <td width="50%">
-      <img src="docs/images/home-fa-dark.png" alt="Persian home page projects section in dark mode, right to left" /><br />
-      <sub><b>Persian, right to left</b> — the same layout mirrored, with Jalali dates and Persian digits.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <img src="docs/images/dashboard-edit.png" alt="Admin dashboard edit project panel" /><br />
-      <sub><b>Dashboard</b> — editing an item opens its panel above the list and scrolls it into view.</sub>
-    </td>
-    <td width="50%">
-      <img src="docs/images/mobile-fa.png" alt="Portfolio home page on a phone in Persian" /><br />
-      <sub><b>Responsive</b> — one column on phones, a floating dock instead of a full navbar.</sub>
-    </td>
-  </tr>
-</table>
-
 ## Quick start (5 minutes)
 
 Prerequisites: **Node.js >= 20** and a MongoDB instance (local `mongod` or a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster).
