@@ -1,6 +1,6 @@
 <div align="center">
 
-# Magic Portfolio Next
+# Magic Portfolio
 
 **A minimal, bilingual (EN/FA) developer portfolio with a Markdown blog, a full admin dashboard and one-click Vercel deployment — built with Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, MongoDB and next-intl.**
 
