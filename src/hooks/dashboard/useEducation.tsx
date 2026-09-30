@@ -113,7 +113,7 @@ const useEducation = () => {
     deleteLogo,
     startEdit,
     fileInputRef,
-    onSubmit: (data: EducationForm) => save.mutate(data),
+    onSubmit: (data: EducationForm, onSaved?: () => void) => save.mutate(data, { onSuccess: onSaved }),
   };
 };
 

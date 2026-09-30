@@ -7,9 +7,11 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import useSocials from '@/hooks/dashboard/useSocials';
+import { useSectionScroll } from '@/hooks/dashboard/useFormPanel';
 import { Pencil, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import type { ISocial } from '@/types';
 
 const AVAILABLE_ICONS = ['github', 'linkedin', 'x', 'instagram', 'telegram', 'whatsapp', 'youtube', 'website', 'email'];
 
@@ -21,11 +23,18 @@ const Socials = () => {
     useSocials();
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const { anchorRef, scrollToSection } = useSectionScroll();
   const selectedIcon = watch('icon');
   const editingId = watch('_id');
 
+  // The form sits above the list, so an edit has to bring it back into view.
+  const beginEdit = (social: ISocial) => {
+    edit(social);
+    scrollToSection();
+  };
+
   return (
-    <SectionShell title={t('title')}>
+    <SectionShell title={t('title')} anchorRef={anchorRef}>
       {/* Create / edit form */}
       <form onSubmit={handleSubmit(onsubmit)} className="grid grid-cols-1 items-end gap-4 md:grid-cols-12">
         <Field label={t('name')} id="social-name" error={errors.name?.message} className="md:col-span-3">
@@ -95,7 +104,7 @@ const Socials = () => {
                         </span>
                       </span>
                       <span className="flex shrink-0 items-center gap-0.5">
-                        <Button size="icon" variant="ghost" className="size-8" onClick={() => edit(social)} aria-label={tDash('edit')}>
+                        <Button size="icon" variant="ghost" className="size-8" onClick={() => beginEdit(social)} aria-label={tDash('edit')}>
                           <Pencil className="size-4" aria-hidden />
                         </Button>
                         <Button

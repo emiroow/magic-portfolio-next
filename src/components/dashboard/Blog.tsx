@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import MarkdownEditor from '@/components/ui/markdown-editor';
 import useBlog from '@/hooks/dashboard/useBlog';
+import { useFormPanel } from '@/hooks/dashboard/useFormPanel';
+import { FilterChip } from '@/components/ui/filter-chip';
 import { cn, formatYearMonthLocal, isOptimizableImage, localizedCount, readingTime, slugify } from '@/lib/utils';
 import type { IBlog } from '@/types';
 import { ExternalLink, Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -56,7 +58,7 @@ const Blog = () => {
     refetchPosts,
   } = useBlog();
 
-  const [formOpen, setFormOpen] = useState(false);
+  const panel = useFormPanel();
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<Status>('all');
@@ -77,19 +79,19 @@ const Blog = () => {
   const words = (content || '').trim().split(/\s+/).filter(Boolean).length;
 
   const closeForm = () => {
-    setFormOpen(false);
+    panel.close();
     reset();
     setTagInput('');
   };
 
   const beginCreate = () => {
     reset();
-    setFormOpen(true);
+    panel.open();
   };
 
   const beginEdit = (post: IBlog) => {
     startEdit(post);
-    setFormOpen(true);
+    panel.open();
   };
 
   const commitTag = () => {
@@ -114,16 +116,17 @@ const Blog = () => {
   return (
     <SectionShell
       title={t('title')}
+      anchorRef={panel.anchorRef}
       action={
-        !formOpen && (
+        !panel.isOpen && (
           <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createBlog')}>
             <Plus className="size-4" aria-hidden />
           </Button>
         )
       }
     >
-      <FormPanel open={formOpen} title={editingId ? t('edit') : t('createBlog')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(data => onSubmit({ ...data, slug: autoSlug }))} className="space-y-5">
+      <FormPanel open={panel.isOpen} title={editingId ? t('edit') : t('createBlog')} onClose={closeForm}>
+        <form onSubmit={handleSubmit(data => onSubmit({ ...data, slug: autoSlug }, panel.close))} className="space-y-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t('titleLabel')} id="blog-title" error={errors.title?.message}>
               <Input id="blog-title" {...register('title')} placeholder={t('titlePlaceholder')} />
@@ -281,21 +284,10 @@ const Blog = () => {
             />
             <div className="flex gap-1.5" role="group" aria-label={t('statusFilter')}>
               {STATUSES.map(value => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setStatus(value)}
-                  aria-pressed={status === value}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                    status === value
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'text-muted-foreground hover:border-foreground/40 hover:text-foreground'
-                  )}
-                >
+                <FilterChip key={value} active={status === value} onClick={() => setStatus(value)}>
                   {t(value)}
                   {value === 'draft' && drafts > 0 && <span className="tabular-nums">({localizedCount(drafts, lang)})</span>}
-                </button>
+                </FilterChip>
               ))}
             </div>
           </div>
@@ -378,7 +370,7 @@ const Blog = () => {
           )}
         </div>
       ) : (
-        !formOpen && <EmptyState text={t('noBlogs')} actionText={t('createBlog')} onAction={beginCreate} />
+        !panel.isOpen && <EmptyState text={t('noBlogs')} actionText={t('createBlog')} onAction={beginCreate} />
       )}
 
       <ConfirmDialog

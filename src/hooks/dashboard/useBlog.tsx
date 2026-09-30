@@ -138,7 +138,7 @@ const useBlog = () => {
     startEdit,
     addTag,
     removeTag,
-    onSubmit: (data: BlogForm) => save.mutate(data),
+    onSubmit: (data: BlogForm, onSaved?: () => void) => save.mutate(data, { onSuccess: onSaved }),
   };
 };
 

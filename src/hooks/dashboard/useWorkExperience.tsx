@@ -122,7 +122,7 @@ const useWorkExperience = () => {
     deleteLogo,
     startEdit,
     fileInputRef,
-    onSubmit: (data: WorkForm) => save.mutate(data),
+    onSubmit: (data: WorkForm, onSaved?: () => void) => save.mutate(data, { onSuccess: onSaved }),
   };
 };
 

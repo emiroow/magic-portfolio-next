@@ -6,15 +6,28 @@ import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, RotateCw, X } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { useValidationMessage } from '@/hooks/useValidationMessage';
 
 /** Shared dashboard building blocks: headers, empty/error/loading states and the form panel. */
 
-/** Section heading row with title, trailing actions and a hairline rule. */
-export function SectionShell({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
+/**
+ * Section heading row with title, trailing actions and a hairline rule.
+ * `anchorRef` marks the section so an opened edit panel can scroll it back into view.
+ */
+export function SectionShell({
+  title,
+  action,
+  anchorRef,
+  children,
+}: {
+  title: string;
+  action?: ReactNode;
+  anchorRef?: React.Ref<HTMLElement>;
+  children: ReactNode;
+}) {
   return (
-    <section className="mb-16">
+    <section ref={anchorRef} className="mb-16">
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold leading-tight ltr:tracking-tight sm:text-xl">{title}</h2>
         {action}
@@ -79,6 +92,24 @@ export function LoadingRows({ rows = 3 }: { rows?: number }) {
  */
 export function FormPanel({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) {
   const t = useTranslations('dashboard');
+  const dismiss = useRef(onClose);
+
+  useEffect(() => {
+    dismiss.current = onClose;
+  });
+
+  // Escape closes the panel, unless a modal (confirm, cropper) owns the key right now.
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || document.querySelector('[role="dialog"]')) return;
+      dismiss.current();
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
 
   return (
     <AnimatePresence mode="wait">
@@ -144,25 +175,41 @@ export function Field({
 
 /**
  * Checkbox rendered as a control surface, so it keeps the same height and
- * alignment as the inputs sitting next to it in a form grid.
+ * alignment as the inputs sitting next to it in a form grid. A `hint` is bound
+ * to the input with `aria-describedby`, which is what makes a disabled
+ * checkbox explain itself instead of looking broken.
  */
 export function CheckboxField({
   label,
   id,
+  hint,
   className,
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; id: string }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; id: string; hint?: string }) {
   return (
-    <div
-      className={cn(
-        'flex min-h-10 items-center gap-2.5 rounded-lg border border-input px-3 py-2 shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring/40',
-        className
+    <div className={cn('flex flex-col gap-1.5', className)}>
+      <div
+        className={cn(
+          'flex min-h-10 items-center gap-2.5 rounded-lg border border-input px-3 py-2 shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring/40',
+          props.disabled && 'opacity-60'
+        )}
+      >
+        <input
+          id={id}
+          type="checkbox"
+          aria-describedby={hint ? `${id}-hint` : undefined}
+          className="size-4 shrink-0 rounded border-input accent-primary"
+          {...props}
+        />
+        <label htmlFor={id} className="cursor-pointer text-sm leading-none">
+          {label}
+        </label>
+      </div>
+      {hint && (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground/80">
+          {hint}
+        </p>
       )}
-    >
-      <input id={id} type="checkbox" className="size-4 shrink-0 rounded border-input accent-primary" {...props} />
-      <label htmlFor={id} className="cursor-pointer text-sm leading-none">
-        {label}
-      </label>
     </div>
   );
 }

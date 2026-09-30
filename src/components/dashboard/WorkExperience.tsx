@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import { Textarea } from '@/components/ui/textarea';
 import useWorkExperience from '@/hooks/dashboard/useWorkExperience';
+import { useFormPanel } from '@/hooks/dashboard/useFormPanel';
 import type { IWork } from '@/types';
 import { formatYearMonthLocal } from '@/lib/utils';
 import { Plus } from 'lucide-react';
@@ -46,25 +47,25 @@ const WorkExperience = () => {
     refetchWorks,
   } = useWorkExperience();
 
-  const [formOpen, setFormOpen] = useState(false);
+  const panel = useFormPanel();
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const closeForm = () => {
-    setFormOpen(false);
+    panel.close();
     reset();
   };
 
   const beginCreate = () => {
     reset();
-    setFormOpen(true);
+    panel.open();
   };
 
   const beginEdit = (work: IWork) => {
     startEdit(work);
-    setFormOpen(true);
+    panel.open();
   };
 
   const logoUrl = getValues('logoUrl');
@@ -72,16 +73,17 @@ const WorkExperience = () => {
   return (
     <SectionShell
       title={t('experience')}
+      anchorRef={panel.anchorRef}
       action={
-        !formOpen && (
+        !panel.isOpen && (
           <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createWork')}>
             <Plus className="h-4 w-4" />
           </Button>
         )
       }
     >
-      <FormPanel open={formOpen} title={getValues('_id') ? t('editWork') : t('createWork')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <FormPanel open={panel.isOpen} title={getValues('_id') ? t('editWork') : t('createWork')} onClose={closeForm}>
+        <form onSubmit={handleSubmit(data => onSubmit(data, panel.close))} className="space-y-5">
           {/* Logo */}
           <Field label={t('logoImage')}>
             <div className="flex flex-wrap items-center gap-3">
@@ -213,7 +215,7 @@ const WorkExperience = () => {
           ))}
         </Stack>
       ) : (
-        !formOpen && <EmptyState text={t('noWorkExperiences')} actionText={t('createFirstWorkExperience')} onAction={beginCreate} />
+        !panel.isOpen && <EmptyState text={t('noWorkExperiences')} actionText={t('createFirstWorkExperience')} onAction={beginCreate} />
       )}
 
       <ConfirmDialog

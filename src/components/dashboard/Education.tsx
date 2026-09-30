@@ -10,6 +10,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import Loading from '@/components/ui/loading';
 import useEducation from '@/hooks/dashboard/useEducation';
+import { useFormPanel } from '@/hooks/dashboard/useFormPanel';
 import type { IEducation } from '@/types';
 import { formatYearMonthLocal } from '@/lib/utils';
 import { Plus } from 'lucide-react';
@@ -44,24 +45,24 @@ const EducationExperience = () => {
     refetchEducations,
   } = useEducation();
 
-  const [formOpen, setFormOpen] = useState(false);
+  const panel = useFormPanel();
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const closeForm = () => {
-    setFormOpen(false);
+    panel.close();
     reset();
   };
 
   const beginCreate = () => {
     reset();
-    setFormOpen(true);
+    panel.open();
   };
 
   const beginEdit = (education: IEducation) => {
     startEdit(education);
-    setFormOpen(true);
+    panel.open();
   };
 
   const logoUrl = getValues('logoUrl');
@@ -69,16 +70,17 @@ const EducationExperience = () => {
   return (
     <SectionShell
       title={t('educationTitle')}
+      anchorRef={panel.anchorRef}
       action={
-        !formOpen && (
+        !panel.isOpen && (
           <Button size="icon" variant="outline" className="size-8" onClick={beginCreate} aria-label={t('createEducation')}>
             <Plus className="h-4 w-4" />
           </Button>
         )
       }
     >
-      <FormPanel open={formOpen} title={getValues('_id') ? t('editTitle') : t('createEducation')} onClose={closeForm}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <FormPanel open={panel.isOpen} title={getValues('_id') ? t('editTitle') : t('createEducation')} onClose={closeForm}>
+        <form onSubmit={handleSubmit(data => onSubmit(data, panel.close))} className="space-y-5">
           {/* Logo */}
           <Field label={t('logoImage')}>
             <div className="flex flex-wrap items-center gap-3">
@@ -200,7 +202,7 @@ const EducationExperience = () => {
           ))}
         </Stack>
       ) : (
-        !formOpen && <EmptyState text={t('noEducations')} actionText={t('createFirstEducation')} onAction={beginCreate} />
+        !panel.isOpen && <EmptyState text={t('noEducations')} actionText={t('createFirstEducation')} onAction={beginCreate} />
       )}
 
       <ConfirmDialog
