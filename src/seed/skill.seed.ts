@@ -1,13 +1,8 @@
 import { skillModel } from '@/models/skill';
+import { withBothLangs, type Persona } from './personas/types';
 
-/** Demo skill badges (shared across both locales). */
-const SKILLS = ['TypeScript', 'React', 'Next.js', 'Node.js', 'MongoDB', 'Tailwind CSS', 'shadcn/ui', 'Git', 'Docker', 'REST APIs'];
-
-export const seedSkillsData = async () => {
-  const data = SKILLS.flatMap(name => [
-    { name, lang: 'en' },
-    { name, lang: 'fa' },
-  ]);
-
-  await skillModel.create(data);
+/** Toolkit badges, localised per persona (a designer's list reads differently from an engineer's). */
+export const seedSkillsData = async (persona: Persona) => {
+  const inserted = await skillModel.insertMany(withBothLangs(persona.skills));
+  return inserted.length;
 };

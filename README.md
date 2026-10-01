@@ -28,6 +28,7 @@ A portfolio that reads like a printed page: one monochrome palette, one heading 
 - [Quick start (5 minutes)](#quick-start-5-minutes)
 - [Scripts](#scripts)
 - [Environment variables](#environment-variables)
+- [Demo content](#demo-content)
 - [Project structure](#project-structure)
 - [Architecture notes](#architecture-notes)
 - [Design system](#design-system)
@@ -65,7 +66,8 @@ cp .env.example .env.local
 # then edit .env.local: set MONGODB_URI, NEXTAUTH_SECRET, ADMIN_EMAIL and ADMIN_PASSWORD
 
 # 3. Load demo content (optional but recommended)
-npm run seed
+npm run seed                 # default persona: frontend
+npm run seed -- --persona=backend --force   # pick another identity, resetting the DB
 
 # 4. Run
 npm run dev
@@ -83,6 +85,7 @@ The dashboard is at `/en/dashboard`. Sign in with the `ADMIN_EMAIL` / `ADMIN_PAS
 | `npm run start`      | Serve the production build                           |
 | `npm run seed`       | Insert demo content (skips if DB is not empty)       |
 | `npm run seed:force` | Drop the database, then seed demo content            |
+| `npm run seed:list`  | List the demo personas and their content counts      |
 | `npm run lint`       | ESLint                                               |
 | `npm run typecheck`  | `tsc --noEmit`                                       |
 | `npm run format`     | Prettier over `src/**`                               |
@@ -100,6 +103,34 @@ The dashboard is at `/en/dashboard`. Sign in with the `ADMIN_EMAIL` / `ADMIN_PAS
 | `BLOB_READ_WRITE_TOKEN`          | Prod     | Vercel Blob token — required for image uploads in production       |
 | `NEXT_PUBLIC_TWITTER_HANDLE`     | No       | `@handle` for Twitter cards                                        |
 | `NEXT_PUBLIC_GA_ID`              | No       | Optional Google Analytics 4 ID                                     |
+| `SEED_PERSONA`                   | No       | Demo identity to seed: `frontend`, `backend`, `fullstack`, `designer` |
+| `SEED_IMAGES`                    | No       | `false` skips the placeholder cover/avatar URLs at seed time       |
+
+## Demo content
+
+`npm run seed` fills the site with **one persona** — a fictional professional whose profile, career history, projects, toolkit, contact links and writing all tell the same story. Switching persona rewrites every section consistently, so a fresh install can look like a front-end engineer, a back-end engineer, a full stack developer or a product designer.
+
+| Persona     | Who                                                          |
+| ----------- | ------------------------------------------------------------ |
+| `frontend`  | Sara Mirzaei — front-end engineer, design systems, RTL work  |
+| `backend`   | Kian Rahmani — back-end engineer, payments and event pipelines |
+| `fullstack` | Alex Carter — full stack developer on small product teams     |
+| `designer`  | Mina Rahimi — product designer, interfaces, systems and motion |
+
+```bash
+npm run seed:list                              # what is available
+npm run seed -- --persona=designer --force     # reset the database and seed that identity
+SEED_IMAGES=false npm run seed                 # no remote placeholder images, just the site's monograms
+```
+
+Notes on what gets written:
+
+- **Both locales at once.** Every entry is authored in English and Persian with parallel documents, including Jalali dates on the `/fa` site.
+- **Projects are case studies.** Each one carries a long-form Markdown body, a `featured` flag (three per persona lead the home row) and an explicit `createdAt`, so archives and the home section land in a sensible order.
+- **The blog has a draft.** One post per persona ships unpublished, which is how the dashboard's draft state gets demonstrated.
+- **A notice post comes first.** "About this demo content" is seeded as the newest post, so nobody mistakes invented metrics for real work.
+- **Everything invented.** Company names, links, numbers and images are placeholders — fictional identities on `*.example.com` domains, with covers and portraits pulled from the picsum demo service. Replace the content from `/dashboard`; nothing here is meant to be quoted.
+- **Add your own identity.** Drop a new module in `src/seed/personas/` exporting a `Persona` and register it in `src/seed/personas/index.ts` — every seed module reads from whatever persona it resolves.
 
 > The site title and meta description are **not** environment variables — they are built from the profile document you edit in the dashboard, as `Name | Job Title | Portfolio` (in Persian: `نام | عنوان شغلی | سایت شخصی`).
 
@@ -132,6 +163,7 @@ src/
 ├── lib/                     # Data layer, Zod schemas, API helpers, utils
 ├── models/                  # Mongoose schemas
 ├── seed/                    # Demo content seeds (npm run seed)
+│   └── personas/            # One fictional identity per persona, both locales
 ├── types/                   # Shared domain types
 └── i18n/                    # next-intl routing & request config
 ```
@@ -167,7 +199,7 @@ src/
 ## Customization
 
 - **Colors** — edit the CSS variables in `src/app/globals.css` (single source of truth for the monochrome theme).
-- **Content** — everything is data-driven from MongoDB via the dashboard; re-run `npm run seed:force` to reset demo content.
+- **Content** — everything is data-driven from MongoDB via the dashboard; re-run `npm run seed:force` to reset demo content, or pick another identity with `--persona=<id>` (see [Demo content](#demo-content)).
 - **Navigation** — the floating dock, its tooltips and the dashboard footer all read from `NavbarRoutes` in `src/constants/global.ts`; one entry change updates all three.
 - **Add a section** — create a model and types in `src/models` and `src/types`, expose it with `createAdminCrud` under `src/app/api/[lang]/admin/...`, add a data reader in `src/lib/data.ts`, then a section component under `src/components/sections`.
 - **Languages** — translations live in `messages/en.json` and `messages/fa.json`; locales are configured in `src/i18n/routing.ts`.

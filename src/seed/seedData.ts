@@ -7,6 +7,8 @@ import { skillModel } from '@/models/skill';
 import { socialModel } from '@/models/social';
 import { workModel } from '@/models/work';
 import mongoose from 'mongoose';
+import { describePersonas, getPersona } from './personas';
+import type { Persona } from './personas/types';
 import { seedBlogData } from './blog.seed';
 import { seedEducationData } from './education.seed';
 import { seedUserData } from './profile.seed';
@@ -15,16 +17,35 @@ import { seedSkillsData } from './skill.seed';
 import { seedSocialData } from './social.seed';
 import { seedWorkData } from './work.seed';
 
+/** One collection to fill, and the label used in the summary line. */
+type Step = readonly [label: string, run: (persona: Persona) => Promise<number>];
+
+const STEPS: readonly Step[] = [
+  ['profile', seedUserData],
+  ['education', seedEducationData],
+  ['work', seedWorkData],
+  ['projects', seedProductData],
+  ['skills', seedSkillsData],
+  ['socials', seedSocialData],
+  ['blog', seedBlogData],
+];
+
+/** `FORCE_SEED=true` or `--force`: drop the database before seeding. */
+const isForced = (argv: string[] = process.argv) => process.env.FORCE_SEED === 'true' || argv.includes('--force');
+
 /**
- * Insert demo content. Skips when the database already has data,
- * unless FORCE_SEED=true which drops the database first.
+ * Insert the demo persona. Skips when the database already has content,
+ * unless `--force` (or `FORCE_SEED=true`) drops it first.
  */
-export const seedData = async () => {
+export const seedData = async (persona: Persona = getPersona()) => {
+  const owner = persona.profile.en[0].fullName;
+  console.log(`Persona: ${persona.id} — ${persona.label} (${owner})`);
+
   await connectDB();
 
-  if (process.env.FORCE_SEED === 'true') {
+  if (isForced()) {
     await mongoose.connection.dropDatabase();
-    console.log('Database dropped (FORCE_SEED).');
+    console.log('Database dropped (--force).');
   }
 
   const counts = await Promise.all([
@@ -38,17 +59,27 @@ export const seedData = async () => {
   ]);
 
   if (counts.some(count => count > 0)) {
-    console.log('Database is not empty; skipping seed. Use `npm run seed:force` to reset.');
+    console.log('Database is not empty; skipping seed. Add --force to reset it, or --list-personas to see the identities.');
     return;
   }
 
-  await Promise.all([seedEducationData(), seedProductData(), seedSocialData(), seedWorkData(), seedUserData(), seedSkillsData(), seedBlogData()]);
-  console.log('Seed data inserted successfully.');
+  const inserted = await Promise.all(STEPS.map(([, run]) => run(persona)));
+  const summary = STEPS.map(([label], index) => `${label} ${inserted[index]}`).join(' · ');
+  console.log(`Seed data inserted successfully (${summary}).`);
 };
 
-// Run directly: `npm run seed` / `npm run seed:force`.
+/** `--list-personas` prints without touching the database. */
+const run = async () => {
+  if (process.argv.includes('--list-personas')) {
+    console.log(describePersonas().join('\n'));
+    return;
+  }
+  await seedData();
+};
+
+// Run directly: `npm run seed`, `npm run seed:force`, `npm run seed -- --persona=<id>`.
 if (process.argv[1] && process.argv[1].includes('seedData')) {
-  seedData()
+  run()
     .then(() => process.exit(0))
     .catch(error => {
       console.error('Seeding failed:', error instanceof Error ? error.message : error);

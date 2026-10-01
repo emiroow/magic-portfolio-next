@@ -14,6 +14,7 @@
     "start": "next start",
     "seed": "tsx --env-file=.env.local src/seed/seedData.ts",
     "seed:force": "FORCE_SEED=true tsx --env-file=.env.local src/seed/seedData.ts",
+    "seed:list": "tsx --env-file=.env.local src/seed/seedData.ts --list-personas",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
